@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Fx3>
+<Fx3 version="1.2.1">
+    <ProgramList>
+        <Name>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/RRTM_SWandLW_Pythonwrapper</Name>
+        <Arguments> </Arguments>
+        <WorkingDirectory>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper</WorkingDirectory>
+        <EnvironmentList></EnvironmentList>
+        <Script></Script>
+        <Type>append</Type>
+    </ProgramList>
+    <AddPaths>
+        <Path>&quot;/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/src&quot;</Path>
+    </AddPaths>
+    <WatchVariables/>
+    <BreakpointList/>
+    <Memory>
+        <address></address>
+        <bytes></bytes>
+        <column></column>
+        <word></word>
+        <checked></checked>
+    </Memory>
+    <IgnoredSources>
+        <IgnoredList/>
+        <Unlocatable></Unlocatable>
+    </IgnoredSources>
+    <Arguments>
+        <Argument></Argument>
+    </Arguments>
+</Fx3>
