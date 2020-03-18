@@ -18,7 +18,7 @@ iemiss=1 #surface emissivity. Keep this fixed for now.
 ireflect=0 #for Lambert reflection
 semis=np.ones(16) #all spectral bands the same as iemissm
 iform=1
-nlayers=10
+nlayers=100
 nmol=7
 psurf=1000.
 pmin=10.
@@ -26,6 +26,7 @@ secntk=0
 cinp=999
 ipthak=0
 ipthrk=0
+lapse=5.7
 pz=np.linspace(psurf,pmin,nlayers+1)
 pavel=np.zeros(nlayers)
 for i in range(len(pavel)):
@@ -37,10 +38,15 @@ for i in range(len(pavel)):
 rsp=287.05
 gravity=9.81
 altz=np.log(psurf/pz)*rsp*tz/gravity/1000. #[km]
+tz=np.ones(nlayers+1) * tbound-lapse*altz
+tavel=np.zeros(nlayers)
+for i in range(len(pavel)):
+	tavel[i]=(tz[i]+tz[i+1])/2.
 wbrodl=np.ones(nlayers) * 1e20
 wkl=np.zeros((nmol,nlayers))
 wkl[1,:] = 1e18
 nxmol0=nmol #don't know what this is
+
 
 def writeparams(params,f):	
 	for i in params:
