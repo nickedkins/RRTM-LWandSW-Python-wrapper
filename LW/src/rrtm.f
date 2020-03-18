@@ -153,6 +153,8 @@ C        level and the heating rate for each layer
 
       CHARACTER PAGE
 
+      character*18 mystr
+
 C      DATA WAVENUM1(1) /10./, WAVENUM2(1) /350./, DELWAVE(1) /340./
 C      DATA WAVENUM1(2) /350./, WAVENUM2(2) /500./, DELWAVE(2) /150./
 C      DATA WAVENUM1(3) /500./, WAVENUM2(3) /630./, DELWAVE(3) /130./
@@ -197,8 +199,12 @@ C     is multiplied by W m-2 mb-1.
       HVRRTM = '$Revision: 3.6 $'
 
 C     Open the INPUT set of atmospheres
-      IRD = 9
-      OPEN (IRD,FILE='INPUT_RRTM',FORM='FORMATTED')
+C       IRD = 9
+C       OPEN (IRD,FILE='INPUT_RRTM',FORM='FORMATTED')
+      open(99,file='RRTM LW Input')
+
+      
+
 
 c Multiple atmosphere option not yet implemented      
       NUMATMOS = 1
@@ -420,10 +426,41 @@ c      DATA WX /MAXPROD*0.0/
 
  1000 CONTINUE
 
-      READ (IRD,9010,END=8800) CTEST
-      IF (CTEST .NE. CDOLLAR) GO TO 1000
+      read(99,*) IATM, IXSECT, ISCAT,NUMANGS, IOUT, ICLD
+      read(99,*) TBOUND,IEMISS,IREFLECT
+      do i=1,16
+        read(99,*) semis(i)
+      end do
+      read(99,*) IFORM,NLAYERS,NMOL
+      read(99,*) secntk,cinp,ipthak
+      do i=1,NLAYERS
+        read(99,*) pavel(i)
+      end do
+      do i=1,NLAYERS
+        read(99,*) tavel(i)
+      end do
+      do i=0,NLAYERS
+        read(99,*) altz(i)
+      end do
+      do i=0,NLAYERS
+        read(99,*) pz(i)
+      end do
+      do i=0,NLAYERS
+        read(99,*) tz(i)
+      end do
+      do i=1,NLAYERS
+        read(99,*) wbrodl(i)
+      end do
+      do imol=1,7
+        do i=1,nlayers
+          read(99,*) wkl(imol,i)
+        end do
+      end do
 
-      READ (IRD,9011) IATM, IXSECT, ISCAT,NUMANGS, IOUT, ICLD
+C       READ (IRD,9010,END=8800) CTEST
+C       IF (CTEST .NE. CDOLLAR) GO TO 1000
+
+C       READ (IRD,9011) IATM, IXSECT, ISCAT,NUMANGS, IOUT, ICLD
       
 c     If numangs set to -1, reset to default rt code for
 c     backwards compatibility with original rrtm
@@ -447,7 +484,8 @@ C     If clouds are present, read in appropriate input file, IN_CLD_RRTM.
       IF (ICLD .GE. 1) CALL READCLD
 
 C     Read in surface information.
-      READ (IRD,9012) TBOUND,IEMISS,IREFLECT,(SEMIS(I),I=1,16)
+C       READ (IRD,9012) TBOUND,IEMISS,IREFLECT,(SEMIS(I),I=1,16)
+      
       DO 1500 IBAND = 1, NBANDS
          SEMISS(IBAND) = 1.0
          IF (IEMISS .EQ. 1 .AND. SEMIS(1) .NE. 0.) THEN
@@ -460,18 +498,19 @@ C     Read in surface information.
  1500 CONTINUE
 
       IF (IATM .EQ. 0) THEN
-         READ (IRD,9013) IFORM,NLAYERS,NMOL
+C          READ (IRD,9013) IFORM,NLAYERS,NMOL
+         
          IF (NMOL.EQ.0) NMOL = 7                                    
-         READ (IRD,FORM1(IFORM)) PAVEL(1),TAVEL(1),SECNTK,CINP,
-     &        IPTHAK,ALTZ(0),PZ(0),TZ(0),ALTZ(1),PZ(1),TZ(1)
-         READ (IRD,FORM3(IFORM)) (WKL(M,1),M=1,7), WBRODL(1)
-         IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,1),M=8,NMOL)
+C          READ (IRD,FORM1(IFORM)) PAVEL(1),TAVEL(1),SECNTK,CINP,
+C      &        IPTHAK,ALTZ(0),PZ(0),TZ(0),ALTZ(1),PZ(1),TZ(1)
+C          READ (IRD,FORM3(IFORM)) (WKL(M,1),M=1,7), WBRODL(1)
+C          IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,1),M=8,NMOL)
 
-         DO 2000 L = 2, NLAYERS
-            READ (IRD,FORM2(IFORM)) PAVEL(L),TAVEL(L),SECNTK,CINP,
-     &           IPTHRK,ALTZ(L),PZ(L),TZ(L)
-            READ (IRD,FORM3(IFORM)) (WKL(M,L),M=1,7), WBRODL(L)
-            IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,L),M=8,NMOL)
+C          DO 2000 L = 2, NLAYERS
+C             READ (IRD,FORM2(IFORM)) PAVEL(L),TAVEL(L),SECNTK,CINP,
+C      &           IPTHRK,ALTZ(L),PZ(L),TZ(L)
+C             READ (IRD,FORM3(IFORM)) (WKL(M,L),M=1,7), WBRODL(L)
+C             IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,L),M=8,NMOL)
  2000    CONTINUE   
            
          IF (IXSECT .EQ. 1) THEN                                 
