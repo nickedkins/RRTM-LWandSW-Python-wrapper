@@ -15,27 +15,13 @@
     <WatchVariables/>
     <BreakpointList>
         <Breakpoint>
-            <id>3</id>
-            <line>516</line>
+            <id>2</id>
+            <line>370</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x100069545</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>4</id>
-            <line>451</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100068eb2</address>
+            <address>0x100068eac</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -44,26 +30,12 @@
         </Breakpoint>
         <Breakpoint>
             <id>5</id>
-            <line>454</line>
+            <line>293</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x100068fde</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>6</id>
-            <line>467</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x10006914e</address>
+            <address>0x100066069</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>

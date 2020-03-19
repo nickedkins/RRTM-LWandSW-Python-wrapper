@@ -5,6 +5,54 @@ import os
 import subprocess
 import time
 from subprocess import Popen, PIPE, STDOUT
+import matplotlib.pyplot as plt
+from pylab import *
+
+def init_plotting():
+	plt.rcParams['figure.figsize'] = (10,10)
+	plt.rcParams['font.size'] = 20
+	plt.rcParams['font.family'] = 'Times New Roman'
+	plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
+	plt.rcParams['axes.titlesize'] = 1.2*plt.rcParams['font.size']
+	plt.rcParams['legend.fontsize'] = plt.rcParams['font.size']
+	plt.rcParams['xtick.labelsize'] = plt.rcParams['font.size']
+	plt.rcParams['ytick.labelsize'] = plt.rcParams['font.size']
+	# plt.rcParams['savefig.dpi'] = 2*plt.rcParams['savefig.dpi']
+	plt.rcParams['xtick.major.size'] = 3    
+	plt.rcParams['xtick.minor.size'] = 3
+	plt.rcParams['xtick.major.width'] = 1
+	plt.rcParams['xtick.minor.width'] = 1   
+	plt.rcParams['ytick.major.size'] = 3
+	plt.rcParams['ytick.minor.size'] = 3
+	plt.rcParams['ytick.major.width'] = 1
+	plt.rcParams['ytick.minor.width'] = 1
+	plt.rcParams['legend.frameon'] = True
+	plt.rcParams['legend.loc'] = 'best'
+	plt.rcParams['axes.linewidth'] = 1
+
+	plt.rcParams['lines.linewidth'] = 2.0 
+	plt.rcParams['lines.markersize'] = 12
+
+	plt.rcParams['figure.facecolor'] = 'white'
+	plt.rcParams['axes.facecolor'] = 'white'
+	#plt.rcParams['axes.color_cycle'] = ['b', 'r', 'g','pink','orange','darkgreen','purple']
+
+	plt.rcParams['grid.color'] = 'k'
+	plt.rcParams['grid.linestyle'] = ':'
+	plt.rcParams['grid.linewidth'] = 0.5
+
+	#plt.gca().spines['right'].set_color('None')
+	#plt.gca().spines['top'].set_color('None')
+	plt.gca().xaxis.set_ticks_position('bottom')
+	plt.gca().yaxis.set_ticks_position('left')
+init_plotting()
+
+def logpplot(x,p,xlab,ylab):
+	plt.semilogy(x,p,'-o')
+	plt.ylim(max(p),min(p))
+	plt.xlabel(xlab)
+	plt.ylabel(ylab)
+
 
 project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/'
 
@@ -32,10 +80,10 @@ icos=0 				#0:there is no need to account for instrumental cosine response, 1:to
 semis=np.ones(16) 	#all spectral bands the same as iemissm
 semiss=np.ones(16) 	#all spectral bands the same as iemissm (surface, I think)
 iform=1
-nlayers=10
+nlayers=203
 nmol=7
 psurf=1000.
-pmin=10.
+pmin=100.
 secntk=0
 cinp=0
 ipthak=0
@@ -67,9 +115,9 @@ for i in range(len(pavel)):
 	tavel[i]=(tz[i]+tz[i+1])/2.
 
 # # Gas inventories
-pin2 = 0.8 * 1e5 #convert the input in bar to Pa
-pico2 = 400e-6 * 1e5 #convert the input in bar to Pa
-pio2 = 0.2 * 1e5
+pin2 = 1.0 * 1e5 #convert the input in bar to Pa
+pico2 = 400e-6* 1e5 #convert the input in bar to Pa
+pio2 = 0.0 * 1e5
 piar = 0.0 * 1e5 #convert the input in bar to Pa
 pich4 = 0.0 * 1e5 #convert the input in bar to Pa
 pih2o = 0.0 * 1e5 #convert the input in bar to Pa
@@ -166,27 +214,17 @@ def writeparamsarr(params,f):
 
 f = open('LW/RRTM LW Input','w+')
 
-params = [iatm,ixsect,iscat,numangs,iout,icld]
-writeparams(params,f)
-
-params = [tbound,iemiss,ireflect]
+params = [iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,ireflect]
 writeparams(params,f)
 
 for i in range(len(semis)):
 	f.write(str(semis[i]))
 	f.write('\n')
 
-params = [iform,nlayers,nmol]
+params = [iform,nlayers,nmol,secntk,cinp,ipthak]
 writeparams(params,f)
 
-# params=[pavel[1],tavel[1],secntk,cinp,ipthak,altz[0],pz[0],tz[0],altz[1],pz[1],tz[1]]
-params = [secntk,cinp,ipthak]
-writeparams(params,f)
-
-params = [pavel,tavel,altz,pz,tz]
-writeparamsarr(params,f)
-
-params = [wbrodl,wkl[0,:],wkl[1,:],wkl[2,:],wkl[3,:],wkl[4,:],wkl[5,:],wkl[6,:]]
+params = [pavel,tavel,altz,pz,tz,wbrodl,wkl[0,:],wkl[1,:],wkl[2,:],wkl[3,:],wkl[4,:],wkl[5,:],wkl[6,:]]
 writeparamsarr(params,f)
 
 f.close()
@@ -199,6 +237,38 @@ stdoutdata, stderrdata = p.communicate()
 print('return code = {}'.format(p.returncode))
 print('------------------------------------------------------------------------------------------')
 print
+
+f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/My Live Output RRTM')
+totuflux=np.zeros(nlayers+1)
+totdflux=np.zeros(nlayers+1)
+fnet=np.zeros(nlayers+1)
+htr=np.zeros(nlayers+1)
+
+for i in range(0,nlayers+1):
+	print i
+	totuflux[i] =  f.readline()
+for i in range(0,nlayers+1):
+	totdflux[i] =  f.readline()
+for i in range(0,nlayers+1):
+	fnet[i] =  f.readline()
+for i in range(0,nlayers+1):
+	htr[i] =  f.readline()	
+
+plt.figure(1)
+plt.subplot(231)
+logpplot(totuflux,pz,'totuflux','pz')
+plt.subplot(232)
+logpplot(totdflux,pz,'totdflux','pz')
+plt.subplot(233)
+logpplot(fnet,pz,'fnet','pz')
+plt.subplot(234)
+logpplot(htr[:-1],pz[:-1],'htr','pz')
+plt.axvline(-0.01,ls='--')
+plt.axvline(0.01,ls='--')
+plt.subplot(235)
+logpplot(tz,pz,'tz','pz')
+plt.subplot(236)
+logpplot(tavel,pavel,'tavel','pavel')
 
 # f = open('SW/RRTM SW Input','w+')
 
@@ -230,3 +300,4 @@ print
 # f.close()
 
 print 'Done'
+show()
