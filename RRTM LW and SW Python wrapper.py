@@ -53,6 +53,76 @@ def logpplot(x,p,xlab,ylab):
 	plt.xlabel(xlab)
 	plt.ylabel(ylab)
 
+def writeparams(params,f):	
+	for i in params:
+		f.write(str(i))
+		f.write('\n')
+
+def writeparamsarr(params,f):
+	for param in params:
+		for i in range(len(param)):
+			f.write(str(param[i]))
+			f.write('\n')
+
+def writeinputfile():
+	f = open('LW/RRTM LW Input','w+')
+
+	params = [iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,ireflect]
+	writeparams(params,f)
+
+	for i in range(len(semis)):
+		f.write(str(semis[i]))
+		f.write('\n')
+
+	params = [iform,nlayers,nmol,secntk,cinp,ipthak]
+	writeparams(params,f)
+
+	params = [pavel,tavel,altz,pz,tz,wbrodl,wkl[0,:],wkl[1,:],wkl[2,:],wkl[3,:],wkl[4,:],wkl[5,:],wkl[6,:]]
+	writeparamsarr(params,f)
+
+	f.close()
+
+def callrrtmlw():
+	loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw'
+	os.chdir(project_dir)
+	print(os.getcwd())  # Prints the current working directory
+	p = subprocess.Popen([loc])
+	stdoutdata, stderrdata = p.communicate()
+	print('return code = {}'.format(p.returncode))
+	print('------------------------------------------------------------------------------------------')
+	print
+
+def readrrtmoutput():
+	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/My Live Output RRTM')
+
+	for i in range(0,nlayers+1):
+		print i
+		totuflux[i] =  f.readline()
+	for i in range(0,nlayers+1):
+		totdflux[i] =  f.readline()
+	for i in range(0,nlayers+1):
+		fnet[i] =  f.readline()
+	for i in range(0,nlayers+1):
+		htr[i] =  f.readline()
+
+	return totuflux,totdflux,fnet,htr
+
+def plotrrtmoutput():
+	plt.figure(1)
+	plt.subplot(231)
+	logpplot(totuflux,pz,'totuflux','pz')
+	plt.subplot(232)
+	logpplot(totdflux,pz,'totdflux','pz')
+	plt.subplot(233)
+	logpplot(fnet,pz,'fnet','pz')
+	plt.subplot(234)
+	logpplot(htr[:-1],pz[:-1],'htr','pz')
+	plt.axvline(-0.01,ls='--')
+	plt.axvline(0.01,ls='--')
+	plt.subplot(235)
+	logpplot(tz,pz,'tz','pz')
+	plt.subplot(236)
+	logpplot(tavel,pavel,'tavel','pavel')
 
 project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/'
 
@@ -80,7 +150,7 @@ icos=0 				#0:there is no need to account for instrumental cosine response, 1:to
 semis=np.ones(16) 	#all spectral bands the same as iemissm
 semiss=np.ones(16) 	#all spectral bands the same as iemissm (surface, I think)
 iform=1
-nlayers=203
+nlayers=100
 nmol=7
 psurf=1000.
 pmin=100.
@@ -96,6 +166,11 @@ isolvar=0 		#= 0 each band uses standard solar source function, corresponding to
 lapse=5.7
 tmin=150.
 tmax=350.
+
+totuflux=np.zeros(nlayers+1)
+totdflux=np.zeros(nlayers+1)
+fnet=np.zeros(nlayers+1)
+htr=np.zeros(nlayers+1)
 
 pz=np.linspace(psurf,pmin,nlayers+1)
 pavel=np.zeros(nlayers)
@@ -200,75 +275,30 @@ for i in range(nlayers):
 # wkl[1,:] = 2e18*0.
 nxmol0=nmol #don't know what this is
 
+# f = open('LW/RRTM LW Input','w+')
 
-def writeparams(params,f):	
-	for i in params:
-		f.write(str(i))
-		f.write('\n')
+# params = [iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,ireflect]
+# writeparams(params,f)
 
-def writeparamsarr(params,f):
-	for param in params:
-		for i in range(len(param)):
-			f.write(str(param[i]))
-			f.write('\n')
+# for i in range(len(semis)):
+# 	f.write(str(semis[i]))
+# 	f.write('\n')
 
-f = open('LW/RRTM LW Input','w+')
+# params = [iform,nlayers,nmol,secntk,cinp,ipthak]
+# writeparams(params,f)
 
-params = [iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,ireflect]
-writeparams(params,f)
+# params = [pavel,tavel,altz,pz,tz,wbrodl,wkl[0,:],wkl[1,:],wkl[2,:],wkl[3,:],wkl[4,:],wkl[5,:],wkl[6,:]]
+# writeparamsarr(params,f)
 
-for i in range(len(semis)):
-	f.write(str(semis[i]))
-	f.write('\n')
+# f.close()
 
-params = [iform,nlayers,nmol,secntk,cinp,ipthak]
-writeparams(params,f)
+writeinputfile()
 
-params = [pavel,tavel,altz,pz,tz,wbrodl,wkl[0,:],wkl[1,:],wkl[2,:],wkl[3,:],wkl[4,:],wkl[5,:],wkl[6,:]]
-writeparamsarr(params,f)
+callrrtmlw()
 
-f.close()
+totuflux,totdflux,fnet,htr = readrrtmoutput()
 
-loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw'
-os.chdir(project_dir)
-print(os.getcwd())  # Prints the current working directory
-p = subprocess.Popen([loc])
-stdoutdata, stderrdata = p.communicate()
-print('return code = {}'.format(p.returncode))
-print('------------------------------------------------------------------------------------------')
-print
-
-f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/My Live Output RRTM')
-totuflux=np.zeros(nlayers+1)
-totdflux=np.zeros(nlayers+1)
-fnet=np.zeros(nlayers+1)
-htr=np.zeros(nlayers+1)
-
-for i in range(0,nlayers+1):
-	print i
-	totuflux[i] =  f.readline()
-for i in range(0,nlayers+1):
-	totdflux[i] =  f.readline()
-for i in range(0,nlayers+1):
-	fnet[i] =  f.readline()
-for i in range(0,nlayers+1):
-	htr[i] =  f.readline()	
-
-plt.figure(1)
-plt.subplot(231)
-logpplot(totuflux,pz,'totuflux','pz')
-plt.subplot(232)
-logpplot(totdflux,pz,'totdflux','pz')
-plt.subplot(233)
-logpplot(fnet,pz,'fnet','pz')
-plt.subplot(234)
-logpplot(htr[:-1],pz[:-1],'htr','pz')
-plt.axvline(-0.01,ls='--')
-plt.axvline(0.01,ls='--')
-plt.subplot(235)
-logpplot(tz,pz,'tz','pz')
-plt.subplot(236)
-logpplot(tavel,pavel,'tavel','pavel')
+plotrrtmoutput()
 
 # f = open('SW/RRTM SW Input','w+')
 
