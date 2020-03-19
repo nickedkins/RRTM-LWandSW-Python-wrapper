@@ -10,102 +10,26 @@
         <Type>append</Type>
     </ProgramList>
     <AddPaths>
-        <Path>&quot;src&quot;</Path>
+        <Path>&quot;/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src&quot;</Path>
     </AddPaths>
-    <WatchVariables/>
+    <WatchVariables>
+        <Variable>TOL</Variable>
+        <Variable>D1MACH</Variable>
+        <Variable>DIGITS</Variable>
+        <Variable>FLUP</Variable>
+        <Variable>TOTUFLUX</Variable>
+        <Variable>TOTDFLUX</Variable>
+        <Variable>ALBEDO</Variable>
+    </WatchVariables>
     <BreakpointList>
         <Breakpoint>
             <id>1</id>
-            <line>361</line>
-            <filename>rrtm.f</filename>
+            <line>3427</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/disort.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x100065545</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>10</id>
-            <line>400</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100065fd7</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>11</id>
-            <line>426</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x1000665bb</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>12</id>
-            <line>444</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100066a51</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>13</id>
-            <line>446</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100066bc8</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>14</id>
-            <line>448</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100067327</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>15</id>
-            <line>452</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100067829</address>
+            <address>0x10001468c</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -114,12 +38,12 @@
         </Breakpoint>
         <Breakpoint>
             <id>2</id>
-            <line>454</line>
-            <filename>rrtm.f</filename>
+            <line>3848</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/disort.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x100067e24</address>
+            <address>0x10001654a</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -128,96 +52,12 @@
         </Breakpoint>
         <Breakpoint>
             <id>3</id>
-            <line>459</line>
-            <filename>rrtm.f</filename>
+            <line>171</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rtrdis.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x10006838d</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>4</id>
-            <line>462</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100068487</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>5</id>
-            <line>465</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100068587</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>6</id>
-            <line>466</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x10006866c</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>7</id>
-            <line>467</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100068951</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>8</id>
-            <line>365</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100065687</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>9</id>
-            <line>367</line>
-            <filename>rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x1000657c6</address>
+            <address>0x10006c6a4</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>

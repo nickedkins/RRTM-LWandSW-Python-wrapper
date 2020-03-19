@@ -1,0 +1,33 @@
+
+
+ Wavenumbers:   820. - 50000. cm-1
+ LEVEL PRESSURE   UPWARD FLUX   DIFDOWN FLUX  DIRDOWN FLUX  DOWNWARD FLUX   NET FLUX    HEATING RATE
+          mb          W/m2          W/m2          W/m2          W/m2          W/m2       degree/day
+  10     10.00       25.0825        0.0000     1368.2220     1368.2220    1343.140000       0.00000
+   9     109.0       22.4468        4.6433      999.6688     1004.3120     981.865200      30.79627
+   8     208.0       20.1243        7.8421      870.6451      878.4871     858.362800      10.52777
+   7     307.0       17.8188       10.6209      814.5964      825.2173     807.398500       4.34437
+   6     406.0       15.4778       13.0861      783.9749      797.0610     781.583120       2.20059
+   5     505.0       13.0836       15.2743      764.3765      779.6508     766.567200       1.28001
+   4     604.0       10.6278       17.2042      750.3624      767.5666     756.938800       0.82076
+   3     703.0        8.1039       18.8908      739.5375      758.4283     750.324400       0.56383
+   2     802.0        5.5034       20.3407      730.7144      751.0551     745.551700       0.40684
+   1     901.0        2.8119       21.5555      723.2436      744.7991     741.987200       0.30385
+   0     1000.        0.0001       22.5250      716.7400      739.2650     739.264900       0.23206
+
+  Modules and versions used in this calculation:
+
+                rrtm.f:  $Revision: 2.10 $                    rrtatm.f:  NOT USED          
+             setcoef.f:  $Revision: 2.6 $                  taumoldis.f:  $Revision: 2.5 $  
+            util_xxx.f:  NOT USED                            cldprop.f:  NOT USED          
+              rtrdis.f:  $Revision: 2.6 $                     disort.f:  $Revision: 2.4 $  
+            RDI1MACH.f:  NOT USED                            ErrPack.f:  NOT USED          
+              LINPAK.f:  $Revision: 2.3 $                      extra.f:  NOT USED          
+             k_gb16.f:   $Revision: 2.4 $                    k_gb17.f:   $Revision: 2.3 $  
+             k_gb18.f:   $Revision: 2.3 $                    k_gb19.f:   $Revision: 2.3 $  
+             k_gb20.f:   $Revision: 2.3 $                    k_gb21.f:   $Revision: 2.3 $  
+             k_gb22.f:   $Revision: 2.3 $                    k_gb23.f:   $Revision: 2.3 $  
+             k_gb24.f:   $Revision: 2.3 $                    k_gb25.f:   $Revision: 2.3 $  
+                                                             k_gb27.f:   $Revision: 2.3 $  
+             k_gb28.f:   $Revision: 2.3 $                    k_gb29.f:   $Revision: 2.3 $  
+

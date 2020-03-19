@@ -359,12 +359,47 @@ C  Initialize molecular amount and cross section arrays to zero here.
 
       IXMAX = MAXINPX
       IRD = 9
-      OPEN (IRD,FILE='input_rrtm_MLS',FORM='FORMATTED')
+C       OPEN (IRD,FILE='input_rrtm_MLS',FORM='FORMATTED')
+      open(98,file='RRTM SW Input')
+
+      read(98,*) IAER, IATM, ISCAT, ISTRM, IOUT, ICLD, IDELM, ICOS
+      READ (98,*) JULDAT, SZA, ISOLVAR
+      READ(98,*) IEMIS, IREFLECT
+      do iband=1,16
+        read(98,*) semiss(iband)
+      end do
+      read(98,*) iform,nlayers,nmol
+      read(98,*) secntk,cinp,ipthak
+      do i=1,nlayers
+        read(98,*) pavel(i)
+      end do
+      do i=1,nlayers
+        read(98,*) tavel(i)
+      end do
+      do i=0,nlayers
+        read(98,*) altz(i)
+      end do
+      do i=0,nlayers
+        read(98,*) pz(i)
+      end do
+      do i=0,nlayers
+        read(98,*) tz(i)
+      end do
+      do i=1,NLAYERS
+        read(98,*) wbrodl(i)
+      end do
+      do imol=1,7
+        do i=1,nlayers
+          read(98,*) wkl(imol,i)
+        end do
+      end do
+
+      close(98)
 
  1000 CONTINUE
-      READ (IRD,9009,END=8800) CTEST
-      IF (CTEST .NE. CDOLLAR) GO TO 1000
-      READ (IRD,9011) IAER, IATM, ISCAT, ISTRM, IOUT, ICLD, IDELM, ICOS
+C       READ (IRD,9009,END=8800) CTEST
+C       IF (CTEST .NE. CDOLLAR) GO TO 1000
+C       READ (IRD,9011) IAER, IATM, ISCAT, ISTRM, IOUT, ICLD, IDELM, ICOS
 
       if (idelm.gt.1 .or. idelm.lt.0 .or. icos.gt.2 .or. icos.lt.0) then
          print *,'INVALID MEASUREMENT COMPARISON FLAG'
@@ -397,7 +432,7 @@ C     If clouds are present, read in appropriate input file, IN_CLD_RRTM.
       IF (ICLD .EQ. 1) CALL READCLD
 
 
-      READ (IRD,9020) JULDAT, SZA, ISOLVAR, (SOLVAR(IB),IB=IB1,IB2)
+C       READ (IRD,9020) JULDAT, SZA, ISOLVAR, (SOLVAR(IB),IB=IB1,IB2)
 
       ZENITH = COS(SZA * PI / 180.)
       IF (JULDAT .EQ. 0) THEN
@@ -423,7 +458,7 @@ C     If clouds are present, read in appropriate input file, IN_CLD_RRTM.
          STOP
       ENDIF
 
-      READ (IRD,9012) IEMIS, IREFLECT, (SEMISS(IB),IB=IB1,IB2)
+C       READ (IRD,9012) IEMIS, IREFLECT, (SEMISS(IB),IB=IB1,IB2)
       IF (IEMIS .EQ. 0) THEN
          DO 1500 IB = IB1, IB2
             SEMISS(IB) = 1.
@@ -441,18 +476,18 @@ C          PRINT *, SEMISS(IB1:IB2)
       ENDIF
      
       IF (IATM .EQ. 0) THEN
-         READ (IRD,9013) IFORM,NLAYERS,NMOL
-         IF (NMOL.EQ.0) NMOL = 7                                    
-         READ (IRD,FORM1(IFORM)) PAVEL(1),TAVEL(1),SECNTK,CINP,
-     &        IPTHAK,ALTZ(0),PZ(0),TZ(0),ALTZ(1),PZ(1),TZ(1)
-         READ (IRD,FORM3(IFORM)) (WKL(M,1),M=1,7), WBRODL(1)
-         IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,1),M=8,NMOL)
+C          READ (IRD,9013) IFORM,NLAYERS,NMOL
+C          IF (NMOL.EQ.0) NMOL = 7                                    
+C          READ (IRD,FORM1(IFORM)) PAVEL(1),TAVEL(1),SECNTK,CINP,
+C      &        IPTHAK,ALTZ(0),PZ(0),TZ(0),ALTZ(1),PZ(1),TZ(1)
+C          READ (IRD,FORM3(IFORM)) (WKL(M,1),M=1,7), WBRODL(1)
+C          IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,1),M=8,NMOL)
 
-         DO 2000 L = 2, NLAYERS
-            READ (IRD,FORM2(IFORM)) PAVEL(L),TAVEL(L),SECNTK,CINP,
-     &           IPTHRK,ALTZ(L),PZ(L),TZ(L)
-            READ (IRD,FORM3(IFORM)) (WKL(M,L),M=1,7), WBRODL(L)
-            IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,L),M=8,NMOL)
+C          DO 2000 L = 2, NLAYERS
+C             READ (IRD,FORM2(IFORM)) PAVEL(L),TAVEL(L),SECNTK,CINP,
+C      &           IPTHRK,ALTZ(L),PZ(L),TZ(L)
+C             READ (IRD,FORM3(IFORM)) (WKL(M,L),M=1,7), WBRODL(L)
+C             IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,L),M=8,NMOL)
  2000    CONTINUE                                                            
            
          IF (IXSECT .EQ. 1) THEN                                 
@@ -658,7 +693,7 @@ c      endif
 c     For each aerosol read in optical properties and layer aerosol 
 c     optical depths.
       do ia = 1, naer
-	 read (irdaer, 9011) nlay, iaod, issa, iasym, (aerpar(i),i=1,3)
+	    read (irdaer, 9011) nlay, iaod, issa, iasym, (aerpar(i),i=1,3)
 
          if (iaod .eq. 0) then
 c           Set defaults to get standard Angstrom relation.

@@ -988,7 +988,8 @@ c     ..
 
 
       IER  = 0
-      TOL  = D1MACH( 4 )
+C       TOL  = D1MACH( 4 )
+        tol=5e-4 !NE
 
       IF( M.LT.1 .OR. IA.LT.M .OR. IEVEC.LT.M )
      &    CALL ERRMSG( 'ASYMTX--bad input variable(s)', .TRUE. )
@@ -6117,7 +6118,8 @@ c     ..
       IF( PI.EQ.0.0 ) THEN
 
          PI   = 2.*ASIN( 1.0 )
-         TOL  = 10.*D1MACH( 4 )
+C          TOL  = 10.*D1MACH( 4 )
+         tol=5e-4 !NJE
 
       END IF
 
@@ -6167,7 +6169,6 @@ c                                              ** Newton Method
 
 c                                              ** Check for convergence
          IF( ABS( XI - X ).GT.TOL ) THEN
-
             IF( ITER.GT.MAXIT )
      &          CALL ERRMSG( 'QGAUSN--max iteration count',.True.)
 
