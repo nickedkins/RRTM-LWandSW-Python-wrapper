@@ -1,6 +1,12 @@
 # RRTM LW and SW Python wrapper
 
 import numpy as np
+import os
+import subprocess
+import time
+from subprocess import Popen, PIPE, STDOUT
+
+project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/'
 
 gravity=9.81
 avogadro=6.022e23
@@ -14,7 +20,7 @@ iout=0 #for broadband only
 #iout=-1 #for broadband, no printings
 icld=0 #for clear sky
 #icld=1  #for grey clouds
-tbound = 288 #surface temperature (K)
+tbound = 300 #surface temperature (K)
 iemiss=1 #surface emissivity. Keep this fixed for now.
 ireflect=0 #for Lambert reflection
 iaer=0 #0=aerosols off, 1=on
@@ -185,33 +191,42 @@ writeparamsarr(params,f)
 
 f.close()
 
-f = open('SW/RRTM SW Input','w+')
+loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw'
+os.chdir(project_dir)
+print(os.getcwd())  # Prints the current working directory
+p = subprocess.Popen([loc])
+stdoutdata, stderrdata = p.communicate()
+print('return code = {}'.format(p.returncode))
+print('------------------------------------------------------------------------------------------')
+print
 
-params = [iaer, iatm, iscat, istrm, iout, icld, idelm, icos]
-writeparams(params,f)
+# f = open('SW/RRTM SW Input','w+')
 
-params = [juldat,sza,isolvar]
-writeparams(params,f)
+# params = [iaer, iatm, iscat, istrm, iout, icld, idelm, icos]
+# writeparams(params,f)
 
-params = [iemiss,ireflect]
-writeparams(params,f)
+# params = [juldat,sza,isolvar]
+# writeparams(params,f)
 
-for i in range(len(semiss)):
-	f.write(str(semiss[i]))
-	f.write('\n')
+# params = [iemiss,ireflect]
+# writeparams(params,f)
 
-params = [iform,nlayers,nmol]
-writeparams(params,f)
+# for i in range(len(semiss)):
+# 	f.write(str(semiss[i]))
+# 	f.write('\n')
 
-params = [secntk,cinp,ipthak]
-writeparams(params,f)
+# params = [iform,nlayers,nmol]
+# writeparams(params,f)
 
-params = [pavel,tavel,altz,pz,tz]
-writeparamsarr(params,f)
+# params = [secntk,cinp,ipthak]
+# writeparams(params,f)
 
-params = [wbrodl,wkl[0,:],wkl[1,:],wkl[2,:],wkl[3,:],wkl[4,:],wkl[5,:],wkl[6,:]]
-writeparamsarr(params,f)
+# params = [pavel,tavel,altz,pz,tz]
+# writeparamsarr(params,f)
 
-f.close()
+# params = [wbrodl,wkl[0,:],wkl[1,:],wkl[2,:],wkl[3,:],wkl[4,:],wkl[5,:],wkl[6,:]]
+# writeparamsarr(params,f)
+
+# f.close()
 
 print 'Done'
