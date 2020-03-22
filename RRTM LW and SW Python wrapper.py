@@ -8,6 +8,8 @@ from subprocess import Popen, PIPE, STDOUT
 import matplotlib.pyplot as plt
 from pylab import *
 
+project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/'
+
 def init_plotting():
 	plt.rcParams['figure.figsize'] = (10,10)
 	plt.rcParams['font.size'] = 20
@@ -48,7 +50,7 @@ def init_plotting():
 init_plotting()
 
 def logpplot(x,p,xlab,ylab):
-	plt.semilogy(x,p,'-o')
+	plt.semilogy(x,p,'-')
 	plt.ylim(max(p),min(p))
 	plt.xlabel(xlab)
 	plt.ylabel(ylab)
@@ -65,7 +67,7 @@ def writeparamsarr(params,f):
 			f.write('\n')
 
 def writeinputfile():
-	f = open('LW/RRTM LW Input','w+')
+	f = open(project_dir+'RRTM LW Input','w+')
 
 	params = [iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,ireflect]
 	writeparams(params,f)
@@ -85,18 +87,17 @@ def writeinputfile():
 def callrrtmlw():
 	loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw'
 	os.chdir(project_dir)
-	print(os.getcwd())  # Prints the current working directory
+	# print(os.getcwd())  # Prints the current working directory
 	p = subprocess.Popen([loc])
 	stdoutdata, stderrdata = p.communicate()
-	print('return code = {}'.format(p.returncode))
-	print('------------------------------------------------------------------------------------------')
-	print
+	# print('return code = {}'.format(p.returncode))
+	# print('------------------------------------------------------------------------------------------')
+	# print
 
 def readrrtmoutput():
 	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/My Live Output RRTM')
 
 	for i in range(0,nlayers+1):
-		print i
 		totuflux[i] =  f.readline()
 	for i in range(0,nlayers+1):
 		totdflux[i] =  f.readline()
@@ -124,8 +125,6 @@ def plotrrtmoutput():
 	plt.subplot(236)
 	logpplot(tavel,pavel,'tavel','pavel')
 
-project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/'
-
 gravity=9.81
 avogadro=6.022e23
 
@@ -150,7 +149,7 @@ icos=0 				#0:there is no need to account for instrumental cosine response, 1:to
 semis=np.ones(16) 	#all spectral bands the same as iemissm
 semiss=np.ones(16) 	#all spectral bands the same as iemissm (surface, I think)
 iform=1
-nlayers=100
+nlayers=60
 nmol=7
 psurf=1000.
 pmin=100.
@@ -292,13 +291,43 @@ nxmol0=nmol #don't know what this is
 
 # f.close()
 
-writeinputfile()
+urmin=0.7
+timesteps=200
 
-callrrtmlw()
+for ts in range(timesteps):
+	maxhtr=max(abs(htr))
+	if(ts>1):
+		ur=maxhtr**2.0 * (nlayers/60.) + urmin
+		# if(ur<0.4):
+		# 	ur=0.4
+		plt.figure(2)
+		plt.subplot(121)
+		plt.plot(ur,maxhtr,'o')
+		plt.xlabel('ur')
+		plt.ylabel('maxhtr')
 
-totuflux,totdflux,fnet,htr = readrrtmoutput()
+		
+		plt.figure(2)
+		plt.subplot(122)
+		plt.plot(ts,maxhtr,'o')
+		plt.xlabel('ts')
+		plt.ylabel('maxhtr')
 
-plotrrtmoutput()
+		tavel += htr[:-1]/ur
+		for i in range(1,nlayers):
+			tz[i] = (tavel[i-1] + tavel[i])/2.
+		tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+
+	writeinputfile()
+
+	callrrtmlw()
+
+	totuflux,totdflux,fnet,htr = readrrtmoutput()
+	maxhtr=max(abs(htr))
+	print ts, maxhtr
+
+	if(ts%20==0):
+		plotrrtmoutput()
 
 # f = open('SW/RRTM SW Input','w+')
 
