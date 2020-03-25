@@ -118,12 +118,20 @@ def plotrrtmoutput():
 	logpplot(fnet,pz,'fnet','pz')
 	plt.subplot(234)
 	logpplot(htr[:-1],pz[:-1],'htr','pz')
-	plt.axvline(-0.01,ls='--')
-	plt.axvline(0.01,ls='--')
+	plt.axvline(-eqb_maxhtr,ls='--')
+	plt.axvline(eqb_maxhtr,ls='--')
 	plt.subplot(235)
 	logpplot(tz,pz,'tz','pz')
 	plt.subplot(236)
 	logpplot(tavel,pavel,'tavel','pavel')
+
+def convection(T,z):
+	for i in range(1,len(T)):
+		dT = (T[i]-T[i-1])
+		dz = (z[i]-z[i-1])/1000.
+		if( -1.0 * dT/dz > lapse ):
+			conv[i]=1.
+			T[i] = T[i-1] - lapse * dz
 
 gravity=9.81
 avogadro=6.022e23
@@ -149,10 +157,10 @@ icos=0 				#0:there is no need to account for instrumental cosine response, 1:to
 semis=np.ones(16) 	#all spectral bands the same as iemissm
 semiss=np.ones(16) 	#all spectral bands the same as iemissm (surface, I think)
 iform=1
-nlayers=60
+nlayers=200
 nmol=7
 psurf=1000.
-pmin=100.
+pmin=0.
 secntk=0
 cinp=0
 ipthak=0
@@ -162,8 +170,8 @@ sza=0 			#Solar zenith angle in degrees (0 deg is overhead).
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
-lapse=5.7
-tmin=150.
+lapse=9.8
+tmin=0.
 tmax=350.
 
 totuflux=np.zeros(nlayers+1)
@@ -181,8 +189,11 @@ for i in range(len(pavel)):
 	tavel[i]=(tz[i]+tz[i+1])/2.
 rsp=287.05
 gravity=9.81
-altz=np.log(psurf/pz)*rsp*tz/gravity/1000. #[km]
-tz=np.ones(nlayers+1) * tbound-lapse*altz
+altz=np.zeros(nlayers+1)
+altz[0] = 0.0
+for i in range(1,nlayers):
+	altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
 tz=np.clip(tz,tmin,tmax)
 tavel=np.zeros(nlayers)
 for i in range(len(pavel)):
@@ -194,8 +205,8 @@ pico2 = 400e-6* 1e5 #convert the input in bar to Pa
 pio2 = 0.0 * 1e5
 piar = 0.0 * 1e5 #convert the input in bar to Pa
 pich4 = 0.0 * 1e5 #convert the input in bar to Pa
-pih2o = 0.0 * 1e5 #convert the input in bar to Pa
-pio3 = 0.0 * 1e5 #convert the input in bar to Pa
+pih2o = 1e-6 * 1e5 #convert the input in bar to Pa
+pio3 = 1e-6 * 1e5 #convert the input in bar to Pa
 
 mmwn2 = 28.0134e-3
 mmwco2 = 44.01e-3
@@ -291,15 +302,23 @@ nxmol0=nmol #don't know what this is
 
 # f.close()
 
-urmin=0.7
+ur_min=0.5
+ur_max=2.0
+eqb_maxhtr = 0.01
 timesteps=200
 
+cti=0
+
 for ts in range(timesteps):
-	maxhtr=max(abs(htr))
+	if(cti+1 < nlayers-1):
+		maxhtr=max(abs(htr[cti+1:nlayers-1]))
+	else:
+		maxhtr = 1.1*eqb_maxhtr
+	# maxhtr=max(abs(htr[cti+1:nlayers-1]))
 	if(ts>1):
-		ur=maxhtr**2.0 * (nlayers/60.) + urmin
-		# if(ur<0.4):
-		# 	ur=0.4
+		ur=maxhtr**2.0 * (nlayers/60.) + ur_min
+		if(ur>ur_max):
+			ur=ur_max
 		plt.figure(2)
 		plt.subplot(121)
 		plt.plot(ur,maxhtr,'o')
@@ -313,20 +332,52 @@ for ts in range(timesteps):
 		plt.xlabel('ts')
 		plt.ylabel('maxhtr')
 
-		tavel += htr[:-1]/ur
+		tavel[1:] += htr[1:-1]/ur
+		tavel=np.clip(tavel,tmin,tmax)
 		for i in range(1,nlayers):
 			tz[i] = (tavel[i-1] + tavel[i])/2.
 		tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+		tz=np.clip(tz,tmin,tmax)
+
+		for i in range(1,nlayers):
+			altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+
+		altavel = np.zeros(nlayers)
+		for i in range(1,nlayers):
+			altavel[i] = (altz[i-1]+altz[i])/2.0
+		
+		conv=np.zeros(nlayers)
+		conv[0]=1
+		convection(tavel,altavel)
+		for i in range(1,nlayers):
+			tz[i] = (tavel[i-1] + tavel[i])/2.
+		tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+		tz=np.clip(tz,tmin,tmax)
+		tavel=np.clip(tavel,tmin,tmax)
+		convection(tz,altz)
+		for i in range(1,nlayers):
+			if(conv[i]==0):
+				cti=i-1
+				break
 
 	writeinputfile()
 
 	callrrtmlw()
 
 	totuflux,totdflux,fnet,htr = readrrtmoutput()
-	maxhtr=max(abs(htr))
-	print ts, maxhtr
+	if(cti+1 < nlayers-1):
+		maxhtr=max(abs(htr[cti+1:nlayers-1]))
+	else:
+		maxhtr = 1.1*eqb_maxhtr
+	print ts, maxhtr, cti
+	if(maxhtr < eqb_maxhtr):
+		plotrrtmoutput()
+		print('Equilibrium reached!')
 
-	if(ts%20==0):
+
+		break
+
+	if(ts%50==2):
 		plotrrtmoutput()
 
 # f = open('SW/RRTM SW Input','w+')
