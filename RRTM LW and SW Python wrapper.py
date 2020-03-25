@@ -123,7 +123,7 @@ def plotrrtmoutput():
 	plt.subplot(235)
 	logpplot(tz,pz,'tz','pz')
 	plt.subplot(236)
-	logpplot(tavel,pavel,'tavel','pavel')
+	logpplot(wkl[1,:],pavel,'wkl1','pavel')
 
 def convection(T,z):
 	for i in range(1,len(T)):
@@ -170,8 +170,8 @@ sza=0 			#Solar zenith angle in degrees (0 deg is overhead).
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
-lapse=9.8
-tmin=0.
+lapse=5.7
+tmin=50.
 tmax=350.
 
 totuflux=np.zeros(nlayers+1)
@@ -205,8 +205,8 @@ pico2 = 400e-6* 1e5 #convert the input in bar to Pa
 pio2 = 0.0 * 1e5
 piar = 0.0 * 1e5 #convert the input in bar to Pa
 pich4 = 0.0 * 1e5 #convert the input in bar to Pa
-pih2o = 1e-6 * 1e5 #convert the input in bar to Pa
-pio3 = 1e-6 * 1e5 #convert the input in bar to Pa
+pih2o = 0.0 * 1e5 #convert the input in bar to Pa
+pio3 = 0.0 * 1e5 #convert the input in bar to Pa
 
 mmwn2 = 28.0134e-3
 mmwco2 = 44.01e-3
@@ -254,31 +254,34 @@ vol_mixn2 = molec_n2 / totmolec
 vol_mixo2 = molec_o2 / totmolec
 vol_mixar = molec_ar / totmolec
 vol_mixch4 = molec_ch4 / totmolec
-vol_mixh2o = molec_h2o / totmolec
-vol_mixo3 = molec_o3 / totmolec
+vol_mixh2o = np.ones(nlayers) * molec_h2o / totmolec
+vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
 
 # Mean molecular weight of the atmosphere
-mmwtot = mmwco2 * vol_mixco2 + mmwn2 * vol_mixn2 + mmwo2 * vol_mixo2 + mmwar*vol_mixar + mmwch4*vol_mixch4 + mmwh2o*vol_mixh2o
+mmwtot = mmwco2 * vol_mixco2 + mmwn2 * vol_mixn2 + mmwo2 * vol_mixo2 + mmwar*vol_mixar + mmwch4*vol_mixch4 + mmwh2o*vol_mixh2o[0]+mmwo3*vol_mixo3[0]
 
 mperlayr = np.zeros(nlayers)
 mperlayr_air = np.zeros(nlayers)
 
 for i in range(nlayers):
-    mperlayr[i] = totmolec/nlayers #Divide the molecules equally between layers
-    mperlayr_air[i] = (molec_n2 + molec_o2)/(nlayers)
+	mperlayr[i] = totmolec/nlayers #Divide the molecules equally between layers
+	mperlayr_air[i] = (molec_n2 + molec_o2)/(nlayers)
 
 
 wbrodl = np.zeros(nlayers)
 wkl = np.zeros((nmol+1,nlayers))
 
+for i in range(nlayers):
+	vol_mixo3[i] = (3.6478*(pz[i]**0.83209))*exp(-pz[i]/11.3515)*1e-6
+
 #Set up mixing ratio of broadening molecules (N2 and O2 mostly)
 for i in range(nlayers):
-    wbrodl[i] = mperlayr_air[i] * 1.0e-4
-    wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o
-    wkl[2,i] = mperlayr[i] * 1.0e-4 * vol_mixco2
-    wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3
-    wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4
-    wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2
+	wbrodl[i] = mperlayr_air[i] * 1.0e-4
+	wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
+	wkl[2,i] = mperlayr[i] * 1.0e-4 * vol_mixco2
+	wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]
+	wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4
+	wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2
 
 # wbrodl=np.ones(nlayers) * 1e20
 # wkl=np.zeros((nmol,nlayers))
@@ -359,6 +362,23 @@ for ts in range(timesteps):
 			if(conv[i]==0):
 				cti=i-1
 				break
+
+		#set up gas amounts
+
+		surf_rh=0.8
+		esat_liq=np.zeros(nlayers)
+		rel_hum=np.zeros(nlayers)
+		vol_mixh2o_min = 1e-6
+		vol_mixh2o_max = 1e6
+		for i in range(nlayers):
+			# h2o
+			esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
+			rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
+			vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
+			vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
+			wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
+
+
 
 	writeinputfile()
 
