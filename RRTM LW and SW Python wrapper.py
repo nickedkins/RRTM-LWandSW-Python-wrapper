@@ -7,6 +7,9 @@ import time
 from subprocess import Popen, PIPE, STDOUT
 import matplotlib.pyplot as plt
 from pylab import *
+import datetime
+
+tstart = datetime.datetime.now()
 
 project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
@@ -375,7 +378,7 @@ nxmol0=nmol #don't know what this is
 ur_min=0.5
 ur_max=3.0
 eqb_maxhtr = 0.01
-timesteps=100
+timesteps=10
 
 cti=0
 
@@ -389,18 +392,18 @@ for ts in range(timesteps):
 		ur=maxhtr**2.0 * (nlayers/60.) + ur_min
 		if(ur>ur_max):
 			ur=ur_max
-		plt.figure(2)
-		plt.subplot(121)
-		plt.plot(ur,maxhtr,'o')
-		plt.xlabel('ur')
-		plt.ylabel('maxhtr')
+		# plt.figure(2)
+		# plt.subplot(121)
+		# plt.plot(ur,maxhtr,'o')
+		# plt.xlabel('ur')
+		# plt.ylabel('maxhtr')
 
 		
-		plt.figure(2)
-		plt.subplot(122)
-		plt.plot(ts,maxhtr,'o')
-		plt.xlabel('ts')
-		plt.ylabel('maxhtr')
+		# plt.figure(2)
+		# plt.subplot(122)
+		# plt.plot(ts,maxhtr,'o')
+		# plt.xlabel('ts')
+		# plt.ylabel('maxhtr')
 
 		tavel[1:] += htr[1:-1]/ur
 		tavel=np.clip(tavel,tmin,tmax)
@@ -474,18 +477,18 @@ for ts in range(timesteps):
 		maxhtr=max(abs(htr[cti+1:nlayers-1]))
 	else:
 		maxhtr = 1.1*eqb_maxhtr
-	print ts, maxhtr, cti
+	print(ts, maxhtr, cti)
 	if(maxhtr < eqb_maxhtr):
-		plotrrtmoutput()
+		# plotrrtmoutput()
 		print('Equilibrium reached!')
 
 
 		break
 
-	if(ts%50==2):
-		plotrrtmoutput()
+	# if(ts%50==2):
+		# plotrrtmoutput()
 
-plotrrtmoutput()
+# plotrrtmoutput()
 
 # f = open('SW/RRTM SW Input','w+')
 
@@ -516,5 +519,9 @@ plotrrtmoutput()
 
 # f.close()
 
-print 'Done'
-show()
+tend = datetime.datetime.now()
+ttotal = tend-tstart
+print(ttotal)
+
+print('Done')
+# show()
