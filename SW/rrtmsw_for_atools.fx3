@@ -20,44 +20,17 @@
         <Variable>TOTUFLUX</Variable>
         <Variable>TOTDFLUX</Variable>
         <Variable>ALBEDO</Variable>
+        <Variable>NLYR</Variable>
     </WatchVariables>
     <BreakpointList>
         <Breakpoint>
-            <id>1</id>
-            <line>3388</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/disort.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x10001468c</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
             <id>2</id>
-            <line>3718</line>
+            <line>5028</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/disort.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x10001654a</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>3</id>
-            <line>133</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rtrdis.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x10006c6a3</address>
+            <address>0x10001bafb</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>

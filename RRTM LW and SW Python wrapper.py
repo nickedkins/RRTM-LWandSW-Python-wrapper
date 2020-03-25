@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE, STDOUT
 import matplotlib.pyplot as plt
 from pylab import *
 
-project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/'
+project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 def init_plotting():
 	plt.rcParams['figure.figsize'] = (10,10)
@@ -66,8 +66,8 @@ def writeparamsarr(params,f):
 			f.write(str(param[i]))
 			f.write('\n')
 
-def writeinputfile():
-	f = open(project_dir+'RRTM LW Input','w+')
+def writeinputfile_lw():
+	f = open(project_dir+'LW/RRTM LW Input','w+')
 
 	params = [iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,ireflect]
 	writeparams(params,f)
@@ -84,9 +84,27 @@ def writeinputfile():
 
 	f.close()
 
+def writeinputfile_sw():
+	f = open(project_dir+'SW/RRTM SW Input','w+')
+
+	params = [iaer, iatm, iscat, istrm, iout, icld, idelm, icos,juldat,sza,isolvar,iemiss,ireflect]
+	writeparams(params,f)
+
+	for i in range(len(semis)):
+		f.write(str(semis[i]))
+		f.write('\n')
+
+	params = [iform,nlayers,nmol,secntk,cinp,ipthak]
+	writeparams(params,f)
+
+	params = [pavel,tavel,altz,pz,tz,wbrodl,wkl[0,:],wkl[1,:],wkl[2,:],wkl[3,:],wkl[4,:],wkl[5,:],wkl[6,:]]
+	writeparamsarr(params,f)
+
+	f.close()
+
 def callrrtmlw():
 	loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw'
-	os.chdir(project_dir)
+	os.chdir(project_dir+'/LW')
 	# print(os.getcwd())  # Prints the current working directory
 	p = subprocess.Popen([loc])
 	stdoutdata, stderrdata = p.communicate()
@@ -94,36 +112,70 @@ def callrrtmlw():
 	# print('------------------------------------------------------------------------------------------')
 	# print
 
-def readrrtmoutput():
+def callrrtmsw():
+	loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/rrtmsw'
+	os.chdir(project_dir+'/SW')
+	p = subprocess.Popen([loc])
+	stdoutdata, stderrdata = p.communicate()
+
+def readrrtmoutput_lw():
 	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/My Live Output RRTM')
+	for i in range(0,nlayers+1):
+		totuflux_lw[i] =  f.readline()
+	for i in range(0,nlayers+1):
+		totdflux_lw[i] =  f.readline()
+	for i in range(0,nlayers+1):
+		fnet_lw[i] =  f.readline()
+	for i in range(0,nlayers+1):
+		htr_lw[i] =  f.readline()
 
-	for i in range(0,nlayers+1):
-		totuflux[i] =  f.readline()
-	for i in range(0,nlayers+1):
-		totdflux[i] =  f.readline()
-	for i in range(0,nlayers+1):
-		fnet[i] =  f.readline()
-	for i in range(0,nlayers+1):
-		htr[i] =  f.readline()
+	return totuflux_lw,totdflux_lw,fnet_lw,htr_lw
 
-	return totuflux,totdflux,fnet,htr
+def readrrtmoutput_sw():
+	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/My Live Output RRTM')
+	for i in range(0,nlayers+1):
+		totuflux_sw[i] =  f.readline()
+	for i in range(0,nlayers+1):
+		totdflux_sw[i] =  f.readline()
+	for i in range(0,nlayers+1):
+		fnet_sw[i] =  f.readline()
+	for i in range(0,nlayers+1):
+		htr_sw[i] =  f.readline()
+
+	return totuflux_sw,totdflux_sw,fnet_sw,htr_sw
+
+
 
 def plotrrtmoutput():
 	plt.figure(1)
-	plt.subplot(231)
+	plt.subplot(331)
 	logpplot(totuflux,pz,'totuflux','pz')
-	plt.subplot(232)
+	# logpplot(totuflux_lw,pz,'totuflux','pz')
+	# logpplot(totuflux_sw,pz,'totuflux','pz')
+	plt.subplot(332)
 	logpplot(totdflux,pz,'totdflux','pz')
-	plt.subplot(233)
+	# logpplot(totdflux_lw,pz,'totdflux','pz')
+	# logpplot(totdflux_sw,pz,'totdflux','pz')
+	plt.subplot(333)
 	logpplot(fnet,pz,'fnet','pz')
-	plt.subplot(234)
+	# logpplot(fnet_lw,pz,'fnet','pz')
+	# logpplot(fnet_sw,pz,'fnet','pz')
+	plt.subplot(334)
 	logpplot(htr[:-1],pz[:-1],'htr','pz')
+	# logpplot(htr_lw[:-1],pz[:-1],'htr','pz')
+	# logpplot(htr_sw[:-1],pz[:-1],'htr','pz')
 	plt.axvline(-eqb_maxhtr,ls='--')
 	plt.axvline(eqb_maxhtr,ls='--')
-	plt.subplot(235)
+	plt.subplot(335)
 	logpplot(tz,pz,'tz','pz')
-	plt.subplot(236)
-	logpplot(wkl[1,:],pavel,'wkl1','pavel')
+	plt.subplot(336)
+	logpplot(wbrodl,pavel,'wbrodl','pavel')
+	plt.subplot(337)
+	logpplot(wkl[1,:],pavel,'wkl1 (h2o)','pavel')
+	plt.subplot(338)
+	logpplot(wkl[2,:],pavel,'wkl2 (co2)','pavel')
+	plt.subplot(339)
+	logpplot(wkl[3,:],pavel,'wkl3 (o3)','pavel')
 
 def convection(T,z):
 	for i in range(1,len(T)):
@@ -145,7 +197,7 @@ iout=0 #for broadband only
 #iout=-1 #for broadband, no printings
 icld=0 #for clear sky
 #icld=1  #for grey clouds
-tbound = 300 #surface temperature (K)
+tbound = 288 #surface temperature (K)
 iemiss=1 #surface emissivity. Keep this fixed for now.
 ireflect=0 #for Lambert reflection
 iaer=0 #0=aerosols off, 1=on
@@ -154,10 +206,10 @@ istrm=1 			# ISTRM   flag for number of streams used in DISORT  (ISCAT must be e
 						#1=8 streams
 idelm=0 			# flag for outputting downwelling fluxes computed using the delta-M scaling approximation. 0=output "true" direct and diffuse downwelling fluxes, 1=output direct and diffuse downwelling fluxes computed with delta-M approximation
 icos=0 				#0:there is no need to account for instrumental cosine response, 1:to account for instrumental cosine response in the computation of the direct and diffuse fluxes, 2:2 to account for instrumental cosine response in the computation of the diffuse fluxes only
-semis=np.ones(16) 	#all spectral bands the same as iemissm
+semis=np.ones(16)	#all spectral bands the same as iemissm
 semiss=np.ones(16) 	#all spectral bands the same as iemissm (surface, I think)
 iform=1
-nlayers=200
+nlayers=100
 nmol=7
 psurf=1000.
 pmin=0.
@@ -166,7 +218,7 @@ cinp=0
 ipthak=0
 ipthrk=0
 juldat=0 		#Julian day associated with calculation (1-365/366 starting January 1). Used to calculate Earth distance from sun. A value of 0 (default) indicates no scaling of solar source function using earth-sun distance.
-sza=0 			#Solar zenith angle in degrees (0 deg is overhead).
+sza=89. 			#Solar zenith angle in degrees (0 deg is overhead).
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
@@ -193,11 +245,14 @@ altz=np.zeros(nlayers+1)
 altz[0] = 0.0
 for i in range(1,nlayers):
 	altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
 tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
 tz=np.clip(tz,tmin,tmax)
 tavel=np.zeros(nlayers)
-for i in range(len(pavel)):
+for i in range(nlayers):
 	tavel[i]=(tz[i]+tz[i+1])/2.
+
+tavel[nlayers-1] = tavel[nlayers-2]
 
 # # Gas inventories
 pin2 = 1.0 * 1e5 #convert the input in bar to Pa
@@ -257,6 +312,18 @@ vol_mixch4 = molec_ch4 / totmolec
 vol_mixh2o = np.ones(nlayers) * molec_h2o / totmolec
 vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
 
+surf_rh=0.8
+esat_liq=np.zeros(nlayers)
+rel_hum=np.zeros(nlayers)
+vol_mixh2o_min = 1e-6
+vol_mixh2o_max = 1e6
+for i in range(nlayers):
+	# h2o
+	esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
+	rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
+	vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
+	vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
+
 # Mean molecular weight of the atmosphere
 mmwtot = mmwco2 * vol_mixco2 + mmwn2 * vol_mixn2 + mmwo2 * vol_mixo2 + mmwar*vol_mixar + mmwch4*vol_mixch4 + mmwh2o*vol_mixh2o[0]+mmwo3*vol_mixo3[0]
 
@@ -272,16 +339,16 @@ wbrodl = np.zeros(nlayers)
 wkl = np.zeros((nmol+1,nlayers))
 
 for i in range(nlayers):
-	vol_mixo3[i] = (3.6478*(pz[i]**0.83209))*exp(-pz[i]/11.3515)*1e-6
+	vol_mixo3[i] = (3.6478*(pz[i]**0.83209))*np.exp(-pz[i]/11.3515)*1e-6
 
 #Set up mixing ratio of broadening molecules (N2 and O2 mostly)
 for i in range(nlayers):
 	wbrodl[i] = mperlayr_air[i] * 1.0e-4
-	wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
+	wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
 	wkl[2,i] = mperlayr[i] * 1.0e-4 * vol_mixco2
-	wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]
-	wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4
-	wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2
+	wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]*0.
+	wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
+	wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
 
 # wbrodl=np.ones(nlayers) * 1e20
 # wkl=np.zeros((nmol,nlayers))
@@ -306,9 +373,9 @@ nxmol0=nmol #don't know what this is
 # f.close()
 
 ur_min=0.5
-ur_max=2.0
+ur_max=3.0
 eqb_maxhtr = 0.01
-timesteps=200
+timesteps=100
 
 cti=0
 
@@ -376,15 +443,33 @@ for ts in range(timesteps):
 			rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
 			vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
 			vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
-			wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
+			wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
 
 
 
-	writeinputfile()
-
+	writeinputfile_lw()
 	callrrtmlw()
 
-	totuflux,totdflux,fnet,htr = readrrtmoutput()
+	writeinputfile_sw()
+	callrrtmsw()
+
+	totuflux_lw=np.zeros(nlayers+1)
+	totdflux_lw=np.zeros(nlayers+1)
+	fnet_lw=np.zeros(nlayers+1)
+	htr_lw=np.zeros(nlayers+1)
+
+	totuflux_sw=np.zeros(nlayers+1)
+	totdflux_sw=np.zeros(nlayers+1)
+	fnet_sw=np.zeros(nlayers+1)
+	htr_sw=np.zeros(nlayers+1)
+
+	totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
+	totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
+	totuflux=totuflux_lw+totuflux_sw
+	totdflux=totdflux_lw+totdflux_sw
+	fnet=fnet_lw+fnet_sw
+	htr=htr_lw+htr_sw
+
 	if(cti+1 < nlayers-1):
 		maxhtr=max(abs(htr[cti+1:nlayers-1]))
 	else:
@@ -399,6 +484,8 @@ for ts in range(timesteps):
 
 	if(ts%50==2):
 		plotrrtmoutput()
+
+plotrrtmoutput()
 
 # f = open('SW/RRTM SW Input','w+')
 

@@ -461,6 +461,7 @@ c      DELTAM = .TRUE.
 
          PI     = 2.*ASIN( 1.0 )
          DITHER = 10.*D1MACH( 4 )
+         dither=5e-4 !NJE
 
 c                            ** Must dither more on high (14-digit)
 c                            ** precision machine
@@ -5022,7 +5023,12 @@ c     ..
 
       DO 10 LC = 1, NLYR
 
-         IF( DTAUC( LC ).LT.0.0 ) INPERR = WRTBAD( 'DTAUC' )
+C          IF( DTAUC( LC ).LT.0.0 ) INPERR = WRTBAD( 'DTAUC' )
+         IF( DTAUC( LC ).LT.0.0 ) then !NJE
+          print*, 'datuc error'
+C           dtauc(lc) = -1.0*dtauc(lc) !NE not a great soln!
+C           INPERR = WRTBAD( 'DTAUC' )
+          end if
 
          IF( SSALB( LC ).LT.0.0 .OR. SSALB( LC ).GT.1.0 )
      &       INPERR = WRTBAD( 'SSALB' )

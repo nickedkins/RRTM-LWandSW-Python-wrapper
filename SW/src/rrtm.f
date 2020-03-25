@@ -189,6 +189,21 @@ C ***    Call the radiative transfer routine.
 
          IF (IOUT .LT. 0) GO TO 4000
 
+         open(97,file='My Live Output RRTM')
+         do i=0,nlayers
+          write(97,*) totuflux(i)
+         end do
+         do i=0,nlayers
+          write(97,*) totdflux(i)
+         end do
+         do i=0,nlayers
+          write(97,*) fnet(i)
+         end do
+         do i=0,nlayers
+          write(97,*) htr(i)
+         end do
+         close(97)
+
 C ***    Process output for this atmosphere.
          OPEN (IWR,FILE='OUTPUT_RRTM',FORM='FORMATTED')
 

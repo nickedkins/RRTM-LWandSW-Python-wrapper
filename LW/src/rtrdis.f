@@ -183,8 +183,9 @@ C ***    Downward radiative transfer.
      &           (SCATCLD)/TAUREV(NLAYERS-LAY+1)
             
             IF (SSALB(NLAYERS-LAY+1) .GT. 1.0) THEN
-               PRINT*,'WARNING SSALB > 1.0, LAYER ',LAY,
-     &              SSALB(NLAYERS-LAY+1)
+              SSALB(NLAYERS-LAY+1) = 1.0-tol!NJE
+C                PRINT*,'WARNING SSALB > 1.0, LAYER ',LAY,
+C      &              SSALB(NLAYERS-LAY+1)
             ENDIF
 
            PMOM(0,NLAYERS-LAY+1) = 1.

@@ -4971,7 +4971,11 @@ c     ..
 
       DO 10 LC = 1, NLYR
 
-         IF( DTAUC( LC ).LT.0.0 ) INPERR = WRTBAD( 'DTAUC' )
+C          IF( DTAUC( LC ).LT.0.0 ) INPERR = WRTBAD( 'DTAUC' )
+         IF( DTAUC( LC ).LT.0.0 ) then !NJE
+          print*, 'datuc error'
+          INPERR = WRTBAD( 'DTAUC' )
+          end if
 
          IF( SSALB( LC ).LT.0.0 .OR. SSALB( LC ).GT.1.0 )
      &       INPERR = WRTBAD( 'SSALB' )
