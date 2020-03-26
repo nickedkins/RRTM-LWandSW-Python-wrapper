@@ -133,6 +133,7 @@ C        level and the heating rate for each layer
       CHARACTER*50 OUTFORM(7)
 
 
+
 c     Setup format statements for output
 
       DATA OUTFORM 
@@ -153,6 +154,7 @@ c      PI = 2.*ASIN(1.)
       FLUXFAC = PI * 2.D4  
 
       IWR = 10
+
 
       
 C     Multiple atmospheres not yet implemented. 
@@ -365,7 +367,8 @@ C      DATA WX /MAXPROD*0.0/
 
 C  Initialize molecular amount and cross section arrays to zero here.
       
-      DO 1200 ILAY = 1,MXLAY
+C       DO 1200 ILAY = 1,MXLAY
+      DO 1200 ILAY = 1,203 !NJE
          DO 1100 ISP = 1,35
  1100       WKL(ISP,ILAY) = 0.0
          DO 1150 ISP = 1,MAXXSEC
@@ -374,7 +377,12 @@ C  Initialize molecular amount and cross section arrays to zero here.
 
       IXMAX = MAXINPX
       IRD = 9
-C       OPEN (IRD,FILE='input_rrtm_MLS',FORM='FORMATTED')
+      OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM
+     &-LWandSW-Python-wrapper/SW/example_runs/input_rrtm_sw_mls',FORM='F
+     &ORMATTED')
+
+
+
       open(98,file='RRTM SW Input')
 
       read(98,*) IAER, IATM, ISCAT, ISTRM, IOUT, ICLD, IDELM, ICOS
@@ -506,14 +514,14 @@ C             IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,L),M=8,NMOL)
  2000    CONTINUE                                                            
            
          IF (IXSECT .EQ. 1) THEN                                 
-            READ (IRD,9300) NXMOL0
+C             READ (IRD,9300) NXMOL0
             NXMOL = NXMOL0
             CALL XSIDENT(IRD)
-            READ (IRD,9301) IFORMX
+C             READ (IRD,9301) IFORMX
 C     
             DO 3000 L = 1, NLAYERS       
-               READ (IRD,9010) CDUM
-               READ (IRD, FORM3(IFORMX)) (WX0(M,L),M=1,7),WBRODX    
+C                READ (IRD,9010) CDUM
+C                READ (IRD, FORM3(IFORMX)) (WX0(M,L),M=1,7),WBRODX    
                IF (NXMOL0 .GT. 7) READ (IRD,FORM3(IFORMX)) 
      &              (WX0(M,L),M=8,NXMOL0)
  3000       CONTINUE

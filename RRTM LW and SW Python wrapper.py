@@ -90,7 +90,7 @@ def writeinputfile_lw():
 def writeinputfile_sw():
 	f = open(project_dir+'SW/RRTM SW Input','w+')
 
-	params = [iaer, iatm, iscat, istrm, iout, icld, idelm, icos,juldat,sza,isolvar,iemiss,ireflect]
+	params = [iaer, iatm, iscat, istrm, iout, icld, idelm, icos,juldat,sza,isolvar,iemis,ireflect]
 	writeparams(params,f)
 
 	for i in range(len(semis)):
@@ -147,8 +147,6 @@ def readrrtmoutput_sw():
 
 	return totuflux_sw,totdflux_sw,fnet_sw,htr_sw
 
-
-
 def plotrrtmoutput():
 	plt.figure(1)
 	plt.subplot(331)
@@ -202,31 +200,32 @@ icld=0 #for clear sky
 #icld=1  #for grey clouds
 tbound = 288 #surface temperature (K)
 iemiss=1 #surface emissivity. Keep this fixed for now.
+iemis=2
 ireflect=0 #for Lambert reflection
 iaer=0 #0=aerosols off, 1=on
 istrm=1 			# ISTRM   flag for number of streams used in DISORT  (ISCAT must be equal to 0). 
 						#0=4 streams
 						#1=8 streams
-idelm=0 			# flag for outputting downwelling fluxes computed using the delta-M scaling approximation. 0=output "true" direct and diffuse downwelling fluxes, 1=output direct and diffuse downwelling fluxes computed with delta-M approximation
+idelm=1 			# flag for outputting downwelling fluxes computed using the delta-M scaling approximation. 0=output "true" direct and diffuse downwelling fluxes, 1=output direct and diffuse downwelling fluxes computed with delta-M approximation
 icos=0 				#0:there is no need to account for instrumental cosine response, 1:to account for instrumental cosine response in the computation of the direct and diffuse fluxes, 2:2 to account for instrumental cosine response in the computation of the diffuse fluxes only
 semis=np.ones(16)	#all spectral bands the same as iemissm
-semiss=np.ones(16) 	#all spectral bands the same as iemissm (surface, I think)
+semiss=np.ones(29)*0.9 	#all spectral bands the same as iemissm (surface, I think)
 iform=1
-nlayers=100
+nlayers=51
 nmol=7
 psurf=1000.
 pmin=0.
 secntk=0
-cinp=0
-ipthak=0
-ipthrk=0
+cinp=1.356316e-19
+ipthak=3
+ipthrk=3
 juldat=0 		#Julian day associated with calculation (1-365/366 starting January 1). Used to calculate Earth distance from sun. A value of 0 (default) indicates no scaling of solar source function using earth-sun distance.
-sza=89. 			#Solar zenith angle in degrees (0 deg is overhead).
+sza=65. 			#Solar zenith angle in degrees (0 deg is overhead).
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
 lapse=5.7
-tmin=50.
+tmin=150.
 tmax=350.
 
 totuflux=np.zeros(nlayers+1)
@@ -347,16 +346,16 @@ for i in range(nlayers):
 #Set up mixing ratio of broadening molecules (N2 and O2 mostly)
 for i in range(nlayers):
 	wbrodl[i] = mperlayr_air[i] * 1.0e-4
-	wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
+	wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
 	wkl[2,i] = mperlayr[i] * 1.0e-4 * vol_mixco2
-	wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]*0.
-	wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
-	wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
+	wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]
+	wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4
+	wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2
 
 # wbrodl=np.ones(nlayers) * 1e20
 # wkl=np.zeros((nmol,nlayers))
 # wkl[1,:] = 2e18*0.
-nxmol0=nmol #don't know what this is
+# nxmol0=nmol #don't know what this is
 
 # f = open('LW/RRTM LW Input','w+')
 
@@ -376,9 +375,9 @@ nxmol0=nmol #don't know what this is
 # f.close()
 
 ur_min=0.5
-ur_max=3.0
+ur_max=1.0
 eqb_maxhtr = 0.01
-timesteps=10
+timesteps=100
 
 cti=0
 
@@ -446,7 +445,7 @@ for ts in range(timesteps):
 			rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
 			vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
 			vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
-			wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
+			wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
 
 
 
@@ -477,18 +476,18 @@ for ts in range(timesteps):
 		maxhtr=max(abs(htr[cti+1:nlayers-1]))
 	else:
 		maxhtr = 1.1*eqb_maxhtr
-	print(ts, maxhtr, cti)
+	print ts, maxhtr, cti
 	if(maxhtr < eqb_maxhtr):
-		# plotrrtmoutput()
+		plotrrtmoutput()
 		print('Equilibrium reached!')
 
 
 		break
 
-	# if(ts%50==2):
-		# plotrrtmoutput()
+	if(ts%50==2):
+		plotrrtmoutput()
 
-# plotrrtmoutput()
+plotrrtmoutput()
 
 # f = open('SW/RRTM SW Input','w+')
 
@@ -524,4 +523,5 @@ ttotal = tend-tstart
 print(ttotal)
 
 print('Done')
-# show()
+plt.tight_layout()
+show()
