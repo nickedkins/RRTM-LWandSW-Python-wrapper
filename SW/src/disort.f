@@ -990,7 +990,7 @@ c     ..
 
       IER  = 0
 C       TOL  = D1MACH( 4 )
-        tol=5e-4 !NE
+        tol=5e-8 !NE
 
       IF( M.LT.1 .OR. IA.LT.M .OR. IEVEC.LT.M )
      &    CALL ERRMSG( 'ASYMTX--bad input variable(s)', .TRUE. )
@@ -5025,13 +5025,23 @@ c     ..
 
 C          IF( DTAUC( LC ).LT.0.0 ) INPERR = WRTBAD( 'DTAUC' )
          IF( DTAUC( LC ).LT.0.0 ) then !NJE
-          print*, 'datuc error'
-C           dtauc(lc) = -1.0*dtauc(lc) !NE not a great soln!
+          dtauc(lc) = tol
+          print*, 'dtauc fixed'
 C           INPERR = WRTBAD( 'DTAUC' )
           end if
 
-         IF( SSALB( LC ).LT.0.0 .OR. SSALB( LC ).GT.1.0 )
-     &       INPERR = WRTBAD( 'SSALB' )
+C          IF( SSALB( LC ).LT.0.0 .OR. SSALB( LC ).GT.1.0 )
+C      &       INPERR = WRTBAD( 'SSALB' )
+
+          IF( SSALB( LC ).LT.0.0) then
+            ssalb(lc) =  tol
+            print*, 'SSALB fixed low'
+          end if
+
+          IF( SSALB( LC ).GT.1.0) then
+            ssalb(lc) = 1.0 - tol
+            print*, 'SSALB fixed high'
+          end if !NJE 2 if blocks
 
          YESSCT = YESSCT + SSALB( LC )
 
@@ -6125,7 +6135,7 @@ c     ..
 
          PI   = 2.*ASIN( 1.0 )
 C          TOL  = 10.*D1MACH( 4 )
-         tol=5e-4 !NJE
+         tol=5e-8 !NJE
 
       END IF
 

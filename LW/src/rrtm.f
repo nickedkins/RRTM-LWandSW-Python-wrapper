@@ -198,14 +198,15 @@ C     is multiplied by W m-2 mb-1.
 
       HVRRTM = '$Revision: 3.6 $'
 
-C     Open the INPUT set of atmospheres
-C       IRD = 9
+!    Open the INPUT set of atmospheres
+      IRD = 9
 C       OPEN (IRD,FILE='INPUT_RRTM',FORM='FORMATTED')
-      open(99,file='RRTM LW Input')
-
+C       OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM
+C      &-LWandSW-Python-wrapper/LW/run_examples/input_rrtm_MLS',FORM='FORM
+C      &ATTED')
       
 
-
+  
 c Multiple atmosphere option not yet implemented      
       NUMATMOS = 1
       DO 4000 IATMOS = 1, NUMATMOS
@@ -441,6 +442,9 @@ c      DATA WX /MAXPROD*0.0/
 
  1000 CONTINUE
 
+
+
+      open(99,file='RRTM LW Input')
       read(99,*) IATM, IXSECT, ISCAT,NUMANGS, IOUT, ICLD
       read(99,*) TBOUND,IEMISS,IREFLECT
       do i=1,16
@@ -498,7 +502,7 @@ c     backwards compatibility with original rrtm
 C     If clouds are present, read in appropriate input file, IN_CLD_RRTM.
       IF (ICLD .GE. 1) CALL READCLD
 
-C     Read in surface information.
+!    Read in surface information.
 C       READ (IRD,9012) TBOUND,IEMISS,IREFLECT,(SEMIS(I),I=1,16)
       
       DO 1500 IBAND = 1, NBANDS
@@ -521,7 +525,7 @@ C      &        IPTHAK,ALTZ(0),PZ(0),TZ(0),ALTZ(1),PZ(1),TZ(1)
 C          READ (IRD,FORM3(IFORM)) (WKL(M,1),M=1,7), WBRODL(1)
 C          IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,1),M=8,NMOL)
 
-C          DO 2000 L = 2, NLAYERS
+         DO 2000 L = 2, NLAYERS
 C             READ (IRD,FORM2(IFORM)) PAVEL(L),TAVEL(L),SECNTK,CINP,
 C      &           IPTHRK,ALTZ(L),PZ(L),TZ(L)
 C             READ (IRD,FORM3(IFORM)) (WKL(M,L),M=1,7), WBRODL(L)
@@ -529,16 +533,16 @@ C             IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,L),M=8,NMOL)
  2000    CONTINUE   
            
          IF (IXSECT .EQ. 1) THEN                                 
-            READ (IRD,9300) NXMOL0
+C             READ (IRD,9300) NXMOL0
             NXMOL = NXMOL0
             CALL XSIDENT(IRD)
-            READ (IRD,9301) IFORMX
+C             READ (IRD,9301) IFORMX
 C     
             DO 3000 L = 1, NLAYERS       
-               READ (IRD,9010) CDUM
-               READ (IRD, FORM3(IFORMX)) (WX0(M,L),M=1,7),WBRODX    
-               IF (NXMOL0 .GT. 7) READ (IRD,FORM3(IFORMX)) 
-     &              (WX0(M,L),M=8,NXMOL0)
+C                READ (IRD,9010) CDUM
+C                READ (IRD, FORM3(IFORMX)) (WX0(M,L),M=1,7),WBRODX    
+C                IF (NXMOL0 .GT. 7) READ (IRD,FORM3(IFORMX)) 
+C      &              (WX0(M,L),M=8,NXMOL0)
  3000       CONTINUE
          ENDIF
       ELSE
@@ -661,7 +665,11 @@ C Open OUT_CLD_RRTM to output the cloud optical properties
       WRITE(ICD,8895) NSTR
 
 C Open Cloud Input File
-      OPEN(IRDCLD,FILE='IN_CLD_RRTM',FORM='FORMATTED')
+C       OPEN(IRDCLD,FILE='IN_CLD_RRTM',FORM='FORMATTED')
+      OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RR
+     &TM-LWandSW-Python-wrapper/LW/run_examples/in_cld_rrtm_MLS-cld1',FO
+     &RM='FORMATTED')
+      
 
 C     Read in cloud input option.  
       

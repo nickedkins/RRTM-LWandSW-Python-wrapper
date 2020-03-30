@@ -15,16 +15,17 @@
     <WatchVariables>
         <Variable>MXLAY</Variable>
         <Variable>TOTDFLUX</Variable>
+        <Variable>TAUG</Variable>
     </WatchVariables>
     <BreakpointList>
         <Breakpoint>
-            <id>3</id>
-            <line>783</line>
+            <id>10</id>
+            <line>517</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x100067a9f</address>
+            <address>0x100064a71</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -32,7 +33,49 @@
             <threads></threads>
         </Breakpoint>
         <Breakpoint>
-            <id>4</id>
+            <id>11</id>
+            <line>239</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x10005ff06</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>12</id>
+            <line>240</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x10005ff25</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>13</id>
+            <line>240</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x10005ff33</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>15</id>
             <line>380</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
             <type>breakpoint</type>
@@ -46,8 +89,50 @@
             <threads></threads>
         </Breakpoint>
         <Breakpoint>
-            <id>5</id>
-            <line>484</line>
+            <id>16</id>
+            <line>420</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x10006180e</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>17</id>
+            <line>422</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x10006194b</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>18</id>
+            <line>455</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x1000621b7</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>19</id>
+            <line>481</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
@@ -60,8 +145,22 @@
             <threads></threads>
         </Breakpoint>
         <Breakpoint>
-            <id>6</id>
-            <line>502</line>
+            <id>2</id>
+            <line>507</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x1000641de</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>20</id>
+            <line>499</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
@@ -74,13 +173,153 @@
             <threads></threads>
         </Breakpoint>
         <Breakpoint>
-            <id>7</id>
+            <id>21</id>
+            <line>503</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x10006369e</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>22</id>
+            <line>514</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x1000648b3</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>23</id>
+            <line>520</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x100064ad9</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>24</id>
+            <line>521</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x100064bd2</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>25</id>
+            <line>868</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x10006847a</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>26</id>
+            <line>501</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x100062e53</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>3</id>
             <line>509</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x100063bf6</address>
+            <address>0x1000643a6</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>4</id>
+            <line>771</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x1000676e6</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>5</id>
+            <line>865</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x1000681b1</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>6</id>
+            <line>866</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x10006834f</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>7</id>
+            <line>113</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rtrdis.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x100068ca7</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -89,12 +328,26 @@
         </Breakpoint>
         <Breakpoint>
             <id>8</id>
-            <line>516</line>
+            <line>202</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x10006489f</address>
+            <address>0x10005f565</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
+        <Breakpoint>
+            <id>9</id>
+            <line>239</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x10005fe72</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
