@@ -124,12 +124,14 @@ def writeformattedinputfile_sw():
 	f.write(' {:1d}{:3d}{:5d}  1.000000MIDLATITUDE SUMM H1=    0.00 H2=   70.00 ANG=   0.000 LEN= 0\n'.format(iform,nlayers,nmol))
 	f.write('{:11.4f}{:14.2f}{:10s}{:3s}{:2d}{:8.3f}{:8.2f}{:7.2f}{:7.3f}{:8.2f}{:7.2f}\n'.format(pavel[0],tavel[0],secntk,cinp,ipthak,altz[0]/1000.,pz[0],tz[0],altz[1]/1000.,pz[1],tz[1]))
 	f.write('{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}\n'.format(wkl[1,0],wkl[2,0],wkl[3,0],wkl[4,0],wkl[5,0],wkl[6,0],wkl[7,0],wbrodl[0] ))
-	for i in range(1,nlayers):
-		f.write('{:11.4f}{:14.2f}{:15.0f}{:30.3f}{:8.3f}{:7.2f}\n'.format(pavel[i],tavel[i],ipthrk,altz[i]/1000.,pz[i],tz[i]))
-		f.write('{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}\n'.format(wkl[1,i],wkl[2,i],wkl[3,i],wkl[4,i],wkl[5,i],wkl[6,i],wkl[7,i],wbrodl[i] ))
+	for i in range(2,nlayers+1):
+		f.write('{:11.4f}{:14.2f}{:15.0f}{:30.3f}{:8.3f}{:7.2f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+		f.write('{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}\n'.format(wkl[1,i-1],wkl[2,i-1],wkl[3,i-1],wkl[4,i-1],wkl[5,i-1],wkl[6,i-1],wkl[7,i-1],wbrodl[i-1] ))
 	f.write('%%%%%\n')
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
 	f.close()
+
+def writeformattedinputfile_lw()
 
 # 9009 FORMAT (A1,1X,I2,I2,I2)
 # 9010 FORMAT (A1)
@@ -267,8 +269,8 @@ istrm=1 			# ISTRM   flag for number of streams used in DISORT  (ISCAT must be e
 						#1=8 streams
 idelm=1 			# flag for outputting downwelling fluxes computed using the delta-M scaling approximation. 0=output "true" direct and diffuse downwelling fluxes, 1=output direct and diffuse downwelling fluxes computed with delta-M approximation
 icos=0 				#0:there is no need to account for instrumental cosine response, 1:to account for instrumental cosine response in the computation of the direct and diffuse fluxes, 2:2 to account for instrumental cosine response in the computation of the diffuse fluxes only
-semis=np.ones(16)	#all spectral bands the same as iemissm
-semiss=np.ones(29)*0.5 	#all spectral bands the same as iemissm (surface, I think)
+semis=np.ones(16)	#all spectral bands the same as iemissm (maybe this is the surface??)
+semiss=np.ones(29) 	#surface emissivity
 semiss[15:29] = [
 0.881,
 0.794,
@@ -290,7 +292,7 @@ psurf=1000.
 pmin=0.
 # secntk=0
 # cinp=1.356316e-19
-secntk=''
+secntk='' #based on not appearing in input mls sw
 cinp='' #based on not appearing in input mls sw
 ipthak=3
 ipthrk=3
@@ -299,7 +301,7 @@ sza=65. 			#Solar zenith angle in degrees (0 deg is overhead).
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
-lapse=6.5
+lapse=5.7
 tmin=150.
 tmax=350.
 rsp=287.05
@@ -492,8 +494,8 @@ for i in range(nlayers):
 	wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
 	wkl[2,i] = mperlayr[i] * 1.0e-4 * vol_mixco2
 	wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]
-	wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
-	wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
+	wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4
+	wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2
 
 ur_min=0.5
 ur_max=1.0
@@ -601,6 +603,7 @@ for ts in range(timesteps):
 	fnet=fnet_lw+fnet_sw
 	htr=htr_lw+htr_sw
 
+
 	if(cti+1 < nlayers-1):
 		maxhtr=max(abs(htr[cti+1:nlayers-1]))
 	else:
@@ -622,39 +625,9 @@ for ts in range(timesteps):
 		writeoutputfile()
 		filewritten=1
 	
-
 plotrrtmoutput()
 if(filewritten!=1):
 	writeoutputfile()
-
-# f = open('SW/RRTM SW Input','w+')
-
-# params = [iaer, iatm, iscat, istrm, iout, icld, idelm, icos]
-# writeparams(params,f)
-
-# params = [juldat,sza,isolvar]
-# writeparams(params,f)
-
-# params = [iemiss,ireflect]
-# writeparams(params,f)
-
-# for i in range(len(semiss)):
-# 	f.write(str(semiss[i]))
-# 	f.write('\n')
-
-# params = [iform,nlayers,nmol]
-# writeparams(params,f)
-
-# params = [secntk,cinp,ipthak]
-# writeparams(params,f)
-
-# params = [pavel,tavel,altz,pz,tz]
-# writeparamsarr(params,f)
-
-# params = [wbrodl,wkl[0,:],wkl[1,:],wkl[2,:],wkl[3,:],wkl[4,:],wkl[5,:],wkl[6,:]]
-# writeparamsarr(params,f)
-
-# f.close()
 
 tend = datetime.datetime.now()
 ttotal = tend-tstart

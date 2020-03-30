@@ -53,21 +53,21 @@ def logpplot(x,p,xlab,ylab):
 def plotrrtmoutput():
 	plt.figure(1)
 	plt.subplot(331)
-	logpplot(totuflux,pz,'totuflux','pz')
+	# logpplot(totuflux,pz,'totuflux','pz')
 	# logpplot(totuflux_lw,pz,'totuflux','pz')
-	# logpplot(totuflux_sw,pz,'totuflux','pz')
+	logpplot(totuflux_sw,pz,'totuflux','pz')
 	plt.subplot(332)
-	logpplot(totdflux,pz,'totdflux','pz')
+	# logpplot(totdflux,pz,'totdflux','pz')
 	# logpplot(totdflux_lw,pz,'totdflux','pz')
-	# logpplot(totdflux_sw,pz,'totdflux','pz')
+	logpplot(totdflux_sw,pz,'totdflux','pz')
 	plt.subplot(333)
-	logpplot(fnet,pz,'fnet','pz')
+	# logpplot(fnet,pz,'fnet','pz')
 	# logpplot(fnet_lw,pz,'fnet','pz')
-	# logpplot(fnet_sw,pz,'fnet','pz')
+	logpplot(fnet_sw,pz,'fnet','pz')
 	plt.subplot(334)
-	logpplot(htr[:-1],pz[:-1],'htr','pz')
+	# logpplot(htr[:-1],pz[:-1],'htr','pz')
 	# logpplot(htr_lw[:-1],pz[:-1],'htr','pz')
-	# logpplot(htr_sw[:-1],pz[:-1],'htr','pz')
+	logpplot(htr_sw[:-1],pz[:-1],'htr','pz')
 	plt.axvline(-eqb_maxhtr,ls='--')
 	plt.axvline(eqb_maxhtr,ls='--')
 	plt.subplot(335)
@@ -242,9 +242,6 @@ for directory in directories:
 				for j in range(shape(x)[1]):
 					x[i,j] = f.readline()
 
-		# plotrrtmoutput()
+		plotrrtmoutput()
 
-for i in range(nlayers):
-	print ' {:4e} {:4e} {:4e} {:4e} {:4e} {:4e} {:4e} {:4e}'.format(wkl[1,i]/wbrodl[i], wkl[2,i]/wbrodl[i], wkl[3,i]/wbrodl[i], wkl[4,i]/wbrodl[i], wkl[5,i]/wbrodl[i], wkl[6,i]/wbrodl[i], wkl[7,i]/wbrodl[i], wbrodl[i])
-
-# show()
+show()
