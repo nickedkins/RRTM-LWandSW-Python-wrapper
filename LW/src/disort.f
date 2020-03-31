@@ -4974,7 +4974,7 @@ c     ..
 C          IF( DTAUC( LC ).LT.0.0 ) INPERR = WRTBAD( 'DTAUC' )
          IF( DTAUC( LC ).LT.0.0 ) then !NJE
           dtauc(lc) = tol
-          print*, 'dtauc fixed'
+C           print*, 'dtauc fixed'
 C           INPERR = WRTBAD( 'DTAUC' )
           end if
 
@@ -4983,12 +4983,12 @@ C      &       INPERR = WRTBAD( 'SSALB' )
 
           IF( SSALB( LC ).LT.0.0) then
             ssalb(lc) =  tol
-            print*, 'SSALB fixed low'
+C             print*, 'SSALB fixed low'
           end if
 
           IF( SSALB( LC ).GT.1.0) then
             ssalb(lc) = 1.0 - tol
-            print*, 'SSALB fixed high'
+C             print*, 'SSALB fixed high'
           end if !NJE 2 if blocks
 
          YESSCT = YESSCT + SSALB( LC )

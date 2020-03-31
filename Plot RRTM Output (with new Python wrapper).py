@@ -53,20 +53,20 @@ def logpplot(x,p,xlab,ylab):
 def plotrrtmoutput():
 	plt.figure(1)
 	plt.subplot(331)
-	# logpplot(totuflux,pz,'totuflux','pz')
-	# logpplot(totuflux_lw,pz,'totuflux','pz')
+	logpplot(totuflux,pz,'totuflux','pz')
+	logpplot(totuflux_lw,pz,'totuflux','pz')
 	logpplot(totuflux_sw,pz,'totuflux','pz')
 	plt.subplot(332)
-	# logpplot(totdflux,pz,'totdflux','pz')
-	# logpplot(totdflux_lw,pz,'totdflux','pz')
+	logpplot(totdflux,pz,'totdflux','pz')
+	logpplot(totdflux_lw,pz,'totdflux','pz')
 	logpplot(totdflux_sw,pz,'totdflux','pz')
 	plt.subplot(333)
-	# logpplot(fnet,pz,'fnet','pz')
-	# logpplot(fnet_lw,pz,'fnet','pz')
+	logpplot(fnet,pz,'fnet','pz')
+	logpplot(fnet_lw,pz,'fnet','pz')
 	logpplot(fnet_sw,pz,'fnet','pz')
 	plt.subplot(334)
-	# logpplot(htr[:-1],pz[:-1],'htr','pz')
-	# logpplot(htr_lw[:-1],pz[:-1],'htr','pz')
+	logpplot(htr_lw[:-1]+htr_sw[:-1],pz[:-1],'htr','pz')
+	logpplot(htr_lw[:-1],pz[:-1],'htr','pz')
 	logpplot(htr_sw[:-1],pz[:-1],'htr','pz')
 	plt.axvline(-eqb_maxhtr,ls='--')
 	plt.axvline(eqb_maxhtr,ls='--')
@@ -243,5 +243,7 @@ for directory in directories:
 					x[i,j] = f.readline()
 
 		plotrrtmoutput()
+
+print gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr
 
 show()

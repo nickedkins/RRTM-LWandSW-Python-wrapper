@@ -204,6 +204,9 @@ C       OPEN (IRD,FILE='INPUT_RRTM',FORM='FORMATTED')
 C       OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM
 C      &-LWandSW-Python-wrapper/LW/run_examples/input_rrtm_MLS',FORM='FORM
 C      &ATTED')
+      open(ird,file='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-
+     &LWandSW-Python-wrapper/LW/Input RRTM LW NJE Formatted',form='forma
+     &tted')
       
 
   
@@ -444,42 +447,42 @@ c      DATA WX /MAXPROD*0.0/
 
 
 
-      open(99,file='RRTM LW Input')
-      read(99,*) IATM, IXSECT, ISCAT,NUMANGS, IOUT, ICLD
-      read(99,*) TBOUND,IEMISS,IREFLECT
-      do i=1,16
-        read(99,*) semis(i)
-      end do
-      read(99,*) IFORM,NLAYERS,NMOL
-      read(99,*) secntk,cinp,ipthak
-      do i=1,NLAYERS
-        read(99,*) pavel(i)
-      end do
-      do i=1,NLAYERS
-        read(99,*) tavel(i)
-      end do
-      do i=0,NLAYERS
-        read(99,*) altz(i)
-      end do
-      do i=0,NLAYERS
-        read(99,*) pz(i)
-      end do
-      do i=0,NLAYERS
-        read(99,*) tz(i)
-      end do
-      do i=1,NLAYERS
-        read(99,*) wbrodl(i)
-      end do
-      do imol=1,7
-        do i=1,nlayers
-          read(99,*) wkl(imol,i)
-        end do
-      end do
+C       open(99,file='RRTM LW Input')
+C       read(99,*) IATM, IXSECT, ISCAT,NUMANGS, IOUT, ICLD
+C       read(99,*) TBOUND,IEMISS,IREFLECT
+C       do i=1,16
+C         read(99,*) semis(i)
+C       end do
+C       read(99,*) IFORM,NLAYERS,NMOL
+C       read(99,*) secntk,cinp,ipthak
+C       do i=1,NLAYERS
+C         read(99,*) pavel(i)
+C       end do
+C       do i=1,NLAYERS
+C         read(99,*) tavel(i)
+C       end do
+C       do i=0,NLAYERS
+C         read(99,*) altz(i)
+C       end do
+C       do i=0,NLAYERS
+C         read(99,*) pz(i)
+C       end do
+C       do i=0,NLAYERS
+C         read(99,*) tz(i)
+C       end do
+C       do i=1,NLAYERS
+C         read(99,*) wbrodl(i)
+C       end do
+C       do imol=1,7
+C         do i=1,nlayers
+C           read(99,*) wkl(imol,i)
+C         end do
+C       end do
 
-C       READ (IRD,9010,END=8800) CTEST
-C       IF (CTEST .NE. CDOLLAR) GO TO 1000
+      READ (IRD,9010,END=8800) CTEST
+      IF (CTEST .NE. CDOLLAR) GO TO 1000
 
-C       READ (IRD,9011) IATM, IXSECT, ISCAT,NUMANGS, IOUT, ICLD
+      READ (IRD,9011) IATM, IXSECT, ISCAT,NUMANGS, IOUT, ICLD
       
 c     If numangs set to -1, reset to default rt code for
 c     backwards compatibility with original rrtm
@@ -503,7 +506,7 @@ C     If clouds are present, read in appropriate input file, IN_CLD_RRTM.
       IF (ICLD .GE. 1) CALL READCLD
 
 !    Read in surface information.
-C       READ (IRD,9012) TBOUND,IEMISS,IREFLECT,(SEMIS(I),I=1,16)
+      READ (IRD,9012) TBOUND,IEMISS,IREFLECT,(SEMIS(I),I=1,16)
       
       DO 1500 IBAND = 1, NBANDS
          SEMISS(IBAND) = 1.0
@@ -517,32 +520,32 @@ C       READ (IRD,9012) TBOUND,IEMISS,IREFLECT,(SEMIS(I),I=1,16)
  1500 CONTINUE
 
       IF (IATM .EQ. 0) THEN
-C          READ (IRD,9013) IFORM,NLAYERS,NMOL
+         READ (IRD,9013) IFORM,NLAYERS,NMOL
          
          IF (NMOL.EQ.0) NMOL = 7                                    
-C          READ (IRD,FORM1(IFORM)) PAVEL(1),TAVEL(1),SECNTK,CINP,
-C      &        IPTHAK,ALTZ(0),PZ(0),TZ(0),ALTZ(1),PZ(1),TZ(1)
-C          READ (IRD,FORM3(IFORM)) (WKL(M,1),M=1,7), WBRODL(1)
-C          IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,1),M=8,NMOL)
+         READ (IRD,FORM1(IFORM)) PAVEL(1),TAVEL(1),SECNTK,CINP,
+     &        IPTHAK,ALTZ(0),PZ(0),TZ(0),ALTZ(1),PZ(1),TZ(1)
+         READ (IRD,FORM3(IFORM)) (WKL(M,1),M=1,7), WBRODL(1)
+         IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,1),M=8,NMOL)
 
          DO 2000 L = 2, NLAYERS
-C             READ (IRD,FORM2(IFORM)) PAVEL(L),TAVEL(L),SECNTK,CINP,
-C      &           IPTHRK,ALTZ(L),PZ(L),TZ(L)
-C             READ (IRD,FORM3(IFORM)) (WKL(M,L),M=1,7), WBRODL(L)
-C             IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,L),M=8,NMOL)
+            READ (IRD,FORM2(IFORM)) PAVEL(L),TAVEL(L),SECNTK,CINP,
+     &           IPTHRK,ALTZ(L),PZ(L),TZ(L)
+            READ (IRD,FORM3(IFORM)) (WKL(M,L),M=1,7), WBRODL(L)
+            IF(NMOL .GT. 7) READ (IRD,FORM3(IFORM)) (WKL(M,L),M=8,NMOL)
  2000    CONTINUE   
            
          IF (IXSECT .EQ. 1) THEN                                 
-C             READ (IRD,9300) NXMOL0
+            READ (IRD,9300) NXMOL0
             NXMOL = NXMOL0
             CALL XSIDENT(IRD)
-C             READ (IRD,9301) IFORMX
+            READ (IRD,9301) IFORMX
 C     
             DO 3000 L = 1, NLAYERS       
-C                READ (IRD,9010) CDUM
-C                READ (IRD, FORM3(IFORMX)) (WX0(M,L),M=1,7),WBRODX    
-C                IF (NXMOL0 .GT. 7) READ (IRD,FORM3(IFORMX)) 
-C      &              (WX0(M,L),M=8,NXMOL0)
+               READ (IRD,9010) CDUM
+               READ (IRD, FORM3(IFORMX)) (WX0(M,L),M=1,7),WBRODX    
+               IF (NXMOL0 .GT. 7) READ (IRD,FORM3(IFORMX)) 
+     &              (WX0(M,L),M=8,NXMOL0)
  3000       CONTINUE
          ENDIF
       ELSE

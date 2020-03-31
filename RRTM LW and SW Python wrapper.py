@@ -112,7 +112,7 @@ def writeinputfile_sw():
 	f.close()
 
 def writeformattedinputfile_sw():
-	f=open('Input RRTM SW NJE Formatted','w+')
+	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/Input RRTM SW NJE Formatted','w+')
 	f.write('INPUT_RRTM_SW NJE created\n')
 
 	f.write('0        1         2         3         4         5         6         7         8         9\n')
@@ -131,7 +131,28 @@ def writeformattedinputfile_sw():
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
 	f.close()
 
-def writeformattedinputfile_lw()
+def writeformattedinputfile_lw():
+	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/Input RRTM LW NJE Formatted','w+')
+	f.write('TAPE5 FOR MLS\n')
+	f.write('0        1         2         3         4         5         6         7         8         9\n')
+	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
+	f.write('$ STANDARD MID-LATITUDE SUMMER ATMOSPHERE\n')
+	f.write('{:50d}{:20d}{:13d}{:2d}{:5d}{:5d}\n'.format(iatm,ixsect,iscat,numangs,iout,icld))
+	# print type(semiss[0:16])
+	f.write('{:6.1f} {:1d}  {:1d}\n'.format(tbound,iemiss,ireflect))
+	# for i in range(16):
+	# 	f.write('{:5.3f}'.format(semiss[i]))
+	f.write('{:2d}{:3d}{:5d}  1.000000MIDLATITUDE SUMM H1=    0.00 H2=   70.00 ANG=   0.000 LEN= 0\n'.format(iform,nlayers,nmol))
+	f.write('{:11.4f}{:14.2f}{:15d}{:8.3f}{:8.2f}{:7.2f}{:7.3f}{:8.2f}{:7.2f}\n'.format(pavel[0],tavel[0],ipthak,altz[0]/1000.,pz[0],tz[0],altz[1]/1000.,pz[1],tz[1]))
+	f.write('{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}\n'.format(wkl[1,0],wkl[2,0],wkl[3,0],wkl[4,0],wkl[5,0],wkl[6,0],wkl[7,0],wbrodl[0] ))
+	for i in range(2,nlayers+1):
+		f.write('{:11.4f}{:14.2f}{:15.0f}{:30.3f}{:8.3f}{:7.2f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+		f.write('{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}{:15.7e}\n'.format(wkl[1,i-1],wkl[2,i-1],wkl[3,i-1],wkl[4,i-1],wkl[5,i-1],wkl[6,i-1],wkl[7,i-1],wbrodl[i-1] ))
+	f.write('%%%%%\n')
+	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
+
+# 9011 FORMAT (49X,I1,19X,I1,12X,I1,I2,2X,I3,4X,I1)
+ # 9012 FORMAT (E10.3,1X,I1,2X,I1,16E5.3)
 
 # 9009 FORMAT (A1,1X,I2,I2,I2)
 # 9010 FORMAT (A1)
@@ -208,6 +229,7 @@ def plotrrtmoutput():
 	plt.axvline(eqb_maxhtr,ls='--')
 	plt.subplot(335)
 	logpplot(tz,pz,'tz','pz')
+	# plt.plot(tz,altz/1000.)
 	plt.subplot(336)
 	logpplot(wbrodl,pavel,'wbrodl','pavel')
 	plt.subplot(337)
@@ -252,14 +274,15 @@ avogadro=6.022e23
 iatm=0 #0 for layer values, 1 for level values
 ixsect=0 #could be 1, but why?
 iscat=0 #just absorption and emission
-numangs=0 #can be 0-4 for higher precision
+# numangs=0 #can be 0-4 for higher precision
+numangs=3 #can be 0-4 for higher precision 3 for SW, 0 for LW
 # iout=99 #for info in all spectral bands
 iout=0 #for broadband only
 # iout=-1 #for broadband, no printings
 # iout=29
 icld=0 #for clear sky
 # icld=1  #for grey clouds
-tbound = 288 #surface temperature (K)
+tbound = 288. #surface temperature (K)
 iemiss=1 #surface emissivity. Keep this fixed for now.
 iemis=2
 ireflect=0 #for Lambert reflection
@@ -269,9 +292,9 @@ istrm=1 			# ISTRM   flag for number of streams used in DISORT  (ISCAT must be e
 						#1=8 streams
 idelm=1 			# flag for outputting downwelling fluxes computed using the delta-M scaling approximation. 0=output "true" direct and diffuse downwelling fluxes, 1=output direct and diffuse downwelling fluxes computed with delta-M approximation
 icos=0 				#0:there is no need to account for instrumental cosine response, 1:to account for instrumental cosine response in the computation of the direct and diffuse fluxes, 2:2 to account for instrumental cosine response in the computation of the diffuse fluxes only
-semis=np.ones(16)	#all spectral bands the same as iemissm (maybe this is the surface??)
-semiss=np.ones(29) 	#surface emissivity
-semiss[15:29] = [
+semis=np.ones(16)*1.	#all spectral bands the same as iemissm (maybe this is the surface??)
+semiss=np.ones(29)*1. 	#surface emissivity
+semiss[15:29] = np.array([
 0.881,
 0.794,
 0.738,
@@ -286,7 +309,7 @@ semiss[15:29] = [
 0.958,
 0.958,
 0.970
-]
+])
 iform=1
 psurf=1000.
 pmin=0.
@@ -497,10 +520,12 @@ for i in range(nlayers):
 	wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4
 	wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2
 
+wkl = np.clip(wkl,1.,1e63)
+
 ur_min=0.5
 ur_max=1.0
 eqb_maxhtr = 0.01
-timesteps=1
+timesteps=200
 
 cti=0
 
@@ -516,7 +541,7 @@ maxhtr=0.
 
 
 params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
-params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,]
+params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
 params2d=[wkl]
 
 
@@ -585,23 +610,25 @@ for ts in range(timesteps):
 			wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
 
 
-
+	writeformattedinputfile_lw()
 	# writeinputfile_lw()
-	# callrrtmlw()
-
-	writeinputfile_sw()
-	callrrtmsw()
+	callrrtmlw()
 
 	writeformattedinputfile_sw()
+	# writeinputfile_sw()
+	callrrtmsw()
+
+	
 
 
 
-	# totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
+	totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
 	totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
 	totuflux=totuflux_lw+totuflux_sw
 	totdflux=totdflux_lw+totdflux_sw
 	fnet=fnet_lw+fnet_sw
 	htr=htr_lw+htr_sw
+	print htr
 
 
 	if(cti+1 < nlayers-1):
@@ -613,6 +640,10 @@ for ts in range(timesteps):
 		plotrrtmoutput()
 
 	print ts, maxhtr, cti
+
+	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
+	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
+	params2d=[wkl]
 
 	if(maxhtr < eqb_maxhtr):
 		plotrrtmoutput()
@@ -627,7 +658,11 @@ for ts in range(timesteps):
 	
 plotrrtmoutput()
 if(filewritten!=1):
+	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
+	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
+	params2d=[wkl]
 	writeoutputfile()
+	
 
 tend = datetime.datetime.now()
 ttotal = tend-tstart
