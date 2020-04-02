@@ -342,7 +342,7 @@ htr_sw=np.zeros(nlayers+1)
 conv=np.zeros(nlayers+1)
 altavel = np.zeros(nlayers)
 
-ur=np.ones(nlayers-1)
+ur=np.ones(nlayers)
 
 # pz=np.linspace(psurf,pmin,nlayers+1)
 # pz=np.logspace(3.,-1.,base=10.,num=nlayers+1)
@@ -1162,10 +1162,10 @@ for i in range(nlayers):
 
 # wkl = np.clip(wkl,1.,1e63)
 
-ur_min=0.5
+ur_min=0.6
 ur_max=1.5
 eqb_maxhtr = 0.01
-timesteps=100
+timesteps=400
 
 cti=0
 
@@ -1209,7 +1209,8 @@ for ts in range(timesteps):
 		# plt.xlabel('ts')
 		# plt.ylabel('maxhtr')
 
-		tavel[1:] += htr[1:-1]/ur
+		# tavel[1:] += htr[1:-1]/ur
+		tavel[:] += htr[:-1]/ur
 		tavel=np.clip(tavel,tmin,tmax)
 		for i in range(1,nlayers):
 			tz[i] = (tavel[i-1] + tavel[i])/2.
@@ -1274,7 +1275,7 @@ for ts in range(timesteps):
 	if(ts%20==2):
 		plotrrtmoutput()
 
-	print '{:16.8f} {:16.8f} {:16.8f} {:16.8f} '.format(htr[nlayers-1],tavel[nlayers-1],tavel[nlayers-2],fnet[nlayers-1]-fnet[nlayers-2])
+	# print '{:16.8f} {:16.8f} {:16.8f} {:16.8f} '.format(htr[nlayers-1],tavel[nlayers-1],tavel[nlayers-2],fnet[nlayers-1]-fnet[nlayers-2])
 	print ts, maxhtr, cti
 
 	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
