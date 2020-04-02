@@ -151,20 +151,6 @@ def writeformattedinputfile_lw():
 	f.write('%%%%%\n')
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
 
-# 9011 FORMAT (49X,I1,19X,I1,12X,I1,I2,2X,I3,4X,I1)
- # 9012 FORMAT (E10.3,1X,I1,2X,I1,16E5.3)
-
-# 9009 FORMAT (A1,1X,I2,I2,I2)
-# 9010 FORMAT (A1)
-# 9011 FORMAT (18X,I2,29X,I1,32X,I1,1X,I1,2X,I3,4X,I1,3x,i1,i1)
-# 9012 FORMAT (11X,I1,2X,I1,14F5.3)
-# 9013 FORMAT (1X,I1,I3,I5)                                     
-# 9020 format (12X, I3, 3X, F7.4, 4X, I1,14F5.3)
-# 9300 FORMAT (I5)
-# 9301 FORMAT (1X,I1)
-# FORM1(1) = '(G15.7,G10.4,G10.4,A3,I2,1X,2(G7.2,G8.3,G7.2))'
-# FORM3(1) = '(8G15.7)'
-
 def callrrtmlw():
 	loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw'
 	os.chdir(project_dir+'/LW')
@@ -233,7 +219,7 @@ def plotrrtmoutput():
 	plt.subplot(336)
 	logpplot(wbrodl,pavel,'wbrodl','pavel')
 	plt.subplot(337)
-	loglogplot(wkl[1,:],pavel,'wkl1 (h2o)','pavel')
+	logpplot(wkl[1,:],pavel,'wkl1 (h2o)','pavel')
 	plt.subplot(338)
 	loglogplot(wkl[2,:],pavel,'wkl2 (co2)','pavel')
 	plt.subplot(339)
@@ -243,7 +229,7 @@ def convection(T,z):
 	for i in range(1,len(T)):
 		dT = (T[i]-T[i-1])
 		dz = (z[i]-z[i-1])/1000.
-		if( -1.0 * dT/dz > lapse or z[i]/1000. < 5.0 ):
+		if( -1.0 * dT/dz > lapse or z[i]/1000. < -1 ):
 			conv[i]=1.
 			T[i] = T[i-1] - lapse * dz
 
@@ -320,12 +306,12 @@ cinp='' #based on not appearing in input mls sw
 ipthak=3
 ipthrk=3
 juldat=0 		#Julian day associated with calculation (1-365/366 starting January 1). Used to calculate Earth distance from sun. A value of 0 (default) indicates no scaling of solar source function using earth-sun distance.
-sza=65. 			#Solar zenith angle in degrees (0 deg is overhead).
+sza=45. 			#Solar zenith angle in degrees (0 deg is overhead).
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
-lapse=5.7
-tmin=150.
+lapse=100
+tmin=10.
 tmax=350.
 rsp=287.05
 gravity=9.81
@@ -338,7 +324,6 @@ htr=np.zeros(nlayers+1)
 pavel=np.zeros(nlayers)
 tz=np.ones(nlayers+1) * tbound
 altz=np.zeros(nlayers+1)
-tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
 tavel=np.zeros(nlayers)
 esat_liq=np.zeros(nlayers)
 rel_hum=np.zeros(nlayers)
@@ -354,8 +339,10 @@ totuflux_sw=np.zeros(nlayers+1)
 totdflux_sw=np.zeros(nlayers+1)
 fnet_sw=np.zeros(nlayers+1)
 htr_sw=np.zeros(nlayers+1)
-conv=np.zeros(nlayers)
+conv=np.zeros(nlayers+1)
 altavel = np.zeros(nlayers)
+
+ur=np.ones(nlayers-1)
 
 # pz=np.linspace(psurf,pmin,nlayers+1)
 # pz=np.logspace(3.,-1.,base=10.,num=nlayers+1)
@@ -413,21 +400,673 @@ pz=np.array([
 0.077529	,
 0.067	,
 	])
-for i in range(len(pavel)):
-	pavel[i]=(pz[i]+pz[i+1])/2.
-tavel=np.zeros(nlayers)
-for i in range(len(pavel)):
-	tavel[i]=(tz[i]+tz[i+1])/2.
-altz[0] = 0.0
-for i in range(1,nlayers):
-	altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
-altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
-tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
-tz=np.clip(tz,tmin,tmax)
-for i in range(nlayers):
-	tavel[i]=(tz[i]+tz[i+1])/2.
 
-tavel[nlayers-1] = tavel[nlayers-2]
+wkl[1,:] = np.array([
+1.59E-02	,
+1.12E-02	,
+7.68E-03	,
+5.27E-03	,
+3.63E-03	,
+2.39E-03	,
+1.71E-03	,
+1.27E-03	,
+9.57E-04	,
+6.97E-04	,
+5.08E-04	,
+3.66E-04	,
+2.50E-04	,
+1.36E-04	,
+6.55E-05	,
+2.84E-05	,
+9.70E-06	,
+4.82E-06	,
+3.43E-06	,
+3.27E-06	,
+3.18E-06	,
+3.18E-06	,
+3.26E-06	,
+3.41E-06	,
+3.59E-06	,
+3.85E-06	,
+4.06E-06	,
+4.25E-06	,
+4.39E-06	,
+4.53E-06	,
+4.68E-06	,
+4.81E-06	,
+4.90E-06	,
+4.97E-06	,
+5.02E-06	,
+5.10E-06	,
+5.25E-06	,
+5.38E-06	,
+5.47E-06	,
+5.47E-06	,
+5.33E-06	,
+5.18E-06	,
+5.05E-06	,
+4.88E-06	,
+4.71E-06	,
+4.54E-06	,
+4.38E-06	,
+4.22E-06	,
+4.06E-06	,
+3.91E-06	,
+3.77E-06	,
+	])
+
+wkl[2,:] = np.array([
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+3.55E-04	,
+	])
+
+wkl[3,:] = np.array([
+3.19E-08	,
+3.55E-08	,
+3.95E-08	,
+4.39E-08	,
+4.89E-08	,
+5.44E-08	,
+6.13E-08	,
+6.99E-08	,
+7.95E-08	,
+8.92E-08	,
+1.02E-07	,
+1.16E-07	,
+1.31E-07	,
+1.60E-07	,
+1.94E-07	,
+2.28E-07	,
+3.04E-07	,
+4.40E-07	,
+5.24E-07	,
+6.32E-07	,
+8.23E-07	,
+1.25E-06	,
+1.80E-06	,
+2.29E-06	,
+2.83E-06	,
+3.45E-06	,
+4.22E-06	,
+5.03E-06	,
+5.68E-06	,
+6.31E-06	,
+6.96E-06	,
+7.77E-06	,
+8.52E-06	,
+8.83E-06	,
+8.49E-06	,
+7.56E-06	,
+6.30E-06	,
+5.10E-06	,
+4.08E-06	,
+2.82E-06	,
+1.80E-06	,
+1.55E-06	,
+1.36E-06	,
+1.18E-06	,
+1.03E-06	,
+9.02E-07	,
+7.88E-07	,
+6.75E-07	,
+5.80E-07	,
+4.98E-07	,
+4.30E-07	,
+	])
+
+wkl[4,:] = np.array([
+3.20E-07	,
+3.20E-07	,
+3.20E-07	,
+3.20E-07	,
+3.20E-07	,
+3.20E-07	,
+3.20E-07	,
+3.20E-07	,
+3.20E-07	,
+3.20E-07	,
+3.18E-07	,
+3.15E-07	,
+3.10E-07	,
+3.03E-07	,
+2.97E-07	,
+2.93E-07	,
+2.87E-07	,
+2.79E-07	,
+2.70E-07	,
+2.55E-07	,
+2.31E-07	,
+2.00E-07	,
+1.69E-07	,
+1.40E-07	,
+1.17E-07	,
+1.03E-07	,
+9.44E-08	,
+8.76E-08	,
+8.24E-08	,
+7.56E-08	,
+6.70E-08	,
+5.42E-08	,
+4.24E-08	,
+3.26E-08	,
+2.40E-08	,
+1.78E-08	,
+1.29E-08	,
+9.31E-09	,
+6.67E-09	,
+3.59E-09	,
+2.03E-09	,
+1.70E-09	,
+1.47E-09	,
+1.32E-09	,
+1.20E-09	,
+1.10E-09	,
+1.02E-09	,
+9.55E-10	,
+9.00E-10	,
+8.48E-10	,
+8.00E-10	,
+	])
+
+wkl[5,:] = np.array([
+1.47E-07	,
+1.42E-07	,
+1.37E-07	,
+1.34E-07	,
+1.31E-07	,
+1.30E-07	,
+1.29E-07	,
+1.27E-07	,
+1.24E-07	,
+1.19E-07	,
+1.14E-07	,
+1.07E-07	,
+1.00E-07	,
+9.32E-08	,
+8.56E-08	,
+7.72E-08	,
+6.39E-08	,
+4.88E-08	,
+3.73E-08	,
+2.87E-08	,
+2.25E-08	,
+1.74E-08	,
+1.41E-08	,
+1.26E-08	,
+1.24E-08	,
+1.32E-08	,
+1.44E-08	,
+1.56E-08	,
+1.67E-08	,
+1.81E-08	,
+1.98E-08	,
+2.19E-08	,
+2.38E-08	,
+2.56E-08	,
+2.75E-08	,
+2.94E-08	,
+3.09E-08	,
+3.23E-08	,
+3.38E-08	,
+3.65E-08	,
+3.96E-08	,
+4.27E-08	,
+4.57E-08	,
+4.98E-08	,
+5.44E-08	,
+5.94E-08	,
+6.52E-08	,
+7.46E-08	,
+8.53E-08	,
+9.76E-08	,
+1.11E-07	,
+	])
+
+wkl[6,:] = np.array([
+1.70E-06	,
+1.70E-06	,
+1.70E-06	,
+1.70E-06	,
+1.70E-06	,
+1.69E-06	,
+1.68E-06	,
+1.66E-06	,
+1.65E-06	,
+1.63E-06	,
+1.62E-06	,
+1.61E-06	,
+1.58E-06	,
+1.56E-06	,
+1.53E-06	,
+1.51E-06	,
+1.48E-06	,
+1.45E-06	,
+1.42E-06	,
+1.38E-06	,
+1.34E-06	,
+1.30E-06	,
+1.25E-06	,
+1.17E-06	,
+1.08E-06	,
+9.65E-07	,
+8.54E-07	,
+7.71E-07	,
+7.25E-07	,
+6.80E-07	,
+6.34E-07	,
+5.79E-07	,
+5.27E-07	,
+4.82E-07	,
+4.38E-07	,
+3.95E-07	,
+3.52E-07	,
+3.10E-07	,
+2.67E-07	,
+2.01E-07	,
+1.59E-07	,
+1.54E-07	,
+1.51E-07	,
+1.50E-07	,
+1.50E-07	,
+1.50E-07	,
+1.50E-07	,
+1.50E-07	,
+1.50E-07	,
+1.50E-07	,
+1.50E-07	,
+	])
+
+wkl[7,:] = np.array([
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+2.09E-01	,
+	])
+
+wbrodl = np.array([
+2.02E+24	,
+1.66E+24	,
+1.22E+24	,
+1.13E+24	,
+1.04E+24	,
+9.57E+23	,
+8.81E+23	,
+7.11E+23	,
+6.59E+23	,
+6.11E+23	,
+5.65E+23	,
+5.22E+23	,
+4.81E+23	,
+4.44E+23	,
+4.08E+23	,
+3.74E+23	,
+5.68E+23	,
+4.36E+23	,
+3.65E+23	,
+3.07E+23	,
+2.58E+23	,
+2.16E+23	,
+1.81E+23	,
+1.52E+23	,
+1.38E+23	,
+1.14E+23	,
+9.44E+22	,
+8.43E+22	,
+7.36E+22	,
+6.29E+22	,
+5.56E+22	,
+5.18E+22	,
+3.61E+22	,
+2.68E+22	,
+2.00E+22	,
+1.51E+22	,
+1.14E+22	,
+8.69E+21	,
+7.51E+21	,
+1.28E+22	,
+2.70E+21	,
+1.65E+21	,
+1.25E+21	,
+7.53E+20	,
+6.35E+20	,
+5.37E+20	,
+3.93E+20	,
+3.11E+20	,
+2.71E+20	,
+2.35E+20	,
+1.87E+20	,
+	])
+
+pavel=np.array([
+952.1147	,
+841.897	,
+755.3917	,
+685.0609	,
+620.7571	,
+561.5159	,
+506.7787	,
+458.9778	,
+417.8179	,
+379.9846	,
+345.1331	,
+313	,
+283.2681	,
+255.9648	,
+230.793	,
+207.5901	,
+179.6777	,
+149.8259	,
+125.467	,
+105.5072	,
+88.85838	,
+74.81903	,
+63.06029	,
+53.19867	,
+44.59128	,
+37.16316	,
+30.91292	,
+25.6397	,
+20.97451	,
+16.9346	,
+13.41941	,
+10.30125	,
+7.703475	,
+5.824757	,
+4.442682	,
+3.407392	,
+2.627624	,
+2.037819	,
+1.56118	,
+0.9634139	,
+0.5106084	,
+0.3820259	,
+0.2975729	,
+0.2388066	,
+0.1978831	,
+0.1639725	,
+0.1372726	,
+0.1161604	,
+9.89E-02	,
+8.43E-02	,
+7.22E-02	,
+	])
+
+tavel=np.array([
+2.92E+02	,
+287.03	,
+282.23	,
+277.43	,
+272.63	,
+267.83	,
+263.03	,
+258.3	,
+253.75	,
+249.2	,
+244.65	,
+240.13	,
+235.64	,
+231.1	,
+226.55	,
+222.01	,
+216.81	,
+215.71	,
+215.7	,
+215.7	,
+216.18	,
+217.39	,
+218.72	,
+220.08	,
+221.46	,
+222.88	,
+224.24	,
+225.81	,
+227.61	,
+230.17	,
+233.52	,
+237.51	,
+242.34	,
+247.27	,
+252.17	,
+257.13	,
+262.09	,
+267.05	,
+272	,
+274.41	,
+268.77	,
+263.53	,
+258.75	,
+253.76	,
+249	,
+244.24	,
+239.61	,
+234.65	,
+229.81	,
+224.97	,
+220.34	,
+	])
+
+altz=np.array([
+0.00E+00	,
+1.1,
+2.1	,
+2.9	,
+3.7	,
+4.5	,
+5.3	,
+6.1	,
+6.8	,
+7.5	,
+8.2	,
+8.9	,
+9.6	,
+10.3	,
+11	,
+11.7	,
+12.4	,
+13.6	,
+14.7	,
+15.8	,
+16.9	,
+18	,
+19.1	,
+20.2	,
+21.3	,
+22.5	,
+23.7	,
+24.9	,
+26.2	,
+27.6	,
+29.1	,
+30.8	,
+32.9	,
+34.9	,
+36.9	,
+38.9	,
+40.9	,
+42.9	,
+44.9	,
+47.2	,
+53.9	,
+56.4	,
+58.4	,
+60.3	,
+61.7	,
+63.1	,
+64.5	,
+65.7	,
+66.8	,
+67.9	,
+69	,
+70	,
+	])*1000.
+
+tz=np.array([
+294.2	,
+289.25,
+284.6	,
+279.8	,
+275	,
+270.2	,
+265.4	,
+260.55	,
+256	,
+251.45	,
+246.9	,
+242.35	,
+237.86	,
+233.35	,
+228.8	,
+224.25	,
+219.7	,
+215.74	,
+215.7	,
+215.7	,
+215.7	,
+216.8	,
+218.03	,
+219.44	,
+220.76	,
+222.2	,
+223.57	,
+224.98	,
+226.71	,
+228.66	,
+231.81	,
+235.4	,
+239.99	,
+244.95	,
+249.84	,
+254.77	,
+259.73	,
+264.69	,
+269.65	,
+274.56	,
+270.71	,
+265.88	,
+261	,
+256.08	,
+251.32	,
+246.56	,
+241.8	,
+237.02	,
+232.18	,
+227.34	,
+222.5	,
+218.1	,
+	])
+
+
+# for i in range(len(pavel)):
+# 	pavel[i]=(pz[i]+pz[i+1])/2.
+# tavel=np.zeros(nlayers)
+# for i in range(len(pavel)):
+# 	tavel[i]=(tz[i]+tz[i+1])/2.
+# altz[0] = 0.0
+# for i in range(1,nlayers):
+# 	altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+# altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
+# tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
+# tz=np.clip(tz,tmin,tmax)
+# for i in range(nlayers):
+# 	tavel[i]=(tz[i]+tz[i+1])/2.
+
+# tavel[nlayers-1] = tavel[nlayers-2]
 
 # # Gas inventories
 pin2 = 0.79 * 1e5 #convert the input in bar to Pa
@@ -512,20 +1151,21 @@ for i in range(nlayers):
 	vol_mixo3[i] = (3.6478*(pz[i]**0.83209))*np.exp(-pz[i]/11.3515)*1e-6
 
 #Set up mixing ratio of broadening molecules (N2 and O2 mostly)
-for i in range(nlayers):
-	wbrodl[i] = mperlayr_air[i] * 1.0e-4
-	wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
-	wkl[2,i] = mperlayr[i] * 1.0e-4 * vol_mixco2
-	wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]
-	wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4
-	wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2
+# for i in range(nlayers):
+# 	wbrodl[i] = mperlayr_air[i] * 1.0e-4
+# 	wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
+# 	# wkl[2,i] = mperlayr[i] * 1.0e-4 * vol_mixco2
+# 	wkl[2,i] = mperlayr[i] * 1.0e-4 * 400e-6
+# 	wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]*0.
+# 	wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
+# 	wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
 
-wkl = np.clip(wkl,1.,1e63)
+# wkl = np.clip(wkl,1.,1e63)
 
 ur_min=0.5
-ur_max=1.0
+ur_max=1.5
 eqb_maxhtr = 0.01
-timesteps=200
+timesteps=100
 
 cti=0
 
@@ -552,9 +1192,10 @@ for ts in range(timesteps):
 		maxhtr = 1.1*eqb_maxhtr
 	# maxhtr=max(abs(htr[cti+1:nlayers-1]))
 	if(ts>0):
-		ur=maxhtr**2.0 * (nlayers/60.) + ur_min
-		if(ur>ur_max):
-			ur=ur_max
+		for i in range(1,nlayers-1):
+			ur[i]=maxhtr**2.0 * pz[0]/(pz[i-1]-pz[i]) + ur_min
+			if(ur[i]>ur_max):
+				ur[i]=ur_max
 		# plt.figure(2)
 		# plt.subplot(121)
 		# plt.plot(ur,maxhtr,'o')
@@ -573,16 +1214,16 @@ for ts in range(timesteps):
 		for i in range(1,nlayers):
 			tz[i] = (tavel[i-1] + tavel[i])/2.
 		tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
-		tz=np.clip(tz,tmin,tmax)
+		# tz=np.clip(tz,tmin,tmax)
 
-		for i in range(1,nlayers):
-			altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+		# for i in range(1,nlayers):
+		# 	altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
 
 		
 		for i in range(1,nlayers):
 			altavel[i] = (altz[i-1]+altz[i])/2.0
 		
-		conv=np.zeros(nlayers) #reset to zero
+		conv=np.zeros(nlayers+1) #reset to zero
 		conv[0]=1
 		convection(tavel,altavel)
 		for i in range(1,nlayers):
@@ -607,19 +1248,15 @@ for ts in range(timesteps):
 			if(i>1 and vol_mixh2o[i] > vol_mixh2o[i-1]):
 				vol_mixh2o[i]=vol_mixh2o[i-1]
 			vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
-			wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
-
+			# wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
 
 	writeformattedinputfile_lw()
 	# writeinputfile_lw()
 	callrrtmlw()
 
 	writeformattedinputfile_sw()
-	# writeinputfile_sw()
+	# # writeinputfile_sw()
 	callrrtmsw()
-
-	
-
 
 
 	totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
@@ -628,8 +1265,6 @@ for ts in range(timesteps):
 	totdflux=totdflux_lw+totdflux_sw
 	fnet=fnet_lw+fnet_sw
 	htr=htr_lw+htr_sw
-	print htr
-
 
 	if(cti+1 < nlayers-1):
 		maxhtr=max(abs(htr[cti+1:nlayers-1]))
@@ -639,6 +1274,7 @@ for ts in range(timesteps):
 	if(ts%20==2):
 		plotrrtmoutput()
 
+	print '{:16.8f} {:16.8f} {:16.8f} {:16.8f} '.format(htr[nlayers-1],tavel[nlayers-1],tavel[nlayers-2],fnet[nlayers-1]-fnet[nlayers-2])
 	print ts, maxhtr, cti
 
 	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]

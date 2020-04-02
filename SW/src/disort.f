@@ -6186,7 +6186,8 @@ c                                              ** Newton Method
 c                                              ** Check for convergence
          IF( ABS( XI - X ).GT.TOL ) THEN
             IF( ITER.GT.MAXIT )
-     &          CALL ERRMSG( 'QGAUSN--max iteration count',.True.)
+C      &          CALL ERRMSG( 'QGAUSN--max iteration count',.True.) 
+     &          CALL ERRMSG( '',.True.)  !NJE
 
             X  = XI
             GO TO  10

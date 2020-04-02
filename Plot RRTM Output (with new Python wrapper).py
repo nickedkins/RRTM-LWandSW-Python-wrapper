@@ -180,7 +180,6 @@ timesteps=1
 cti=0
 maxhtr=0.
 
-
 pz=np.linspace(psurf,pmin,nlayers+1)
 totuflux=np.zeros(nlayers+1)
 totdflux=np.zeros(nlayers+1)
@@ -215,7 +214,8 @@ params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,tot
 params2d=[wkl]
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/96 mb discontinuity/'
 ]
 
 for directory in directories:
@@ -234,6 +234,7 @@ for directory in directories:
 		f=open(output_file,'r')
 		for x in params0d:
 			x = f.readline()
+
 		for x in params1d:
 			for i in range(shape(x)[0]):
 				x[i] = f.readline()
@@ -244,6 +245,8 @@ for directory in directories:
 
 		plotrrtmoutput()
 
-print gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr
-
+for i in range(nlayers):
+	print '{:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f}'.format(pz[i],altz[i]/1000.,tz[i],pavel[i],tavel[i],totuflux[i],totuflux_lw[i],fnet_lw[i],fnet_sw[i]) 
+i=nlayers
+print pz[i],',',altz[i]/1000.,',',tz[i]
 show()

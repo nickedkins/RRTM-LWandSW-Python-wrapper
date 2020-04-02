@@ -12,16 +12,20 @@
     <AddPaths>
         <Path>&quot;/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src&quot;</Path>
     </AddPaths>
-    <WatchVariables/>
+    <WatchVariables>
+        <Variable>HTR</Variable>
+        <Variable>FNET</Variable>
+        <Variable>PZ</Variable>
+    </WatchVariables>
     <BreakpointList>
         <Breakpoint>
             <id>1</id>
-            <line>355</line>
+            <line>545</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x100068ea4</address>
+            <address>0x10006b82e</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -30,12 +34,12 @@
         </Breakpoint>
         <Breakpoint>
             <id>10</id>
-            <line>482</line>
+            <line>539</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x1000693c5</address>
+            <address>0x10006b630</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -44,54 +48,12 @@
         </Breakpoint>
         <Breakpoint>
             <id>11</id>
-            <line>520</line>
+            <line>310</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x100069cf9</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>12</id>
-            <line>506</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x1000698f7</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>13</id>
-            <line>523</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100069e70</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>14</id>
-            <line>529</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x10006aad1</address>
+            <address>0x10006680a</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -100,26 +62,12 @@
         </Breakpoint>
         <Breakpoint>
             <id>2</id>
-            <line>525</line>
+            <line>546</line>
             <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x10006a5cf</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>3</id>
-            <line>531</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x10006b0cc</address>
+            <address>0x10006b90e</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -128,12 +76,12 @@
         </Breakpoint>
         <Breakpoint>
             <id>4</id>
-            <line>536</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
+            <line>7877</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtatm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x10006b635</address>
+            <address>0x100065234</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -142,12 +90,12 @@
         </Breakpoint>
         <Breakpoint>
             <id>5</id>
-            <line>538</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
+            <line>7877</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtatm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x10006b723</address>
+            <address>0x1000652e6</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -156,54 +104,12 @@
         </Breakpoint>
         <Breakpoint>
             <id>6</id>
-            <line>542</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
+            <line>7877</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtatm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
-            <address>0x10006b82f</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>7</id>
-            <line>543</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x10006b914</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>8</id>
-            <line>250</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100066068</address>
-            <what></what>
-            <times>0</times>
-            <ignore>0</ignore>
-            <condition></condition>
-            <threads></threads>
-        </Breakpoint>
-        <Breakpoint>
-            <id>9</id>
-            <line>479</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
-            <type>breakpoint</type>
-            <disposition></disposition>
-            <enabled>y</enabled>
-            <address>0x100069286</address>
+            <address>0x1000652f7</address>
             <what></what>
             <times>0</times>
             <ignore>0</ignore>
@@ -220,7 +126,7 @@
     </Memory>
     <IgnoredSources>
         <IgnoredList/>
-        <Unlocatable></Unlocatable>
+        <Unlocatable>N</Unlocatable>
     </IgnoredSources>
     <Arguments>
         <Argument></Argument>

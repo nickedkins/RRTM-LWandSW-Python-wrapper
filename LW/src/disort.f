@@ -6134,7 +6134,8 @@ c                                              ** Check for convergence
          IF( ABS( XI - X ).GT.TOL ) THEN
 
             IF( ITER.GT.MAXIT )
-     &          CALL ERRMSG( 'QGAUSN--max iteration count',.True.)
+C      &          CALL ERRMSG( 'QGAUSN--max iteration count',.True.) !NJE commented out
+     &          CALL ERRMSG( 'QGAUSN--max iteration count',.False.) !NJE commented out
 
             X  = XI
             GO TO  10

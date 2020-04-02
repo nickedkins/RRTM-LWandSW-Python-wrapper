@@ -296,16 +296,16 @@ C    ***    Call the radiative transfer routine.
          
          open(97,file='My Live Output RRTM')
          do i=0,nlayers
-          write(97,*) totuflux(i)
+          write(97,'(F16.8)') totuflux(i)
          end do
          do i=0,nlayers
-          write(97,*) totdflux(i)
+          write(97,'(F16.8)') totdflux(i)
          end do
          do i=0,nlayers
-          write(97,*) fnet(i)
+          write(97,'(F16.8)') fnet(i)
          end do
          do i=0,nlayers
-          write(97,*) htr(i)
+          write(97,'(F16.8)') htr(i)
          end do
          close(97)
 

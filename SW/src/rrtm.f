@@ -193,16 +193,16 @@ C ***    Call the radiative transfer routine.
 
          open(97,file='My Live Output RRTM')
          do i=0,nlayers
-          write(97,*) totuflux(i)
+          write(97,'(F16.8)') totuflux(i)
          end do
          do i=0,nlayers
-          write(97,*) totdflux(i)
+          write(97,'(F16.8)') totdflux(i)
          end do
          do i=0,nlayers
-          write(97,*) fnet(i)
+          write(97,'(F16.8)') fnet(i)
          end do
          do i=0,nlayers
-          write(97,*) htr(i)
+          write(97,'(F16.8)') htr(i)
          end do
          close(97)
 
@@ -380,8 +380,10 @@ C       DO 1200 ILAY = 1,MXLAY
       OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM
      &-LWandSW-Python-wrapper/SW/Input RRTM SW NJE Formatted',FORM='FORM
      &ATTED')
-
-C         /Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/Input RRTM SW NJE Formatted
+      
+C        OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RRT
+C      &M-LWandSW-Python-wrapper/SW/example_runs/input_rrtm_sw_mls',FORM='
+C      &FORMATTED')
 
 C       open(98,file='RRTM SW Input')
 
