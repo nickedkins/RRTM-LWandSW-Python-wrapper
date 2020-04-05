@@ -316,9 +316,9 @@ sza=65. 			#Solar zenith angle in degrees (0 deg is overhead).
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
-lapse=1000.
+lapse=6.5
 tmin=10.
-tmax=350.
+tmax=1000.
 rsp=287.05
 gravity=9.81
 filewritten=0
@@ -1172,7 +1172,7 @@ for i in range(nlayers):
 ur_min=0.6
 ur_max=1.5
 eqb_maxhtr = 0.01
-timesteps=400
+timesteps=1000
 
 cti=0
 
@@ -1191,30 +1191,27 @@ params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iem
 params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
 params2d=[wkl]
 
+toa_fnet=0
 
 for ts in range(timesteps):
-	if(cti+1 < nlayers-1):
-		maxhtr=max(abs(htr[cti+1:nlayers-1]))
-	else:
-		maxhtr = 1.1*eqb_maxhtr
-	# maxhtr=max(abs(htr[cti+1:nlayers-1]))
+	# if(cti+1 < nlayers-1):
+	# 	maxhtr=max(abs(htr[cti+1:nlayers-1]))
+	# else:
+	# 	maxhtr = 1.1*eqb_maxhtr
+
+	re_htrs = np.where(conv==0,htr,0.)
+	maxhtr = max(abs(re_htrs))
+
+	if(maxhtr<0.1):
+		tz+=toa_fnet*0.2
+		tavel+=toa_fnet*0.2
+		tbound+=toa_fnet*0.2
+
 	if(ts>0):
 		for i in range(1,nlayers-1):
 			ur[i]=maxhtr**2.0 * pz[0]/(pz[i-1]-pz[i]) + ur_min
 			if(ur[i]>ur_max):
 				ur[i]=ur_max
-		# plt.figure(2)
-		# plt.subplot(121)
-		# plt.plot(ur,maxhtr,'o')
-		# plt.xlabel('ur')
-		# plt.ylabel('maxhtr')
-
-		
-		# plt.figure(2)
-		# plt.subplot(122)
-		# plt.plot(ts,maxhtr,'o')
-		# plt.xlabel('ts')
-		# plt.ylabel('maxhtr')
 
 		# tavel[1:] += htr[1:-1]/ur
 		tavel[:] += htr[:-1]/ur
@@ -1271,19 +1268,25 @@ for ts in range(timesteps):
 	totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
 	totuflux=totuflux_lw+totuflux_sw
 	totdflux=totdflux_lw+totdflux_sw
-	fnet=fnet_lw+fnet_sw
+	fnet=fnet_sw-fnet_lw
 	htr=htr_lw+htr_sw
 
-	if(cti+1 < nlayers-1):
-		maxhtr=max(abs(htr[cti+1:nlayers-1]))
-	else:
-		maxhtr = 1.1*eqb_maxhtr
+	toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
 
-	if(ts%20==2):
+	# if(cti+1 < nlayers-1):
+	# 	maxhtr=max(abs(htr[cti+1:nlayers-1]))
+	# else:
+	# 	maxhtr = 1.1*eqb_maxhtr
+
+	re_htrs = np.where(conv==0,htr,0.)
+	maxhtr = max(abs(re_htrs))
+
+	if(ts%50==2):
 		plotrrtmoutput()
 
+
 	# print '{:16.8f} {:16.8f} {:16.8f} {:16.8f} '.format(htr[nlayers-1],tavel[nlayers-1],tavel[nlayers-2],fnet[nlayers-1]-fnet[nlayers-2])
-	print ts, maxhtr, cti
+	print '{:4d} | {:8.4f} | {:3d} | {:8.4f} | {:8.4f}'.format(ts, maxhtr, cti,toa_fnet,tz[0])
 
 	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
 	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]

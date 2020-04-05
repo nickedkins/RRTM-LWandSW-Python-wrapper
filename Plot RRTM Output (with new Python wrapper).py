@@ -5,6 +5,11 @@ import matplotlib.pyplot as plt
 from pylab import *
 from os import listdir
 
+directories = [
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/mls replication/'
+]
+
 def init_plotting():
 	plt.rcParams['figure.figsize'] = (10,10)
 	plt.rcParams['font.size'] = 20
@@ -213,10 +218,7 @@ params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iem
 params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,]
 params2d=[wkl]
 
-directories = [
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/96 mb discontinuity/'
-]
+
 
 for directory in directories:
 
