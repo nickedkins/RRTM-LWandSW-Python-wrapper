@@ -20,19 +20,19 @@ DUMMY=
 #
 # Flags
 #
-ABSOFT_F95_FLAGS= -O4 -m64 -openmp -s -speed_math=10 -speed_openmp=5 -stack:1f40000
-ABSOFT_F77_FLAGS= -O4 -f77_compat -m64 -openmp -s -speed_math=10 -speed_openmp=5 -stack:1f40000
+ABSOFT_F95_FLAGS= -g -i8 -m64 -openmp -speed_math=10 -speed_openmp=5 -stack:1f40000
+ABSOFT_F77_FLAGS= -f77_compat -g -i8 -m64 -openmp -speed_math=10 -speed_openmp=5 -stack:1f40000
 RC_FLAGS= 
-GCC_FLAGS=  -O4 -m64
+GCC_FLAGS=  -g -m64
 MAKE_FLAGS=  -k
-ABSOFT_F95_LINKER_FLAGS=-IPA:debug=on -IPA:source_pu_order=on       -stack:1f40000 -m64 -speed_openmp=5 -openmp -speed_math=10 -O4
+ABSOFT_F95_LINKER_FLAGS=-IPA:debug=on -IPA:source_pu_order=on       -stack:1f40000 -m64 -speed_openmp=5 -openmp -speed_math=10 -g
 
 #
 # Name of the executable
 #
 TARGET=rrtmsw
 OUTDIR=.
-OBJDIR=./Release
+OBJDIR=./Debug
 
 #
 # Files for this executable
@@ -120,4 +120,4 @@ ScanAll: "$(OUTDIR)" "$(OBJDIR)" MakeDepsAll
 # Scan for all F77/F95, and c/c++ dependencies
 #
 MakeDepsAll:
-	$(MKDEP) -quiet "-pre./Release/" -Y -modInfo -errdel -f90 -f makefile.amake -a -info  -O4 -f77_compat -m64 -openmp -s -speed_math=10 -speed_openmp=5 -stack:1f40000 -info "src/cldprop.f" "src/disort.f" "src/ErrPack.f" "src/extra.f" "src/k_g.f" "src/LINPAK.f" "src/RDI1MACH.f" "src/rrtatm.f" "src/rrtm.f" "src/rtrdis.f" "src/setcoef.f" "src/taumoldis.f" 
+	$(MKDEP) -quiet "-pre./Debug/" -Y -modInfo -errdel -f90 -f makefile.amake -a -info  -f77_compat -g -i8 -m64 -openmp -speed_math=10 -speed_openmp=5 -stack:1f40000 -info "src/cldprop.f" "src/disort.f" "src/ErrPack.f" "src/extra.f" "src/k_g.f" "src/LINPAK.f" "src/RDI1MACH.f" "src/rrtatm.f" "src/rrtm.f" "src/rtrdis.f" "src/setcoef.f" "src/taumoldis.f" 

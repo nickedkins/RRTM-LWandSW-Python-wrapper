@@ -5,6 +5,11 @@ import matplotlib.pyplot as plt
 from pylab import *
 from os import listdir
 
+directories = [
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/mls replication/'
+]
+
 def init_plotting():
 	plt.rcParams['figure.figsize'] = (10,10)
 	plt.rcParams['font.size'] = 20
@@ -213,10 +218,7 @@ params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iem
 params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,]
 params2d=[wkl]
 
-directories = [
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/96 mb discontinuity/'
-]
+
 
 for directory in directories:
 
@@ -245,8 +247,8 @@ for directory in directories:
 
 		plotrrtmoutput()
 
-for i in range(nlayers):
-	print '{:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f}'.format(pz[i],altz[i]/1000.,tz[i],pavel[i],tavel[i],totuflux[i],totuflux_lw[i],fnet_lw[i],fnet_sw[i]) 
-i=nlayers
-print pz[i],',',altz[i]/1000.,',',tz[i]
+		for i in range(nlayers):
+			print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i],htr[i],htr_lw[i],htr_sw[i])
+		print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],htr[i],htr_lw[i],htr_sw[i])
+
 show()
