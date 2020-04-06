@@ -1171,7 +1171,8 @@ for i in range(nlayers):
 
 ur_min=0.6
 ur_max=1.5
-eqb_maxhtr = 0.01
+eqb_maxhtr=0.03
+toa_fnet_eqb=1.0
 timesteps=1000
 
 cti=0
@@ -1202,7 +1203,7 @@ for ts in range(timesteps):
 	re_htrs = np.where(conv==0,htr,0.)
 	maxhtr = max(abs(re_htrs))
 
-	if(maxhtr<0.1):
+	if(maxhtr<eqb_maxhtr and abs(toa_fnet)>toa_fnet_eqb):
 		tz+=toa_fnet*0.2
 		tavel+=toa_fnet*0.2
 		tbound+=toa_fnet*0.2
@@ -1260,12 +1261,19 @@ for ts in range(timesteps):
 	callrrtmlw()
 
 	writeformattedinputfile_sw()
-	# # writeinputfile_sw()
-	callrrtmsw()
+
+	if(maxhtr<eqb_maxhtr):
+		writeformattedinputfile_sw()
+		# # writeinputfile_sw()
+		callrrtmsw()
 
 
 	totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
 	totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
+	# totuflux_sw*=(238./fnet_sw[nlayers])
+	# totdflux_sw*=(238./fnet_sw[nlayers])
+	# htr_sw*=(238./fnet_sw[nlayers])
+	# fnet_sw*=(238./fnet_sw[nlayers])
 	totuflux=totuflux_lw+totuflux_sw
 	totdflux=totdflux_lw+totdflux_sw
 	fnet=fnet_sw-fnet_lw
@@ -1292,7 +1300,7 @@ for ts in range(timesteps):
 	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
 	params2d=[wkl]
 
-	if(maxhtr < eqb_maxhtr):
+	if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
 		plotrrtmoutput()
 		print('Equilibrium reached!')
 		writeoutputfile()
