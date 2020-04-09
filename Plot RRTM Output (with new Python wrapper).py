@@ -6,8 +6,8 @@ from pylab import *
 from os import listdir
 
 directories = [
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/mls replication/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/mls replication/'
 ]
 
 def init_plotting():
@@ -59,20 +59,20 @@ def plotrrtmoutput():
 	plt.figure(1)
 	plt.subplot(331)
 	logpplot(totuflux,pz,'totuflux','pz')
-	logpplot(totuflux_lw,pz,'totuflux','pz')
-	logpplot(totuflux_sw,pz,'totuflux','pz')
+	# logpplot(totuflux_lw,pz,'totuflux','pz')
+	# logpplot(totuflux_sw,pz,'totuflux','pz')
 	plt.subplot(332)
 	logpplot(totdflux,pz,'totdflux','pz')
-	logpplot(totdflux_lw,pz,'totdflux','pz')
-	logpplot(totdflux_sw,pz,'totdflux','pz')
+	# logpplot(totdflux_lw,pz,'totdflux','pz')
+	# logpplot(totdflux_sw,pz,'totdflux','pz')
 	plt.subplot(333)
 	logpplot(fnet,pz,'fnet','pz')
-	logpplot(fnet_lw,pz,'fnet','pz')
-	logpplot(fnet_sw,pz,'fnet','pz')
+	# logpplot(fnet_lw,pz,'fnet','pz')
+	# logpplot(fnet_sw,pz,'fnet','pz')
 	plt.subplot(334)
-	logpplot(htr_lw[:-1]+htr_sw[:-1],pz[:-1],'htr','pz')
-	logpplot(htr_lw[:-1],pz[:-1],'htr','pz')
-	logpplot(htr_sw[:-1],pz[:-1],'htr','pz')
+	logpplot(htr[:],pz[:],'htr','pz')
+	# logpplot(htr_lw[:-1],pz[:-1],'htr','pz')
+	# logpplot(htr_sw[:-1],pz[:-1],'htr','pz')
 	plt.axvline(-eqb_maxhtr,ls='--')
 	plt.axvline(eqb_maxhtr,ls='--')
 	plt.subplot(335)
@@ -180,7 +180,7 @@ vol_mixh2o_min = 1e-6
 vol_mixh2o_max = 1e6
 ur_min=0.5
 ur_max=1.0
-eqb_maxhtr = 0.01
+eqb_maxhtr = 0.001
 timesteps=1
 cti=0
 maxhtr=0.
@@ -247,8 +247,17 @@ for directory in directories:
 
 		plotrrtmoutput()
 
-		for i in range(nlayers):
-			print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i],htr[i],htr_lw[i],htr_sw[i])
-		print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],htr[i],htr_lw[i],htr_sw[i])
+		print tz
+
+		print timesteps, ur_min,ur_max
+
+		# re_htrs=np.zeros(nlayers)
+		# re_htrs = np.where(conv==0,htr,0.)
+		# maxhtr=max(abs(re_htrs))
+		# print maxhtr
+
+		# for i in range(nlayers):
+			# print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i],htr[i],htr_lw[i],htr_sw[i])
+		# print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],htr[i],htr_lw[i],htr_sw[i])
 
 show()

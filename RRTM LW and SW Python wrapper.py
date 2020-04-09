@@ -8,6 +8,7 @@ from subprocess import Popen, PIPE, STDOUT
 import matplotlib.pyplot as plt
 from pylab import *
 import datetime
+from random import randint
 
 tstart = datetime.datetime.now()
 
@@ -53,7 +54,8 @@ def init_plotting():
 init_plotting()
 
 def logpplot(x,p,xlab,ylab,color='blue'):
-	plt.semilogy(x,p,'-',c=color)
+	# plt.semilogy(x,p,'-',c=color)
+	plt.semilogy(x,p,'-',c=color,alpha=(float(ts)/timesteps)**1.0)
 	plt.ylim(max(p),min(p))
 	plt.xlabel(xlab)
 	plt.ylabel(ylab)
@@ -144,10 +146,7 @@ def writeformattedinputfile_lw():
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
 	f.write('$ STANDARD MID-LATITUDE SUMMER ATMOSPHERE\n')
 	f.write('{:50d}{:20d}{:13d}{:2d}{:5d}{:5d}\n'.format(iatm,ixsect,iscat,numangs,iout,icld))
-	# print type(semiss[0:16])
-	f.write('{:6.1f} {:1d}  {:1d}\n'.format(tbound,iemiss,ireflect))
-	# for i in range(16):
-	# 	f.write('{:5.3f}'.format(semiss[i]))
+	f.write('{:6.1f} {:1d}  {:1d}\n'.format(tbound,iemiss,ireflect)) #add semis read here?
 	f.write('{:2d}{:3d}{:5d}  1.000000MIDLATITUDE SUMM H1=    0.00 H2=   70.00 ANG=   0.000 LEN= 0\n'.format(iform,nlayers,nmol))
 	f.write('{:11.4f}{:14.2f}{:15d}{:8.3f}{:8.2f}{:7.2f}{:7.3f}{:8.2f}{:7.2f}\n'.format(pavel[0],tavel[0],ipthak,altz[0]/1000.,pz[0],tz[0],altz[1]/1000.,pz[1],tz[1]))
 	f.write('{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}\n'.format(wkl[1,0],wkl[2,0],wkl[3,0],wkl[4,0],wkl[5,0],wkl[6,0],wkl[7,0],wbrodl[0] ))
@@ -160,12 +159,8 @@ def writeformattedinputfile_lw():
 def callrrtmlw():
 	loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw'
 	os.chdir(project_dir+'/LW')
-	# print(os.getcwd())  # Prints the current working directory
 	p = subprocess.Popen([loc])
 	stdoutdata, stderrdata = p.communicate()
-	# print('return code = {}'.format(p.returncode))
-	# print('------------------------------------------------------------------------------------------')
-	# print
 
 def callrrtmsw():
 	loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/rrtmsw'
@@ -203,21 +198,21 @@ def plotrrtmoutput():
 	plt.figure(1)
 	plt.subplot(331)
 	logpplot(totuflux,pz,'totuflux','pz')
-	logpplot(totuflux_lw,pz,'totuflux','pz','red')
-	logpplot(totuflux_sw,pz,'totuflux','pz','green')
+	# logpplot(totuflux_lw,pz,'totuflux','pz','red')
+	# logpplot(totuflux_sw,pz,'totuflux','pz','green')
 	plt.subplot(332)
 	logpplot(totdflux,pz,'totdflux','pz')
 	logpplot(totdflux_lw,pz,'totdflux','pz','red')
 	logpplot(totdflux_sw,pz,'totdflux','pz','green')
 	plt.subplot(333)
 	logpplot(fnet,pz,'fnet','pz')
-	logpplot(fnet_lw,pz,'fnet','pz','red')
-	logpplot(fnet_sw,pz,'fnet','pz','green')
+	# logpplot(fnet_lw,pz,'fnet','pz','red')
+	# logpplot(fnet_sw,pz,'fnet','pz','green')
 	plt.subplot(334)
 	logpplot(htr[:-1],pz[:-1],'htr','pz')
-	logpplot(htr_lw[:-1],pz[:-1],'htr','pz','red')
-	logpplot(htr_sw[:-1],pz[:-1],'htr','pz','green')
-	plt.ylim(200,20)
+	# logpplot(htr_lw[:-1],pz[:-1],'htr','pz','red')
+	# logpplot(htr_sw[:-1],pz[:-1],'htr','pz','green')
+	plt.xlim(-2,2)
 	plt.axvline(-eqb_maxhtr,ls='--')
 	plt.axvline(eqb_maxhtr,ls='--')
 	plt.subplot(335)
@@ -261,7 +256,8 @@ def writeoutputfile():
 
 nlayers=51
 nmol=7
-
+lw_on=1
+sw_on=0
 gravity=9.81
 avogadro=6.022e23
 iatm=0 #0 for layer values, 1 for level values
@@ -317,7 +313,7 @@ sza=65. 			#Solar zenith angle in degrees (0 deg is overhead).
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
-lapse=6.5
+lapse=1000.
 tmin=10.
 tmax=1000.
 rsp=287.05
@@ -1004,58 +1000,58 @@ altz=np.array([
 	])*1000.
 
 tz=np.array([
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
-288	,
+294.2	,
+289.25	,
+284.6	,
+279.8	,
+275	,
+270.2	,
+265.4	,
+260.55	,
+256	,
+251.45	,
+246.9	,
+242.35	,
+237.86	,
+233.35	,
+228.8	,
+224.25	,
+219.7	,
+215.74	,
+215.7	,
+215.7	,
+215.7	,
+216.8	,
+218.03	,
+219.44	,
+220.76	,
+222.2	,
+223.57	,
+224.98	,
+226.71	,
+228.66	,
+231.81	,
+235.4	,
+239.99	,
+244.95	,
+249.84	,
+254.77	,
+259.73	,
+264.69	,
+269.65	,
+274.56	,
+270.71	,
+265.88	,
+261	,
+256.08	,
+251.32	,
+246.56	,
+241.8	,
+237.02	,
+232.18	,
+227.34	,
+222.5	,
+218.1	,
 	])
 
 tbound=tz[0]
@@ -1171,11 +1167,11 @@ for i in range(nlayers):
 # wkl = np.clip(wkl,1.,1e63)
 
 ur_min=0.6
-ur_max=1.5
+ur_max=3.0
 
-eqb_maxhtr=0.03
+eqb_maxhtr=0.0001
 toa_fnet_eqb=1.0
-timesteps=1000
+timesteps=1001
 
 
 cti=0
@@ -1197,32 +1193,38 @@ params2d=[wkl]
 
 toa_fnet=0
 
+damps=np.ones(nlayers)
+
+color = []
+n = 6
+for i in range(100):
+    color.append('#%06X' % randint(0, 0xFFFFFF))
+
+dmax=1.0
+
 for ts in range(timesteps):
-	# if(cti+1 < nlayers-1):
-	# 	maxhtr=max(abs(htr[cti+1:nlayers-1]))
-	# else:
-	# 	maxhtr = 1.1*eqb_maxhtr
 
-	re_htrs = np.where(conv==0,htr,0.)
-	maxhtr = max(abs(re_htrs))
-
-	if(maxhtr<eqb_maxhtr and abs(toa_fnet)>toa_fnet_eqb):
-		tz+=toa_fnet*0.2
-		tavel+=toa_fnet*0.2
-		tbound+=toa_fnet*0.2
+	# if((maxhtr<eqb_maxhtr*10. and abs(toa_fnet)>toa_fnet_eqb)):
+	# 	tz+=toa_fnet*0.2
+	# 	tavel+=toa_fnet*0.2
+	# 	tbound+=toa_fnet*0.2
 
 	if(ts>0):
-		for i in range(1,nlayers-1):
-			ur[i]=maxhtr**2.0 * pz[0]/(pz[i-1]-pz[i]) + ur_min
-			if(ur[i]>ur_max):
-				ur[i]=ur_max
+		for i in range(1,nlayers):
+			# ur[i]=maxhtr**1.0 * pz[0]/(pz[i-1]-pz[i]) + ur_min
+			# ur[i]=maxhtr**2.0 + ur_min
+			ur[i] = ur_min
+			# if(ur[i]>ur_max):
+			# 	ur[i]=ur_max
+
+		# for i in range(nlayers+1):
+		# 	if(abs(htr[i])>abs(prev_htr[i])):
+		# 		damps[i]*=1.02
+
+		# ur=ur*damps
 
 		# tavel[1:] += htr[1:-1]/ur
-		tavel[:] += htr[:-1]/ur
-		tavel=np.clip(tavel,tmin,tmax)
-		for i in range(1,nlayers):
-			tz[i] = (tavel[i-1] + tavel[i])/2.
-		tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+
 		# tz=np.clip(tz,tmin,tmax)
 
 		# for i in range(1,nlayers):
@@ -1234,13 +1236,13 @@ for ts in range(timesteps):
 		
 		conv=np.zeros(nlayers+1) #reset to zero
 		conv[0]=1
-		convection(tavel,altavel)
-		for i in range(1,nlayers):
-			tz[i] = (tavel[i-1] + tavel[i])/2.
-		tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
-		tz=np.clip(tz,tmin,tmax)
-		tavel=np.clip(tavel,tmin,tmax)
-		convection(tz,altz)
+		# convection(tavel,altavel)
+		# for i in range(1,nlayers):
+		# 	tz[i] = (tavel[i-1] + tavel[i])/2.
+		# tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+		# tz=np.clip(tz,tmin,tmax)
+		# tavel=np.clip(tavel,tmin,tmax)
+		# convection(tz,altz)
 		for i in range(1,nlayers):
 			if(conv[i]==0):
 				cti=i-1
@@ -1259,19 +1261,27 @@ for ts in range(timesteps):
 			vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
 			# wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
 
-	writeformattedinputfile_lw()
-	# writeinputfile_lw()
-	callrrtmlw()
+	dtbound=(fnet_sw[0]-fnet_lw[0])*0.1
+	dtbound=np.clip(dtbound,-dmax,dmax)
+	# tbound+=dtbound
+
+	if(lw_on==1):
+		writeformattedinputfile_lw()
+		callrrtmlw()
+		totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
+
+	if(sw_on==1):
+		if(maxhtr<eqb_maxhtr):
+			writeformattedinputfile_sw()
+			callrrtmsw()
+			totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
+
+	
 
 
-	if(maxhtr<eqb_maxhtr):
-		writeformattedinputfile_sw()
-		# # writeinputfile_sw()
-		callrrtmsw()
 
-
-	totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
-	totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
+	prev_htr=htr
+	
 	# totuflux_sw*=(238./fnet_sw[nlayers])
 	# totdflux_sw*=(238./fnet_sw[nlayers])
 	# htr_sw*=(238./fnet_sw[nlayers])
@@ -1283,30 +1293,76 @@ for ts in range(timesteps):
 
 	toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
 
+	for i in range(nlayers):
+		dT = htr[i]*3.0
+		dT=np.clip(dT,-dmax,dmax)
+		tavel[i]+=dT
+
+	for i in range(nlayers):
+		# tz[i] = (tavel[i-1] + tavel[i])/2.
+		tz[i] = tavel[i]
+	tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+	# tz[nlayers]
+
 	# if(cti+1 < nlayers-1):
 	# 	maxhtr=max(abs(htr[cti+1:nlayers-1]))
 	# else:
 	# 	maxhtr = 1.1*eqb_maxhtr
 
+	prev_maxhtr=maxhtr
 	re_htrs = np.where(conv==0,htr,0.)
-	maxhtr = max(abs(re_htrs))
-
-	if(ts%50==2):
-		plotrrtmoutput()
-
-
-	# print '{:16.8f} {:16.8f} {:16.8f} {:16.8f} '.format(htr[nlayers-1],tavel[nlayers-1],tavel[nlayers-2],fnet[nlayers-1]-fnet[nlayers-2])
-	print '{:4d} | {:8.4f} | {:3d} | {:8.4f} | {:8.4f}'.format(ts, maxhtr, cti,toa_fnet,tz[0])
-
+	maxhtr=max(abs(re_htrs))
+	maxhtr_ind=np.argmax(abs(re_htrs))
+	dfnet=np.zeros(nlayers)
 	for i in range(nlayers):
-		print '{},{}'.format(pz[i],htr[i])
+		dfnet[i]=fnet[i+1]-fnet[0]
+	maxdfnet=max(abs(dfnet))
+
+	if (maxhtr>0.002):
+		if(maxhtr<prev_maxhtr and maxhtr/prev_maxhtr>0.):
+			dmax*=1.1
+			dmax=np.clip(dmax,-10.,10.)
+			prev_maxhtr=maxhtr
+		else:
+			dmax*=0.9
+	elif(maxhtr/prev_maxhtr>0.):
+		dmax*=0.9
+	if(0.<dmax<0.0000000001):
+		dmax=0.0000000001
+	if(-0.0000000001<dmax<0.):
+		dmax=-0.0000000001
+
+	if(ts%int((50.*(timesteps/2000.)))==0):
+		plt.figure(1)
+		plt.subplot(221)
+		plt.title('maxhtr')
+		plt.plot(ts,maxhtr,'o')
+		plt.subplot(222)
+		plt.title('many htrs')
+		i_c=0
+		for i in range(nlayers):		
+			plt.plot(ts,htr[i],'o',color=color[i_c])
+			i_c+=1
+		plt.subplot(223)
+		plt.title('tz')
+		plt.plot(ts,tz[nlayers],'o')
+		plt.subplot(224)
+		plt.title('ur vs maxhtr')
+		plt.plot(ur[1],maxhtr,'o')	
+
+	# if(ts%50==0):
+	# # if(ts>950):
+	# 	plotrrtmoutput()
+
+	print '{:4d} | {:12.6f} | {:3d} | {:3d} | {:8.4f} | {:8.4f} | {:8.4f} | {:12.8f} | {:8.4f}'.format(ts,htr[maxhtr_ind],maxhtr_ind,cti,toa_fnet,tbound,tz[0],dmax,maxdfnet)
+
 
 	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
 	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
 	params2d=[wkl]
 
 	if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
-		plotrrtmoutput()
+		# plotrrtmoutput()
 		print('Equilibrium reached!')
 		writeoutputfile()
 		filewritten=1
@@ -1316,7 +1372,7 @@ for ts in range(timesteps):
 		writeoutputfile()
 		filewritten=1
 	
-plotrrtmoutput()
+# plotrrtmoutput()
 if(filewritten!=1):
 	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
 	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
