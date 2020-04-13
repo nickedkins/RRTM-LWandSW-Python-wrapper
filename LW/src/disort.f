@@ -4971,25 +4971,25 @@ c     ..
 
       DO 10 LC = 1, NLYR
 
-C          IF( DTAUC( LC ).LT.0.0 ) INPERR = WRTBAD( 'DTAUC' )
-         IF( DTAUC( LC ).LT.0.0 ) then !NJE
-          dtauc(lc) = tol
+         IF( DTAUC( LC ).LT.0.0 ) INPERR = WRTBAD( 'DTAUC' )
+C          IF( DTAUC( LC ).LT.0.0 ) then !NJE
+C           dtauc(lc) = tol
 C           print*, 'dtauc fixed'
 C           INPERR = WRTBAD( 'DTAUC' )
-          end if
+C           end if
 
-C          IF( SSALB( LC ).LT.0.0 .OR. SSALB( LC ).GT.1.0 )
-C      &       INPERR = WRTBAD( 'SSALB' )
+         IF( SSALB( LC ).LT.0.0 .OR. SSALB( LC ).GT.1.0 )
+     &       INPERR = WRTBAD( 'SSALB' )
 
-          IF( SSALB( LC ).LT.0.0) then
-            ssalb(lc) =  tol
-C             print*, 'SSALB fixed low'
-          end if
+C           IF( SSALB( LC ).LT.0.0) then
+C             ssalb(lc) =  tol
+C C             print*, 'SSALB fixed low'
+C           end if
 
-          IF( SSALB( LC ).GT.1.0) then
-            ssalb(lc) = 1.0 - tol
-C             print*, 'SSALB fixed high'
-          end if !NJE 2 if blocks
+C           IF( SSALB( LC ).GT.1.0) then
+C             ssalb(lc) = 1.0 - tol
+C C             print*, 'SSALB fixed high'
+C           end if !NJE 2 if blocks
 
          YESSCT = YESSCT + SSALB( LC )
 
