@@ -20,12 +20,12 @@ DUMMY=
 #
 # Flags
 #
-ABSOFT_F95_FLAGS= -N113 -g -m64 -stack:1f40000
-ABSOFT_F77_FLAGS= -N113 -f77_compat -g -m64 -stack:1f40000
+ABSOFT_F95_FLAGS= -N113 -fpic -g -m64 -s -stack:1f40000 -v -z4
+ABSOFT_F77_FLAGS= -N113 -f77_compat -fpic -g -m64 -s -stack:1f40000 -v -z4
 RC_FLAGS=
 GCC_FLAGS= -g -m64
 MAKE_FLAGS= -k
-ABSOFT_F95_LINKER_FLAGS=-IPA:debug=on -IPA:source_pu_order=on       -stack:1f40000 -m64 -g
+ABSOFT_F95_LINKER_FLAGS=-IPA:debug=on -IPA:source_pu_order=on       -stack:1f40000 -m64 -fpic -g
 
 #
 # Name of the executable
@@ -138,7 +138,7 @@ ScanAll: "$(OUTDIR)" "$(OBJDIR)" MakeDepsAll
 # Scan for all F77/F95, and c/c++ dependencies
 #
 MakeDepsAll:
-	$(MKDEP) -quiet "-pre./Debug/" -Y -modInfo -errdel -f90 -f makefile.amake -a -info  -N113 -f77_compat -g -m64 -stack:1f40000 -info "src/cldprop.f" "src/disort.f" "src/ErrPack.f" "src/extra.f" "src/k_g.f" "src/LINPAK.f" "src/RDI1MACH.f" "src/rrtatm.f" "src/rrtm.f" "src/rtr.f" "src/rtrcld.f" "src/rtrcldmr.f" "src/rtrdis.f" "src/rtreg.f" "src/rtregcld.f" "src/rtregcldmr.f" "src/setcoef.f" "src/taumol.f" 
+	$(MKDEP) -quiet "-pre./Debug/" -Y -modInfo -errdel -f90 -f makefile.amake -a -info  -N113 -f77_compat -fpic -g -m64 -s -stack:1f40000 -v -z4 -info "src/cldprop.f" "src/disort.f" "src/ErrPack.f" "src/extra.f" "src/k_g.f" "src/LINPAK.f" "src/RDI1MACH.f" "src/rrtatm.f" "src/rrtm.f" "src/rtr.f" "src/rtrcld.f" "src/rtrcldmr.f" "src/rtrdis.f" "src/rtreg.f" "src/rtregcld.f" "src/rtregcldmr.f" "src/setcoef.f" "src/taumol.f" 
 # DO NOT DELETE THIS LINE - makedepend depends upon it.
 
 

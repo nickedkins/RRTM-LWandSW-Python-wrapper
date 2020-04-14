@@ -313,7 +313,7 @@ sza=65. 			#Solar zenith angle in degrees (0 deg is overhead).
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
-lapse=6.5
+lapse=1000
 tmin=10.
 tmax=1000.
 rsp=287.05
@@ -1160,7 +1160,7 @@ for i in range(nlayers):
 	wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
 	# wkl[2,i] = mperlayr[i] * 1.0e-4 * vol_mixco2
 	wkl[2,i] = mperlayr[i] * 1.0e-4 * 400e-6
-	wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]*0.
+	wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]
 	wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
 	wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
 
@@ -1200,7 +1200,7 @@ n = 6
 for i in range(nlayers+1):
     color.append('#%06X' % randint(0, 0xFFFFFF))
 
-dmax=1.0
+dmax=10.0
 
 for ts in range(timesteps):
 
@@ -1285,16 +1285,16 @@ for ts in range(timesteps):
 	# totdflux_sw*=(238./fnet_sw[nlayers])
 	# htr_sw*=(238./fnet_sw[nlayers])
 	# fnet_sw*=(238./fnet_sw[nlayers])
-	totuflux=totuflux_lw+totuflux_sw
-	totdflux=totdflux_lw+totdflux_sw
-	fnet=fnet_sw-fnet_lw
-	htr=htr_lw+htr_sw
+	totuflux=around(totuflux_lw+totuflux_sw,11)
+	totdflux=around(totdflux_lw+totdflux_sw,11)
+	fnet=around(fnet_sw-fnet_lw,11)
+	htr=around(htr_lw+htr_sw,11)
 
 	toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
 
 	prev_tz=tz*1.0
 	for i in range(nlayers):
-		dT = htr[i]*3.0
+		dT = htr[i]/3.0
 		dT=np.clip(dT,-dmax,dmax)
 		tavel[i]+=dT
 
@@ -1317,19 +1317,19 @@ for ts in range(timesteps):
 		dfnet[i]=fnet[i+1]-fnet[0]
 	maxdfnet=max(abs(dfnet))
 
-	if (maxhtr>0.002):
-		if(maxhtr<prev_maxhtr and maxhtr/prev_maxhtr>0.):
-			dmax*=1.1
-			dmax=np.clip(dmax,-1.,1.)
-			prev_maxhtr=maxhtr
-		else:
-			dmax*=0.99
-	elif(maxhtr/prev_maxhtr>0.):
-		dmax*=0.99
-	if(0.<dmax<0.0000000001):
-		dmax=0.0000000001
-	if(-0.0000000001<dmax<0.):
-		dmax=-0.0000000001
+	# if (maxhtr>0.002):
+	# 	if(maxhtr<prev_maxhtr and maxhtr/prev_maxhtr>0.):
+	# 		dmax*=1.1
+	# 		dmax=np.clip(dmax,-1.,1.)
+	# 		prev_maxhtr=maxhtr
+	# 	else:
+	# 		dmax*=0.99
+	# elif(maxhtr/prev_maxhtr>0.):
+	# 	dmax*=0.99
+	# if(0.<dmax<0.0000000001):
+	# 	dmax=0.0000000001
+	# if(-0.0000000001<dmax<0.):
+	# 	dmax=-0.0000000001
 
 	# print prev_tz
 	# print tz
@@ -1362,7 +1362,7 @@ for ts in range(timesteps):
 	# # if(ts>950):
 	# 	plotrrtmoutput()
 
-	print '{:4d} | {:12.6f} | {:3d} | {:3d} | {:8.4f} | {:8.4f} | {:8.4f} | {:12.8f} | {:12.8f} | {:12.8f}'.format(ts,htr[maxhtr_ind],maxhtr_ind,cti,toa_fnet,tbound,tz[0],-dmax,maxdtz,dmax)
+	print '{:4d} | {:32.28f} | {:3d} | {:3d} | {:8.4f} | {:8.4f} | {:8.4f} | {:12.8f} | {:12.8f} | {:12.8f}'.format(ts,htr[maxhtr_ind],maxhtr_ind,cti,toa_fnet,tbound,tz[0],-dmax,maxdtz,dmax)
 
 
 	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
