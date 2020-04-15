@@ -437,8 +437,8 @@ c      DATA WX /MAXPROD*0.0/
       FORM1(0) = '(3F10.4,A3,I2,1X,2(F7.2,F8.3,F7.2))'
       FORM2(0) = '(3F10.4,A3,I2,23X,(F7.2,F8.3,F7.2))'
       FORM3(0) = '(8E10.3)'
-      FORM1(1) = '(G15.7,G10.4,G10.4,A3,I2,1X,2(G7.2,G8.3,G7.2))'
-      FORM2(1) = '(G15.7,G10.4,G10.4,A3,I2,23X,(G7.2,G8.3,G7.2))'
+      FORM1(1)='(G25.17,G21.15,G10.4,A3,I2,1X,2(G17.12,G18.13,G17.12))'!!
+      FORM2(1)='(G25.17,G21.15,G11.5,A3,I2,23X,(G17.12,G18.13,G17.12))'!!!
       FORM3(1) = '(8G15.7)'
 
       IXMAX = MAXINPX
@@ -609,7 +609,7 @@ C     Test for mixing ratio input.
 
  9010 FORMAT (A1)
  9011 FORMAT (49X,I1,19X,I1,12X,I1,I2,2X,I3,4X,I1)
- 9012 FORMAT (E10.3,1X,I1,2X,I1,16E5.3)
+ 9012 FORMAT (E20.13,1X,I1,2X,I1,16E5.3)
  9013 FORMAT (1X,I1,I3,I5)                                     
  9300 FORMAT (I5)
  9301 FORMAT (1X,I1)
