@@ -125,15 +125,15 @@ def writeformattedinputfile_sw():
 	f.write('            {:3d}   {:7.3f} \n'.format(juldat,sza))
 	f.write('           {:1d}  {:1d}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}\n'.format(iemis,ireflect,semiss[15],semiss[16],semiss[17],semiss[18],semiss[19],semiss[20],semiss[21],semiss[22],semiss[23],semiss[24],semiss[25],semiss[26],semiss[27],semiss[28] ))
 	f.write(' {:1d}{:3d}{:5d}  1.000000MIDLATITUDE SUMM H1=    0.00 H2=   70.00 ANG=   0.000 LEN= 0\n'.format(iform,nlayers,nmol))
-	f.write('{:11.4f}{:16.4f}{:10s}{:3s}{:2d}{:8.3f}{:8.2f}{:7.2f}{:7.3f}{:8.2f}{:9.4f}\n'.format(pavel[0],tavel[0],secntk,cinp,ipthak,altz[0]/1000.,pz[0],tz[0],altz[1]/1000.,pz[1],tz[1]))
+	f.write('{:11.4f}{:17.5f}{:10s}{:3s}{:2d}{:8.3f}{:8.2f}{:7.2f}{:7.3f}{:8.2f}{:10.5f}\n'.format(pavel[0],tavel[0],secntk,cinp,ipthak,altz[0]/1000.,pz[0],tz[0],altz[1]/1000.,pz[1],tz[1]))
 	f.write('{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}\n'.format(wkl[1,0],wkl[2,0],wkl[3,0],wkl[4,0],wkl[5,0],wkl[6,0],wkl[7,0],wbrodl[0] ))
 	for i in range(2,nlayers+1):
 		if(pavel[i-1]<0.1):
-			f.write('  {:13.7E}{:12.4f}{:15.0f}{:30.3f}{:0<08.8g}{:9.4f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			f.write('  {:13.7E}{:13.5f}{:15.0f}{:30.3f}{:0<08.8g}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
 		elif(pavel[i-1]<1.):
-			f.write('  {:0<08.7g}{:16.4f}{:15.0f}{:30.3f}{:0<08.8g}{:9.4f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			f.write('  {:0<08.7g}{:17.5f}{:15.0f}{:30.3f}{:0<08.8g}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
 		else:
-			f.write('   {:0<08.8g}{:16.4f}{:15.0f}{:30.3f} {:0<07.7g}{:9.4f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			f.write('   {:0<08.8g}{:17.5f}{:15.0f}{:30.3f} {:0<07.7g}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
 		f.write('{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}\n'.format(wkl[1,i-1],wkl[2,i-1],wkl[3,i-1],wkl[4,i-1],wkl[5,i-1],wkl[6,i-1],wkl[7,i-1],wbrodl[i-1] ))
 	f.write('%%%%%\n')
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
@@ -323,6 +323,7 @@ tmax=1000.
 rsp=287.05
 gravity=9.81
 filewritten=0
+sw_freq=100
 
 totuflux=np.zeros(nlayers+1)
 totdflux=np.zeros(nlayers+1)
@@ -1277,7 +1278,6 @@ for ts in range(timesteps):
 		totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
 
 	if(ts==1):
-	# if(sw_on==1):
 	# 	if(maxhtr<eqb_maxhtr):
 		writeformattedinputfile_sw()
 		callrrtmsw()

@@ -92,6 +92,8 @@ def plotrrtmoutput():
 def readrrtmoutput(fn):
 	f = open(fn)
 
+
+
 nlayers=51
 nmol=7
 
