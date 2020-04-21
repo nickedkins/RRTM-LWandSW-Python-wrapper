@@ -125,15 +125,15 @@ def writeformattedinputfile_sw():
 	f.write('            {:3d}   {:7.3f} \n'.format(juldat,sza))
 	f.write('           {:1d}  {:1d}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}\n'.format(iemis,ireflect,semiss[15],semiss[16],semiss[17],semiss[18],semiss[19],semiss[20],semiss[21],semiss[22],semiss[23],semiss[24],semiss[25],semiss[26],semiss[27],semiss[28] ))
 	f.write(' {:1d}{:3d}{:5d}  1.000000MIDLATITUDE SUMM H1=    0.00 H2=   70.00 ANG=   0.000 LEN= 0\n'.format(iform,nlayers,nmol))
-	f.write('{:11.4f}{:14.2f}{:10s}{:3s}{:2d}{:8.3f}{:8.2f}{:7.2f}{:7.3f}{:8.2f}{:7.2f}\n'.format(pavel[0],tavel[0],secntk,cinp,ipthak,altz[0]/1000.,pz[0],tz[0],altz[1]/1000.,pz[1],tz[1]))
+	f.write('{:11.4f}{:16.4f}{:10s}{:3s}{:2d}{:8.3f}{:8.2f}{:7.2f}{:7.3f}{:8.2f}{:9.4f}\n'.format(pavel[0],tavel[0],secntk,cinp,ipthak,altz[0]/1000.,pz[0],tz[0],altz[1]/1000.,pz[1],tz[1]))
 	f.write('{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}\n'.format(wkl[1,0],wkl[2,0],wkl[3,0],wkl[4,0],wkl[5,0],wkl[6,0],wkl[7,0],wbrodl[0] ))
 	for i in range(2,nlayers+1):
 		if(pavel[i-1]<0.1):
-			f.write('  {:13.7E}{:10.2f}{:15.0f}{:30.3f}{:0<08.8g}{:7.2f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			f.write('  {:13.7E}{:12.4f}{:15.0f}{:30.3f}{:0<08.8g}{:9.4f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
 		elif(pavel[i-1]<1.):
-			f.write('  {:0<08.7g}{:14.2f}{:15.0f}{:30.3f}{:0<08.8g}{:7.2f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			f.write('  {:0<08.7g}{:16.4f}{:15.0f}{:30.3f}{:0<08.8g}{:9.4f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
 		else:
-			f.write('   {:0<08.8g}{:14.2f}{:15.0f}{:30.3f} {:0<07.7g}{:7.2f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			f.write('   {:0<08.8g}{:16.4f}{:15.0f}{:30.3f} {:0<07.7g}{:9.4f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
 		f.write('{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}\n'.format(wkl[1,i-1],wkl[2,i-1],wkl[3,i-1],wkl[4,i-1],wkl[5,i-1],wkl[6,i-1],wkl[7,i-1],wbrodl[i-1] ))
 	f.write('%%%%%\n')
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
@@ -205,11 +205,12 @@ def plotrrtmoutput():
 	logpplot(totdflux_lw,pz,'totdflux','pz','red')
 	logpplot(totdflux_sw,pz,'totdflux','pz','green')
 	plt.subplot(333)
-	logpplot(fnet,pz,'fnet','pz')
+	logpplot(dfnet,pz[:-1],'fnet','pz')
 	# logpplot(fnet_lw,pz,'fnet','pz','red')
 	# logpplot(fnet_sw,pz,'fnet','pz','green')
 	plt.subplot(334)
 	logpplot(htr[:-1],pz[:-1],'htr','pz')
+	plt.semilogy(-4.*dfnet/dpz,pz[:-1])
 	# logpplot(htr_lw[:-1],pz[:-1],'htr','pz','red')
 	# logpplot(htr_sw[:-1],pz[:-1],'htr','pz','green')
 	# plt.xlim(-2,2)
@@ -218,7 +219,6 @@ def plotrrtmoutput():
 	plt.subplot(335)
 	logpplot(tavel,pavel,'tz','pz')
 	logpplot(tz,pz,'tz','pz')
-	print tbound, 'tbound'
 	plt.plot(tbound,pz[0],'o')
 	# plt.plot(tz,altz/1000.)
 	plt.subplot(336)
@@ -1175,7 +1175,7 @@ ur_max=3.0
 eqb_maxhtr=1e-4
 eqb_maxdfnet=1e-6
 toa_fnet_eqb=1.0e12
-timesteps=2000
+timesteps=8000
 
 
 cti=0
@@ -1207,10 +1207,10 @@ dmax=10.0
 
 for ts in range(timesteps):
 
-	# if((maxhtr<eqb_maxhtr*10. and abs(toa_fnet)>toa_fnet_eqb)):
-	# 	tz+=toa_fnet*0.2
-	# 	tavel+=toa_fnet*0.2
-	# 	tbound+=toa_fnet*0.2
+	if((maxhtr<eqb_maxhtr*10. and abs(toa_fnet)>toa_fnet_eqb)):
+		tz+=toa_fnet*0.2
+		tavel+=toa_fnet*0.2
+		tbound+=toa_fnet*0.2
 
 	if(ts>0):
 		for i in range(1,nlayers):
@@ -1233,26 +1233,26 @@ for ts in range(timesteps):
 		# for i in range(1,nlayers):
 		# 	altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
 
-		for i in range(1,nlayers):
-			altavel[i] = (altz[i-1]+altz[i])/2.0
+		# for i in range(1,nlayers):
+		# 	altavel[i] = (altz[i-1]+altz[i])/2.0
 		
-		conv=np.zeros(nlayers+1) #reset to zero
-		conv[0]=1
-		# tavel[0]=tz[0]
-		# conv[1]=1 #couple first layer to surface
-		convection(tavel,altavel)
-		for i in range(1,nlayers):
-			# tz[i] = (tavel[i-1] + tavel[i])/2.
-			tz[i] = tavel[i]*1.0
-		tz[0]=tbound
-		tz[nlayers] = 2.*tavel[nlayers-1]-tz[nlayers-1]
-		tz=np.clip(tz,tmin,tmax)
-		tavel=np.clip(tavel,tmin,tmax)
-		# convection(tz,altz)
-		for i in range(1,nlayers):
-			if(conv[i]==0):
-				cti=i-1
-				break
+		# conv=np.zeros(nlayers+1) #reset to zero
+		# conv[0]=1
+		# # tavel[0]=tz[0]
+		# # conv[1]=1 #couple first layer to surface
+		# convection(tavel,altavel)
+		# for i in range(1,nlayers):
+		# 	# tz[i] = (tavel[i-1] + tavel[i])/2.
+		# 	tz[i] = tavel[i]*1.0
+		# tz[0]=tbound
+		# tz[nlayers] = 2.*tavel[nlayers-1]-tz[nlayers-1]
+		# tz=np.clip(tz,tmin,tmax)
+		# tavel=np.clip(tavel,tmin,tmax)
+		# # convection(tz,altz)
+		# for i in range(1,nlayers):
+		# 	if(conv[i]==0):
+		# 		cti=i-1
+		# 		break
 
 		#set up gas amounts
 
@@ -1269,20 +1269,23 @@ for ts in range(timesteps):
 
 	dtbound=(fnet_sw[0]-fnet_lw[0])*0.1
 	dtbound=np.clip(dtbound,-dmax,dmax)
-	# tbound+=dtbound
+	tbound+=dtbound
 
 	if(lw_on==1):
 		writeformattedinputfile_lw()
 		callrrtmlw()
 		totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
 
-	if(sw_on==1):
-		if(maxhtr<eqb_maxhtr):
-			writeformattedinputfile_sw()
-			callrrtmsw()
-			totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
+	if(ts==1):
+	# if(sw_on==1):
+	# 	if(maxhtr<eqb_maxhtr):
+		writeformattedinputfile_sw()
+		callrrtmsw()
+		totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
 
-	
+	# fnet_sw=np.ones(nlayers+1)*100.0	
+	# fnet_sw=np.linspace(100,0,nlayers+1)
+	# htr_sw=np.linspace(0.03,0.,nlayers+1)
 
 
 
@@ -1292,12 +1295,14 @@ for ts in range(timesteps):
 	# totdflux_sw*=(238./fnet_sw[nlayers])
 	# htr_sw*=(238./fnet_sw[nlayers])
 	# fnet_sw*=(238./fnet_sw[nlayers])
-	totuflux=around(totuflux_lw+totuflux_sw,11)
-	totdflux=around(totdflux_lw+totdflux_sw,11)
-	fnet=around(fnet_sw-fnet_lw,11)
-	htr=around(htr_lw+htr_sw,11)
+	totuflux=totuflux_lw+totuflux_sw
+	totdflux=totdflux_lw+totdflux_sw
+	# for i in range(1,nlayers):
+	# 	fnet[i]=fnet_sw[i]-fnet_lw[i-1]
+	fnet=fnet_sw-fnet_lw
+	htr=htr_lw+htr_sw
 
-	# toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
+	toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
 	
 	# if(cti+1 < nlayers-1):
 	# 	maxhtr=max(abs(htr[cti+1:nlayers-1]))
@@ -1309,15 +1314,19 @@ for ts in range(timesteps):
 	maxhtr=max(abs(re_htrs))
 	maxhtr_ind=np.argmax(abs(re_htrs))
 	dfnet=np.zeros(nlayers)
+	dpz=np.zeros(nlayers)
 	for i in range(nlayers):
 		dfnet[i]=fnet[i+1]-fnet[i]
+		dpz[i]=pz[i+1]-pz[i]
 	maxdfnet=max(abs(dfnet))
 
-	toa_fnet=240.-totuflux[nlayers]
+	# toa_fnet=240.-totuflux[nlayers]
 
 	prev_tz=tz*1.0
 	for i in range(nlayers):
-		dT = htr[i]*3.0 #undrelax
+		dT=dfnet[i]/dpz[i]*-1.
+		# print dT
+		# dT = htr[i]/3. #undrelax
 		dT=np.clip(dT,-dmax,dmax)
 		tavel[i]+=dT
 

@@ -66,7 +66,7 @@ def plotrrtmoutput():
 	# # logpplot(totdflux_lw,pz,'totdflux','pz')
 	# # logpplot(totdflux_sw,pz,'totdflux','pz')
 	# plt.subplot(333)
-	logpplot(fnet,pz,'fnet','pz')
+	logpplot(dfnet,pz[:-1],'fnet','pz')
 	# logpplot(fnet_lw,pz,'fnet','pz')
 	# logpplot(fnet_sw,pz,'fnet','pz')
 	# plt.subplot(334)
@@ -248,11 +248,20 @@ for directory in directories:
 				for j in range(shape(x)[1]):
 					x[i,j] = f.readline()
 
+		dfnet=np.zeros(nlayers)
+
+		for i in range(nlayers):
+			dfnet[i]=fnet[i+1]-fnet[i]
+
 		plotrrtmoutput()
 
 		print tz
 
 		print timesteps, ur_min,ur_max
+
+		
+
+		
 
 		# re_htrs=np.zeros(nlayers)
 		# re_htrs = np.where(conv==0,htr,0.)
