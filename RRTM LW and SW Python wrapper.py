@@ -16,7 +16,7 @@ project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python
 
 def init_plotting():
 	plt.rcParams['figure.figsize'] = (10,10)
-	plt.rcParams['font.size'] = 20
+	plt.rcParams['font.size'] = 10
 	plt.rcParams['font.family'] = 'Times New Roman'
 	plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
 	plt.rcParams['axes.titlesize'] = 1.2*plt.rcParams['font.size']
@@ -216,8 +216,11 @@ def plotrrtmoutput():
 	plt.axvline(-eqb_maxhtr,ls='--')
 	plt.axvline(eqb_maxhtr,ls='--')
 	plt.subplot(335)
-	# logpplot(tz,pz,'tz','pz')
-	plt.plot(tz,altz/1000.)
+	logpplot(tavel,pavel,'tz','pz')
+	logpplot(tz,pz,'tz','pz')
+	print tbound, 'tbound'
+	plt.plot(tbound,pz[0],'o')
+	# plt.plot(tz,altz/1000.)
 	plt.subplot(336)
 	logpplot(wbrodl,pavel,'wbrodl','pavel')
 	plt.subplot(337)
@@ -314,7 +317,7 @@ sza=65. 			#Solar zenith angle in degrees (0 deg is overhead).
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
-lapse=9.8
+lapse=1e6
 tmin=10.
 tmax=1000.
 rsp=287.05
@@ -1170,8 +1173,9 @@ ur_min=0.6
 ur_max=3.0
 
 eqb_maxhtr=1e-4
+eqb_maxdfnet=1e-6
 toa_fnet_eqb=1.0e12
-timesteps=100
+timesteps=2000
 
 
 cti=0
@@ -1234,8 +1238,8 @@ for ts in range(timesteps):
 		
 		conv=np.zeros(nlayers+1) #reset to zero
 		conv[0]=1
-		tavel[0]=tz[0]
-		conv[1]=1 #couple first layer to surface
+		# tavel[0]=tz[0]
+		# conv[1]=1 #couple first layer to surface
 		convection(tavel,altavel)
 		for i in range(1,nlayers):
 			# tz[i] = (tavel[i-1] + tavel[i])/2.
@@ -1306,20 +1310,21 @@ for ts in range(timesteps):
 	maxhtr_ind=np.argmax(abs(re_htrs))
 	dfnet=np.zeros(nlayers)
 	for i in range(nlayers):
-		dfnet[i]=fnet[i+1]-fnet[0]
+		dfnet[i]=fnet[i+1]-fnet[i]
 	maxdfnet=max(abs(dfnet))
 
 	toa_fnet=240.-totuflux[nlayers]
 
 	prev_tz=tz*1.0
 	for i in range(nlayers):
-		dT = htr[i]*3.0
+		dT = htr[i]*3.0 #undrelax
 		dT=np.clip(dT,-dmax,dmax)
 		tavel[i]+=dT
 
 	for i in range(1,nlayers):
 		# tz[i] = (tavel[i-1] + tavel[i])/2.
 		tz[i] = tavel[i]*1.0
+	tz[0]=tbound
 	tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
 
 	
@@ -1374,14 +1379,15 @@ for ts in range(timesteps):
 	# 	plotrrtmoutput()
 
 	if(ts%10==0):
-		print('{:4d} | {:32.28f} | {:3d} | {:3d} | {:12.8f} | {:8.4f} | {:8.4f} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f}'.format(ts,htr[maxhtr_ind],maxhtr_ind,cti,maxdfnet,tbound,tz[0],-dmax,maxdtz,dmax,toa_fnet))
+		print('{:4d} | {:32.28f} | {:3d} | {:3d} | {:12.8f} | {:8.4f} | {:8.4f} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f}'.format(ts,maxdfnet,maxhtr_ind,cti,maxdfnet,tbound,tz[0],-dmax,maxdtz,dmax,toa_fnet))
 
 
 	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
 	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
 	params2d=[wkl]
 
-	if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
+	# if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
+	if(maxdfnet < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb):
 		plotrrtmoutput()
 		print('Equilibrium reached!')
 		writeoutputfile()
