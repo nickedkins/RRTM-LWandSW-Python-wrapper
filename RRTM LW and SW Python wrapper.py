@@ -287,21 +287,37 @@ idelm=1 			# flag for outputting downwelling fluxes computed using the delta-M s
 icos=0 				#0:there is no need to account for instrumental cosine response, 1:to account for instrumental cosine response in the computation of the direct and diffuse fluxes, 2:2 to account for instrumental cosine response in the computation of the diffuse fluxes only
 semis=np.ones(16)*1.	#all spectral bands the same as iemissm (maybe this is the surface??)
 semiss=np.ones(29)*1. 	#surface emissivity
+# semiss[15:29] = np.array([
+# 0.881,
+# 0.794,
+# 0.738,
+# 0.727,
+# 0.657,
+# 0.660,
+# 0.626,
+# 0.655,
+# 0.791,
+# 0.883,
+# 0.957,
+# 0.958,
+# 0.958,
+# 0.970
+# ])
 semiss[15:29] = np.array([
-0.881,
-0.794,
-0.738,
-0.727,
-0.657,
-0.660,
-0.626,
-0.655,
-0.791,
-0.883,
-0.957,
-0.958,
-0.958,
-0.970
+0.64,
+0.64,
+0.64,
+0.64,
+0.64,
+0.64,
+0.64,
+0.64,
+0.64,
+0.64,
+0.64,
+0.64,
+0.64,
+0.64,
 ])
 iform=1
 psurf=1000.
@@ -313,11 +329,12 @@ cinp='' #based on not appearing in input mls sw
 ipthak=3
 ipthrk=3
 juldat=0 		#Julian day associated with calculation (1-365/366 starting January 1). Used to calculate Earth distance from sun. A value of 0 (default) indicates no scaling of solar source function using earth-sun distance.
-sza=65. 			#Solar zenith angle in degrees (0 deg is overhead).
+# sza=65. 			#Solar zenith angle in degrees (0 deg is overhead).
+sza=45. #(RD repl) 			#Solar zenith angle in degrees (0 deg is overhead).
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
-lapse=1e6
+lapse=1000
 tmin=10.
 tmax=1000.
 rsp=287.05
@@ -352,7 +369,7 @@ altavel = np.zeros(nlayers)
 
 ur=np.ones(nlayers)
 
-pz=np.linspace(psurf,pmin,nlayers+1)
+# pz=np.linspace(psurf,pmin,nlayers+1)
 # pz=np.logspace(3.,-1.,base=10.,num=nlayers+1)
 pz=np.array([
 1013.000000	,
@@ -1174,7 +1191,7 @@ ur_min=0.6
 ur_max=3.0
 
 eqb_maxhtr=1e-4
-eqb_maxdfnet=1e-6
+eqb_maxdfnet=1e-3
 toa_fnet_eqb=1.0e12
 timesteps=8000
 
@@ -1208,10 +1225,10 @@ dmax=10.0
 
 for ts in range(timesteps):
 
-	if((maxhtr<eqb_maxhtr*10. and abs(toa_fnet)>toa_fnet_eqb)):
-		tz+=toa_fnet*0.2
-		tavel+=toa_fnet*0.2
-		tbound+=toa_fnet*0.2
+	# if((maxhtr<eqb_maxhtr*10. and abs(toa_fnet)>toa_fnet_eqb)):
+	# 	tz+=toa_fnet*0.2
+	# 	tavel+=toa_fnet*0.2
+	# 	tbound+=toa_fnet*0.2
 
 	if(ts>0):
 		for i in range(1,nlayers):
@@ -1290,15 +1307,14 @@ for ts in range(timesteps):
 
 
 	prev_htr=htr
-	
-	# totuflux_sw*=(238./fnet_sw[nlayers])
-	# totdflux_sw*=(238./fnet_sw[nlayers])
-	# htr_sw*=(238./fnet_sw[nlayers])
-	# fnet_sw*=(238./fnet_sw[nlayers])
+
+	if(ts>1):
+		totuflux_sw*=(238./fnet_sw[nlayers])
+		totdflux_sw*=(238./fnet_sw[nlayers])
+		htr_sw*=(238./fnet_sw[nlayers])
+		fnet_sw*=(238./fnet_sw[nlayers])
 	totuflux=totuflux_lw+totuflux_sw
 	totdflux=totdflux_lw+totdflux_sw
-	# for i in range(1,nlayers):
-	# 	fnet[i]=fnet_sw[i]-fnet_lw[i-1]
 	fnet=fnet_sw-fnet_lw
 	htr=htr_lw+htr_sw
 
@@ -1324,7 +1340,7 @@ for ts in range(timesteps):
 
 	prev_tz=tz*1.0
 	for i in range(nlayers):
-		dT=dfnet[i]/dpz[i]*-1.
+		dT=dfnet[i]/dpz[i]*-1.*3.0
 		# print dT
 		# dT = htr[i]/3. #undrelax
 		dT=np.clip(dT,-dmax,dmax)
@@ -1332,9 +1348,11 @@ for ts in range(timesteps):
 
 	for i in range(1,nlayers):
 		# tz[i] = (tavel[i-1] + tavel[i])/2.
-		tz[i] = tavel[i]*1.0
-	tz[0]=tbound
-	tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+		tz[i] = tavel[i-1]*1.0
+	# tz[0]=tbound
+	tz[0]=tavel[0]
+	# tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+	tz[nlayers]=tavel[nlayers-1]
 
 	
 	# if(maxhtr<eqb_maxhtr):
@@ -1387,7 +1405,7 @@ for ts in range(timesteps):
 	# # if(ts>950):
 	# 	plotrrtmoutput()
 
-	if(ts%10==0):
+	if(ts%1==0):
 		print('{:4d} | {:32.28f} | {:3d} | {:3d} | {:12.8f} | {:8.4f} | {:8.4f} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f}'.format(ts,maxdfnet,maxhtr_ind,cti,maxdfnet,tbound,tz[0],-dmax,maxdtz,dmax,toa_fnet))
 
 
@@ -1396,7 +1414,7 @@ for ts in range(timesteps):
 	params2d=[wkl]
 
 	# if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
-	if(maxdfnet < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb):
+	if(maxdfnet < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>1):
 		plotrrtmoutput()
 		print('Equilibrium reached!')
 		writeoutputfile()
@@ -1426,4 +1444,4 @@ print(ttotal)
 
 print('Done')
 # plt.tight_layout()
-show()
+# show()
