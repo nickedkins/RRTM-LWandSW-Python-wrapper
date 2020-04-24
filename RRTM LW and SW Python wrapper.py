@@ -261,7 +261,7 @@ def writeoutputfile():
 nlayers=51
 nmol=7
 lw_on=1
-sw_on=0
+sw_on=1
 gravity=9.81
 avogadro=6.022e23
 iatm=0 #0 for layer values, 1 for level values
@@ -1078,6 +1078,8 @@ tz=np.array([
 
 tbound=tz[0]
 
+wkl[2,:]*=2.0
+
 # for i in range(len(pavel)):
 # 	pavel[i]=(pz[i]+pz[i+1])/2.
 # tavel=np.zeros(nlayers)
@@ -1294,7 +1296,7 @@ for ts in range(timesteps):
 		callrrtmlw()
 		totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
 
-	if(ts==1):
+	if(ts==1 and sw_on==1):
 	# 	if(maxhtr<eqb_maxhtr):
 		writeformattedinputfile_sw()
 		callrrtmsw()

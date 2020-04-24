@@ -7,7 +7,7 @@ from os import listdir
 
 directories = [
 # '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/mls replication/new precision/pz fixed/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/mls rd mods/re/'
 ]
 
 def init_plotting():
@@ -59,24 +59,25 @@ def plotrrtmoutput():
 	plt.figure(1)
 	plt.subplot(331)
 	logpplot(totuflux,pz,'totuflux','pz')
-	# logpplot(totuflux_lw,pz,'totuflux','pz')
-	# logpplot(totuflux_sw,pz,'totuflux','pz')
+	logpplot(totuflux_lw,pz,'totuflux','pz')
+	logpplot(totuflux_sw,pz,'totuflux','pz')
 	plt.subplot(332)
 	logpplot(totdflux,pz,'totdflux','pz')
-	# logpplot(totdflux_lw,pz,'totdflux','pz')
-	# logpplot(totdflux_sw,pz,'totdflux','pz')
+	logpplot(totdflux_lw,pz,'totdflux','pz')
+	logpplot(totdflux_sw,pz,'totdflux','pz')
 	plt.subplot(333)
 	logpplot(dfnet,pz[:-1],'fnet','pz')
 	logpplot(fnet_lw,pz,'fnet','pz')
 	logpplot(fnet_sw,pz,'fnet','pz')
 	plt.subplot(334)
 	logpplot(htr[:],pz[:],'htr','pz')
-	# logpplot(htr_lw[:-1],pz[:-1],'htr','pz')
-	# logpplot(htr_sw[:-1],pz[:-1],'htr','pz')
+	logpplot(htr_lw[:-1],pz[:-1],'htr','pz')
+	logpplot(htr_sw[:-1],pz[:-1],'htr','pz')
 	plt.axvline(-eqb_maxhtr,ls='--')
 	plt.axvline(eqb_maxhtr,ls='--')
 	plt.subplot(335)
 	logpplot(tz,pz,'tz','pz')
+	plt.plot(tbound,pz[0],'o')
 	# plt.semilogy(tz,pz,'o',c='g')
 	# plt.semilogy(tavel,pavel,'o',c='b')
 	plt.ylim(max(pz),min(pz))
@@ -108,7 +109,8 @@ iout=0 #for broadband only
 #iout=-1 #for broadband, no printings
 icld=0 #for clear sky
 #icld=1  #for grey clouds
-tbound = 288 #surface temperature (K)
+tbound=288 #surface temperature (K)
+# tbound=np.zeros(1)
 iemiss=1 #surface emissivity. Keep this fixed for now.
 iemis=2
 ireflect=0 #for Lambert reflection
@@ -223,8 +225,6 @@ params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iem
 params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,]
 params2d=[wkl]
 
-
-
 for directory in directories:
 
 	filenames = []
@@ -239,12 +239,74 @@ for directory in directories:
 		print(fn)
 		output_file = directory + fn
 		f=open(output_file,'r')
-		for x in params0d:
-			x = f.readline()
+
+
+		gravity	=	float	(	f.readline().rstrip('\n')	)
+		avogadro	=	float	(	f.readline().rstrip('\n')	)
+		iatm	=	int	(	f.readline().rstrip('\n')	)
+		ixsect	=	int	(	f.readline().rstrip('\n')	)
+		iscat	=	int	(	f.readline().rstrip('\n')	)
+		numangs	=	int	(	f.readline().rstrip('\n')	)
+		iout	=	int	(	f.readline().rstrip('\n')	)
+		icld	=	int	(	f.readline().rstrip('\n')	)
+		tbound	=	float	(	f.readline().rstrip('\n')	)
+		iemiss	=	int	(	f.readline().rstrip('\n')	)
+		iemis	=	int	(	f.readline().rstrip('\n')	)
+		ireflect	=	int	(	f.readline().rstrip('\n')	)
+		iaer	=	int	(	f.readline().rstrip('\n')	)
+		istrm	=	int	(	f.readline().rstrip('\n')	)
+		idelm	=	int	(	f.readline().rstrip('\n')	)
+		icos	=	int	(	f.readline().rstrip('\n')	)
+		iform	=	int	(	f.readline().rstrip('\n')	)
+		nlayers	=	int	(	f.readline().rstrip('\n')	)
+		nmol	=	int	(	f.readline().rstrip('\n')	)
+		psurf	=	float	(	f.readline().rstrip('\n')	)
+		pmin	=	float	(	f.readline().rstrip('\n')	)
+		secntk	=	str	(	f.readline().rstrip('\n')	)
+		cinp	=	str	(	f.readline().rstrip('\n')	)
+		ipthak	=	float	(	f.readline().rstrip('\n')	)
+		ipthrk	=	float	(	f.readline().rstrip('\n')	)
+		juldat	=	float	(	f.readline().rstrip('\n')	)
+		sza	=	float	(	f.readline().rstrip('\n')	)
+		isolvar	=	int	(	f.readline().rstrip('\n')	)
+		lapse	=	float	(	f.readline().rstrip('\n')	)
+		tmin	=	float	(	f.readline().rstrip('\n')	)
+		tmax	=	float	(	f.readline().rstrip('\n')	)
+		rsp	=	float	(	f.readline().rstrip('\n')	)
+		gravity	=	float	(	f.readline().rstrip('\n')	)
+		pin2	=	float	(	f.readline().rstrip('\n')	)
+		pico2	=	float	(	f.readline().rstrip('\n')	)
+		pio2	=	float	(	f.readline().rstrip('\n')	)
+		piar	=	float	(	f.readline().rstrip('\n')	)
+		pich4	=	float	(	f.readline().rstrip('\n')	)
+		pih2o	=	float	(	f.readline().rstrip('\n')	)
+		pio3	=	float	(	f.readline().rstrip('\n')	)
+		mmwn2	=	float	(	f.readline().rstrip('\n')	)
+		mmwco2	=	float	(	f.readline().rstrip('\n')	)
+		mmwo2	=	float	(	f.readline().rstrip('\n')	)
+		mmwar	=	float	(	f.readline().rstrip('\n')	)
+		mmwch4	=	float	(	f.readline().rstrip('\n')	)
+		mmwh2o	=	float	(	f.readline().rstrip('\n')	)
+		mmwo3	=	float	(	f.readline().rstrip('\n')	)
+		piair	=	float	(	f.readline().rstrip('\n')	)
+		totmolec	=	float	(	f.readline().rstrip('\n')	)
+		surf_rh	=	float	(	f.readline().rstrip('\n')	)
+		vol_mixh2o_min	=	float	(	f.readline().rstrip('\n')	)
+		vol_mixh2o_max	=	float	(	f.readline().rstrip('\n')	)
+		ur_min	=	float	(	f.readline().rstrip('\n')	)
+		ur_max	=	float	(	f.readline().rstrip('\n')	)
+		eqb_maxhtr	=	float	(	f.readline().rstrip('\n')	)
+		timesteps	=	int	(	f.readline().rstrip('\n')	)
+		cti	=	int	(	f.readline().rstrip('\n')	)
+		maxhtr	=	float	(	f.readline().rstrip('\n')	)
+
+
 
 		for x in params1d:
 			for i in range(shape(x)[0]):
 				x[i] = f.readline()
+
+
 		for x in params2d:
 			for i in range(shape(x)[0]):
 				for j in range(shape(x)[1]):
@@ -255,24 +317,18 @@ for directory in directories:
 		for i in range(nlayers):
 			dfnet[i]=fnet[i+1]-fnet[i]
 
+		print tbound, tz[0]
+
 		plotrrtmoutput()
-
-		print tz
-
-		print timesteps, ur_min,ur_max
-
-		
-
-		
 
 		# re_htrs=np.zeros(nlayers)
 		# re_htrs = np.where(conv==0,htr,0.)
 		# maxhtr=max(abs(re_htrs))
 		# print maxhtr
 
-		#print output for easy spreadsheettransfer
-		for i in range(nlayers):
-			print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i],htr[i],htr_lw[i],htr_sw[i])
-		print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],htr[i],htr_lw[i],htr_sw[i])
+		#print output for easy spreadsheet transfer
+		# for i in range(nlayers):
+		# 	print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i],htr[i],htr_lw[i],htr_sw[i])
+		# print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],htr[i],htr_lw[i],htr_sw[i])
 
 show()
