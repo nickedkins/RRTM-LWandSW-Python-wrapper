@@ -37,6 +37,20 @@
             <condition></condition>
             <threads></threads>
         </Breakpoint>
+        <Breakpoint>
+            <id>2</id>
+            <line>522</line>
+            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
+            <type>breakpoint</type>
+            <disposition></disposition>
+            <enabled>y</enabled>
+            <address>0x10006ad30</address>
+            <what></what>
+            <times>0</times>
+            <ignore>0</ignore>
+            <condition></condition>
+            <threads></threads>
+        </Breakpoint>
     </BreakpointList>
     <Memory>
         <address></address>

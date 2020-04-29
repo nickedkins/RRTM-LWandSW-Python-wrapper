@@ -6,8 +6,8 @@ from pylab import *
 from os import listdir
 
 directories = [
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/mls rd mods/re/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/mls rd mods/re/'
 ]
 
 def init_plotting():
@@ -51,6 +51,7 @@ init_plotting()
 
 def logpplot(x,p,xlab,ylab):
 	plt.semilogy(x,p,'-')
+	# plt.plot(x,p,'-')
 	plt.ylim(max(p),min(p))
 	plt.xlabel(xlab)
 	plt.ylabel(ylab)
@@ -317,7 +318,7 @@ for directory in directories:
 		for i in range(nlayers):
 			dfnet[i]=fnet[i+1]-fnet[i]
 
-		print tbound, tz[0]
+		print totdflux_sw[nlayers]
 
 		plotrrtmoutput()
 

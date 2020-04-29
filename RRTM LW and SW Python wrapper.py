@@ -121,19 +121,29 @@ def writeformattedinputfile_sw():
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
 	f.write('$ Dynamic Formatted RRTM SW Input\n')
 	f.write('                  {:2d}                             {:1d}                                {:1d} {:1d}   {:02d}    {:1d}   {:1d}{:1d}\n'.format(iaer,iatm,iscat,istrm,iout,icld,idelm,icos))
-	# f.write('            {:3d}   {:7.3f}    {:1d}\n'.format(juldat,sza,isolvar))
-	f.write('            {:3d}   {:7.3f} \n'.format(juldat,sza))
+	f.write('            {:3d}   {:7.3f}    {:1d}'.format(juldat,sza,isolvar))
+	for i in range(29):
+		f.write('{:5.3f}'.format(solvar[i]))
+	f.write('\n')
+	# f.write('            {:3d}   {:7.3f} \n'.format(juldat,sza)) #herenext
 	f.write('           {:1d}  {:1d}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}\n'.format(iemis,ireflect,semiss[15],semiss[16],semiss[17],semiss[18],semiss[19],semiss[20],semiss[21],semiss[22],semiss[23],semiss[24],semiss[25],semiss[26],semiss[27],semiss[28] ))
 	f.write(' {:1d}{:3d}{:5d}  1.000000MIDLATITUDE SUMM H1=    0.00 H2=   70.00 ANG=   0.000 LEN= 0\n'.format(iform,nlayers,nmol))
 	f.write('{:11.4f}{:17.5f}{:10s}{:3s}{:2d}{:8.3f}{:8.2f}{:7.2f}{:7.3f}{:8.2f}{:10.5f}\n'.format(pavel[0],tavel[0],secntk,cinp,ipthak,altz[0]/1000.,pz[0],tz[0],altz[1]/1000.,pz[1],tz[1]))
 	f.write('{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}\n'.format(wkl[1,0],wkl[2,0],wkl[3,0],wkl[4,0],wkl[5,0],wkl[6,0],wkl[7,0],wbrodl[0] ))
 	for i in range(2,nlayers+1):
 		if(pavel[i-1]<0.1):
-			f.write('  {:13.7E}{:13.5f}{:15.0f}{:30.3f}{:0<08.8g}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			# f.write('  {:13.7E}{:13.5f}{:15.0f}{:30.3f}{:0<08.8g}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			f.write('  {:13.7f}{:13.5f}{:15.0f}{:30.3f}{:7.2f}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
 		elif(pavel[i-1]<1.):
-			f.write('  {:0<08.7g}{:17.5f}{:15.0f}{:30.3f}{:0<08.8g}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			# f.write('  {:0<08.7g}{:17.5f}{:15.0f}{:30.3f}{:0<08.8g}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			f.write('  {:9.7f}{:17.5f}{:15.0f}{:30.3f}{:7.2f}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+		elif(pavel[i-1]<10.):
+			f.write('   {:8.6f}{:17.5f}{:15.0f}{:30.3f} {:7.2f}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+		elif(pavel[i-1]<100.):
+			f.write('   {:8.5f}{:17.5f}{:15.0f}{:30.3f} {:7.2f}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
 		else:
-			f.write('   {:0<08.8g}{:17.5f}{:15.0f}{:30.3f} {:0<07.7g}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			# f.write('   {:0<08.8g}{:17.5f}{:15.0f}{:30.3f} {:0<07.7g}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+			f.write('   {:8.4f}{:17.5f}{:15.0f}{:30.3f} {:7.2f}{:10.5f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
 		f.write('{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}\n'.format(wkl[1,i-1],wkl[2,i-1],wkl[3,i-1],wkl[4,i-1],wkl[5,i-1],wkl[6,i-1],wkl[7,i-1],wbrodl[i-1] ))
 	f.write('%%%%%\n')
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
@@ -232,6 +242,7 @@ def plotrrtmoutput():
 
 def convection(T,z):
 	# print T[0]
+	T[0]=tbound
 	for i in range(1,len(T)):
 		dT = (T[i]-T[i-1])
 		dz = (z[i]-z[i-1])/1000.
@@ -258,17 +269,21 @@ def writeoutputfile():
 
 
 # master switches
-master_input=0 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP
+master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP
 conv_on=0 #0: no convection, 1: convective adjustment
+if(master_input==3):
+	conv_on=1
 lowlay_lowlev_coupled=1 #0: lowest level and lowest layer temperature independent, 1: lowest level and lowest layer temperatures coupled (equal)
 surf_lowlev_coupled=1 #0: surface and lowest level temperatures independent, 1: lowest level temperature = surface temperature
+if(conv_on==1):
+	surf_lowlev_coupled=1
 
 # Declare variables
 nlayers=51
 nmol=7
 lw_on=1
 sw_on=1
-gravity=9.81
+gravity=9.79764 # RCEMIP value
 avogadro=6.022e23
 iatm=0 #0 for layer values, 1 for level values
 ixsect=0 #could be 1, but why?
@@ -310,7 +325,7 @@ if(master_input==1):
 	0.958,
 	0.970
 	])
-if(master_input==2):
+elif(master_input==2):
 	semiss[15:29] = np.array([
 	0.64,
 	0.64,
@@ -327,8 +342,12 @@ if(master_input==2):
 	0.64,
 	0.64,
 	])
+elif(master_input==3):
+	semiss=np.ones(29)*0.93
 iform=1
 psurf=1000.
+if(master_input==3):
+	psurf=1014.8
 pmin=0.
 # secntk=0
 # cinp=1.356316e-19
@@ -342,13 +361,21 @@ if(master_input==1):
 	sza=65. 			#Solar zenith angle in degrees (0 deg is overhead).
 elif(master_input==2):
 	sza=45. #(RD repl) 			#Solar zenith angle in degrees (0 deg is overhead).
+elif(master_input==3): # RCEMIP
+	sza=42.05
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
-lapse=1000
+solvar=np.ones(29)
+if(master_input==3):
+	isolvar=2
+	solvar=np.ones(29)*551.58/1015.98791896
+lapse=5.7
+if(master_input==3): # RCEMIP
+	lapse=6.7
 tmin=10.
 tmax=1000.
-rsp=287.05
+rsp=287.04 # RCEMIP value
 gravity=9.81
 filewritten=0
 sw_freq=100
@@ -1090,7 +1117,7 @@ if(master_input==1 or master_input==2):
 
 tbound=tz[0]
 
-wkl[2,:]*=2.0
+# wkl[2,:]*=2.0
 
 if(master_input==0):
 	for i in range(len(pavel)):
@@ -1106,8 +1133,49 @@ if(master_input==0):
 	tz=np.clip(tz,tmin,tmax)
 	for i in range(nlayers):
 		tavel[i]=(tz[i]+tz[i+1])/2.
-
 	tavel[nlayers-1] = tavel[nlayers-2]
+elif(master_input==3): # RCEMIP hydrostatics
+	tbound=295.
+	g1=3.6478
+	g2=0.83209
+	g3=11.3515
+	q0295=12e-3 # other values for different tbounds
+	zq1=4000.
+	zq2=7500.
+	zt=15000.
+	qt=1.e-11
+	altz=np.linspace(0.,40.,nlayers+1)
+	altz*=1.e3
+	trop_ind = np.argmin(abs(altz-15000.))
+	print trop_ind
+	q=np.zeros(nlayers+1)
+	for i in range(nlayers+1):
+		if(altz[i]<zt):
+			q[i]=q0295*exp(-altz[i]/zq1)*exp(-(altz[i]/zq2)**2.)
+		else:
+			q[i]=qt
+	tv0=tbound*(1.+0.608*q0295)
+	tv=np.zeros(nlayers+1)
+	for i in range(nlayers):
+		if(altz[i]<zt):
+			tv[i]=tv0-lapse*altz[i]/1000.
+		else:
+			tv[i]=tv0-lapse*zt/1000.
+	tz=tv/(1.+0.608*q)
+	for i in range(nlayers+1):
+		if(altz[i]<zt):
+			pz[i]=psurf*( ( tv0-lapse*altz[i]/1000. )/tv0 ) ** ( gravity/( rsp*lapse/1000. ) )
+		else:
+			pt=psurf*(tv[trop_ind]/tv0)**(gravity/(rsp*lapse/1000.))
+			pz[i]=pt*np.exp( -( gravity*( altz[i]-altz[trop_ind] ) / ( rsp*tv[trop_ind] ) ) )
+	for i in range(len(pavel)):
+		pavel[i]=(pz[i]+pz[i+1])/2.
+	tavel=np.zeros(nlayers)
+	for i in range(len(pavel)):
+		tavel[i]=(tz[i]+tz[i+1])/2.
+
+for i in range(nlayers):
+	altavel[i]=(altz[i]+altz[i+1])/2.
 
 # # Gas inventories
 pin2 = 0.79 * 1e5 #convert the input in bar to Pa
@@ -1192,7 +1260,7 @@ for i in range(nlayers):
 	vol_mixo3[i] = (3.6478*(pz[i]**0.83209))*np.exp(-pz[i]/11.3515)*1e-6
 
 #Set up mixing ratio of broadening molecules (N2 and O2 mostly)
-if(master_input==0):
+if(master_input==0): # manual input
 	for i in range(nlayers):
 		wbrodl[i] = mperlayr_air[i] * 1.0e-4
 		wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
@@ -1202,13 +1270,29 @@ if(master_input==0):
 		wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
 		wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
 	wkl = np.clip(wkl,1.,1e63) #only if wkl is molec/cm, not mixing ratio!
+elif(master_input==3): # RCEMIP
+	g1=3.6478
+	g2=0.83209
+	g3=11.3515
+	for i in range(nlayers):
+		wbrodl[i] = mperlayr_air[i] * 1.0e-4
+		if(altz[i]/1000.<15.):
+			wkl[1,i]=q[i]*1e-3
+		else:
+			wkl[1,i]=qt*1e-3
+		wkl[2,i]=348e-6 # co2
+		wkl[3,i]=g1*pz[i]**(g2)*np.exp(-1.0*(pz[i]/g3))*1e-6 # o3
+		wkl[4,i]=306e-9 # n2o
+		wkl[5,i]=0.# co
+		wkl[6,i]=1650e-9 # ch4
+		wkl[7,i]=0. # o2
 
 ur_min=0.6
 ur_max=3.0
 eqb_maxhtr=1e-4
 eqb_maxdfnet=1e-3
 toa_fnet_eqb=1.0e12
-timesteps=8000
+timesteps=2
 cti=0
 surf_rh=0.8
 vol_mixh2o_min = 1e-6
@@ -1298,6 +1382,7 @@ for ts in range(timesteps):
 	fnet=fnet_sw-fnet_lw
 	htr=htr_lw+htr_sw
 
+
 	toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
 
 	prev_maxhtr=maxhtr*1.0
@@ -1314,7 +1399,6 @@ for ts in range(timesteps):
 	prev_tz=tz*1.0
 	for i in range(nlayers):
 		dT=dfnet[i]/dpz[i]*-1.*3.0
-		# print dT
 		# dT = htr[i]/3. #undrelax
 		dT=np.clip(dT,-dmax,dmax)
 		tavel[i]+=dT
@@ -1322,6 +1406,7 @@ for ts in range(timesteps):
 	for i in range(1,nlayers):
 		# tz[i] = (tavel[i-1] + tavel[i])/2.
 		tz[i] = tavel[i-1]*1.0
+	# print tz
 	if(surf_lowlev_coupled):
 		tz[0]=tbound
 	if(lowlay_lowlev_coupled==1):
