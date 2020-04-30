@@ -232,13 +232,14 @@ totuflux_sw=np.zeros(nlayers+1)
 totdflux_sw=np.zeros(nlayers+1)
 fnet_sw=np.zeros(nlayers+1)
 htr_sw=np.zeros(nlayers+1)
-conv=np.zeros(nlayers)
+conv=np.zeros(nlayers+1)
 altavel = np.zeros(nlayers)
 vol_mixh2o = np.ones(nlayers) * molec_h2o / totmolec
 vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
+solvar=np.zeros(29)
 
 params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
-params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,]
+params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,solvar]
 params2d=[wkl]
 
 for directory in directories:
@@ -328,6 +329,8 @@ for directory in directories:
 				for j in range(shape(x)[1]):
 					x[i,j] = f.readline()
 
+		print solvar
+
 		dfnet=np.zeros(nlayers)
 
 		for i in range(nlayers):
@@ -337,11 +340,11 @@ for directory in directories:
 
 		plotrrtmoutput()
 
-		# print tbound
+		print tbound
 
 		#print output for easy spreadsheet transfer
 		# for i in range(nlayers):
-		# 	print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i],htr[i],htr_lw[i],htr_sw[i],conv[i])
-		# print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],tbound)
+		# 	print '{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i])
+		# print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],tbound)
 
 show()

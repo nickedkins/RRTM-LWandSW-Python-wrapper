@@ -206,39 +206,50 @@ def readrrtmoutput_sw():
 
 def plotrrtmoutput():
 	plt.figure(1)
-	plt.subplot(331)
-	logpplot(totuflux,pz,'totuflux','pz')
-	# logpplot(totuflux_lw,pz,'totuflux','pz','red')
-	# logpplot(totuflux_sw,pz,'totuflux','pz','green')
-	plt.subplot(332)
-	logpplot(totdflux,pz,'totdflux','pz')
-	logpplot(totdflux_lw,pz,'totdflux','pz','red')
-	logpplot(totdflux_sw,pz,'totdflux','pz','green')
-	plt.subplot(333)
-	logpplot(dfnet,pz[:-1],'fnet','pz')
-	# logpplot(fnet_lw,pz,'fnet','pz','red')
-	# logpplot(fnet_sw,pz,'fnet','pz','green')
-	plt.subplot(334)
-	logpplot(htr[:-1],pz[:-1],'htr','pz')
-	plt.semilogy(-4.*dfnet/dpz,pz[:-1])
-	# logpplot(htr_lw[:-1],pz[:-1],'htr','pz','red')
-	# logpplot(htr_sw[:-1],pz[:-1],'htr','pz','green')
-	# plt.xlim(-2,2)
-	plt.axvline(-eqb_maxhtr,ls='--')
-	plt.axvline(eqb_maxhtr,ls='--')
-	plt.subplot(335)
-	logpplot(tavel,pavel,'tz','pz')
-	logpplot(tz,pz,'tz','pz')
+	plt.subplot(221)
+	plt.semilogy(tz,pz)
 	plt.plot(tbound,pz[0],'o')
-	# plt.plot(tz,altz/1000.)
-	plt.subplot(336)
-	logpplot(wbrodl,pavel,'wbrodl','pavel')
-	plt.subplot(337)
-	logpplot(wkl[1,:],pavel,'wkl1 (h2o)','pavel')
-	plt.subplot(338)
-	loglogplot(wkl[2,:],pavel,'wkl2 (co2)','pavel')
-	plt.subplot(339)
-	logpplot(wkl[3,:],pavel,'wkl3 (o3)','pavel')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('tz')
+	plt.ylabel('pz')
+	plt.subplot(222)
+	plt.semilogy(fnet,pz,c='b',label='total')
+	plt.semilogy(fnet_lw,pz,c='r',label='lw')
+	plt.semilogy(fnet_sw,pz,c='g',label='sw')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('fnet')
+	plt.ylabel('pz')
+	plt.legend()
+	plt.subplot(223)
+	plt.semilogy(totuflux,pz,c='b',label='total')
+	plt.semilogy(totuflux_lw,pz,c='r',label='lw')
+	plt.semilogy(totuflux_sw,pz,c='g',label='sw')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('totuflux')
+	plt.ylabel('pz')
+	plt.legend()
+	plt.subplot(224)
+	plt.semilogy(totdflux,pz,c='b',label='total')
+	plt.semilogy(totdflux_lw,pz,c='r',label='lw')
+	plt.semilogy(totdflux_sw,pz,c='g',label='sw')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('totdflux')
+	plt.ylabel('pz')
+	plt.legend()
+	# plt.subplot(335)
+	# logpplot(tz,pz,'tz','pz')
+	# plt.plot(tbound,pz[0],'o')
+	# # plt.semilogy(tz,pz,'o',c='g')
+	# # plt.semilogy(tavel,pavel,'o',c='b')
+	# plt.ylim(max(pz),min(pz))
+	# plt.subplot(336)
+	# logpplot(wbrodl,pavel,'wbrodl','pavel')
+	# plt.subplot(337)
+	# logpplot(wkl[1,:],pavel,'wkl1 (h2o)','pavel')
+	# plt.subplot(338)
+	# logpplot(wkl[2,:],pavel,'wkl2 (co2)','pavel')
+	# plt.subplot(339)
+	# logpplot(wkl[3,:],pavel,'wkl3 (o3)','pavel')
 
 def convection(T,z):
 	# print T[0]
@@ -369,7 +380,9 @@ isolvar=0 		#= 0 each band uses standard solar source function, corresponding to
 solvar=np.ones(29)
 if(master_input==3):
 	isolvar=2
-	solvar=np.ones(29)*551.58/1015.98791896
+	# solvar=np.ones(29)*551.58/1015.98791896
+	solvar=np.ones(29)*409.6/1015.98791896 # different interpretation of 'insolation'
+print solvar
 lapse=5.7
 if(master_input==3): # RCEMIP
 	lapse=6.7
@@ -1287,7 +1300,7 @@ elif(master_input==3): # RCEMIP
 		wkl[6,i]=1650e-9 # ch4
 		wkl[7,i]=0. # o2
 
-# wkl[2,:]*=2.0
+wkl[2,:]*=2.0
 
 ur_min=0.6
 ur_max=3.0
@@ -1304,7 +1317,7 @@ rel_hum=np.zeros(nlayers)
 maxhtr=0.
 
 params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
-params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
+params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,solvar]
 params2d=[wkl]
 
 toa_fnet=0
@@ -1476,7 +1489,7 @@ for ts in range(timesteps):
 
 
 	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
-	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
+	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,solvar]
 	params2d=[wkl]
 
 	# if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
@@ -1494,7 +1507,7 @@ for ts in range(timesteps):
 plotrrtmoutput()
 if(filewritten!=1):
 	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
-	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
+	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,solvar]
 	params2d=[wkl]
 	writeoutputfile()
 	
