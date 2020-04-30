@@ -246,7 +246,7 @@ def convection(T,z):
 	for i in range(1,len(T)):
 		dT = (T[i]-T[i-1])
 		dz = (z[i]-z[i-1])/1000.
-		if( -1.0 * dT/dz > lapse or z[i]/1000. < -1 ):
+		if( (-1.0 * dT/dz > lapse or z[i]/1000. < -1) and z[i]/1000. < 15. ):
 			conv[i]=1.
 			T[i] = T[i-1] - lapse * dz
 
@@ -1117,7 +1117,7 @@ if(master_input==1 or master_input==2):
 
 tbound=tz[0]
 
-# wkl[2,:]*=2.0
+
 
 if(master_input==0):
 	for i in range(len(pavel)):
@@ -1287,12 +1287,14 @@ elif(master_input==3): # RCEMIP
 		wkl[6,i]=1650e-9 # ch4
 		wkl[7,i]=0. # o2
 
+# wkl[2,:]*=2.0
+
 ur_min=0.6
 ur_max=3.0
 eqb_maxhtr=1e-4
 eqb_maxdfnet=1e-3
 toa_fnet_eqb=1.0e12
-timesteps=2
+timesteps=4000
 cti=0
 surf_rh=0.8
 vol_mixh2o_min = 1e-6
@@ -1355,7 +1357,8 @@ for ts in range(timesteps):
 				vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
 				wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
 
-	dtbound=(fnet_sw[0]-fnet_lw[0])*0.1
+	# dtbound=(fnet_sw[0]-fnet_lw[0])*0.1
+	dtbound=toa_fnet*0.1
 	dtbound=np.clip(dtbound,-dmax,dmax)
 	tbound+=dtbound
 
@@ -1394,7 +1397,10 @@ for ts in range(timesteps):
 	for i in range(nlayers):
 		dfnet[i]=fnet[i+1]-fnet[i]
 		dpz[i]=pz[i+1]-pz[i]
-	maxdfnet=max(abs(dfnet))
+	re_dfnets=np.where(conv[:-1]==0,dfnet,0.)
+	maxdfnet_ind=np.argmax(abs(re_dfnets))
+	maxdfnet=dfnet[maxdfnet_ind]
+	# maxdfnet=max(abs(dfnet))
 
 	prev_tz=tz*1.0
 	for i in range(nlayers):
@@ -1466,7 +1472,7 @@ for ts in range(timesteps):
 	# 	plotrrtmoutput()
 
 	if(ts%1==0):
-		print('{:4d} | {:32.28f} | {:3d} | {:3d} | {:12.8f} | {:8.4f} | {:8.4f} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f}'.format(ts,maxdfnet,maxhtr_ind,cti,maxdfnet,tbound,tz[0],-dmax,maxdtz,dmax,toa_fnet))
+		print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet,cti,tbound,tz[0]))
 
 
 	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
@@ -1474,7 +1480,7 @@ for ts in range(timesteps):
 	params2d=[wkl]
 
 	# if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
-	if(maxdfnet < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>1):
+	if(abs(maxdfnet) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>1):
 		plotrrtmoutput()
 		print('Equilibrium reached!')
 		writeoutputfile()
@@ -1504,4 +1510,4 @@ print(ttotal)
 
 print('Done')
 # plt.tight_layout()
-# show()
+show()

@@ -7,12 +7,15 @@ from os import listdir
 
 directories = [
 '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/mls rd mods/re/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/mls/re/',
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/rcemip/conv off z>15/',
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/rcemip/conv on z>15/',
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/mls rd mods/re/run 2/',
 ]
 
 def init_plotting():
 	plt.rcParams['figure.figsize'] = (10,10)
-	plt.rcParams['font.size'] = 20
+	plt.rcParams['font.size'] = 10
 	plt.rcParams['font.family'] = 'Times New Roman'
 	plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
 	plt.rcParams['axes.titlesize'] = 1.2*plt.rcParams['font.size']
@@ -58,38 +61,50 @@ def logpplot(x,p,xlab,ylab):
 
 def plotrrtmoutput():
 	plt.figure(1)
-	plt.subplot(331)
-	logpplot(totuflux,pz,'totuflux','pz')
-	logpplot(totuflux_lw,pz,'totuflux','pz')
-	logpplot(totuflux_sw,pz,'totuflux','pz')
-	plt.subplot(332)
-	logpplot(totdflux,pz,'totdflux','pz')
-	logpplot(totdflux_lw,pz,'totdflux','pz')
-	logpplot(totdflux_sw,pz,'totdflux','pz')
-	plt.subplot(333)
-	logpplot(dfnet,pz[:-1],'fnet','pz')
-	logpplot(fnet_lw,pz,'fnet','pz')
-	logpplot(fnet_sw,pz,'fnet','pz')
-	plt.subplot(334)
-	logpplot(htr[:],pz[:],'htr','pz')
-	logpplot(htr_lw[:-1],pz[:-1],'htr','pz')
-	logpplot(htr_sw[:-1],pz[:-1],'htr','pz')
-	plt.axvline(-eqb_maxhtr,ls='--')
-	plt.axvline(eqb_maxhtr,ls='--')
-	plt.subplot(335)
-	logpplot(tz,pz,'tz','pz')
+	plt.subplot(221)
+	plt.semilogy(tz,pz)
 	plt.plot(tbound,pz[0],'o')
-	# plt.semilogy(tz,pz,'o',c='g')
-	# plt.semilogy(tavel,pavel,'o',c='b')
 	plt.ylim(max(pz),min(pz))
-	plt.subplot(336)
-	logpplot(wbrodl,pavel,'wbrodl','pavel')
-	plt.subplot(337)
-	logpplot(wkl[1,:],pavel,'wkl1 (h2o)','pavel')
-	plt.subplot(338)
-	logpplot(wkl[2,:],pavel,'wkl2 (co2)','pavel')
-	plt.subplot(339)
-	logpplot(wkl[3,:],pavel,'wkl3 (o3)','pavel')
+	plt.xlabel('tz')
+	plt.ylabel('pz')
+	plt.subplot(222)
+	plt.semilogy(fnet,pz,c='b',label='total')
+	plt.semilogy(fnet_lw,pz,c='r',label='lw')
+	plt.semilogy(fnet_sw,pz,c='g',label='sw')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('fnet')
+	plt.ylabel('pz')
+	plt.legend()
+	plt.subplot(223)
+	plt.semilogy(totuflux,pz,c='b',label='total')
+	plt.semilogy(totuflux_lw,pz,c='r',label='lw')
+	plt.semilogy(totuflux_sw,pz,c='g',label='sw')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('totuflux')
+	plt.ylabel('pz')
+	plt.legend()
+	plt.subplot(224)
+	plt.semilogy(totdflux,pz,c='b',label='total')
+	plt.semilogy(totdflux_lw,pz,c='r',label='lw')
+	plt.semilogy(totdflux_sw,pz,c='g',label='sw')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('totdflux')
+	plt.ylabel('pz')
+	plt.legend()
+	# plt.subplot(335)
+	# logpplot(tz,pz,'tz','pz')
+	# plt.plot(tbound,pz[0],'o')
+	# # plt.semilogy(tz,pz,'o',c='g')
+	# # plt.semilogy(tavel,pavel,'o',c='b')
+	# plt.ylim(max(pz),min(pz))
+	# plt.subplot(336)
+	# logpplot(wbrodl,pavel,'wbrodl','pavel')
+	# plt.subplot(337)
+	# logpplot(wkl[1,:],pavel,'wkl1 (h2o)','pavel')
+	# plt.subplot(338)
+	# logpplot(wkl[2,:],pavel,'wkl2 (co2)','pavel')
+	# plt.subplot(339)
+	# logpplot(wkl[3,:],pavel,'wkl3 (o3)','pavel')
 
 def readrrtmoutput(fn):
 	f = open(fn)
@@ -322,14 +337,11 @@ for directory in directories:
 
 		plotrrtmoutput()
 
-		# re_htrs=np.zeros(nlayers)
-		# re_htrs = np.where(conv==0,htr,0.)
-		# maxhtr=max(abs(re_htrs))
-		# print maxhtr
+		# print tbound
 
 		#print output for easy spreadsheet transfer
 		# for i in range(nlayers):
-		# 	print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i],htr[i],htr_lw[i],htr_sw[i])
-		# print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],htr[i],htr_lw[i],htr_sw[i])
+		# 	print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i],htr[i],htr_lw[i],htr_sw[i],conv[i])
+		# print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],tbound)
 
 show()
