@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pylab import *
 from os import listdir
+import pandas as pd
+from pandas import ExcelWriter
+from pandas import ExcelFile
 
 directories = [
 '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
@@ -11,6 +14,8 @@ directories = [
 # '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/rcemip/conv off z>15/',
 # '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/rcemip/conv on z>15/',
 # '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/mls rd mods/re/run 2/',
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RD replication from my original inputs/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RD replication from my original inputs/v2/'
 ]
 
 def init_plotting():
@@ -63,14 +68,16 @@ def plotrrtmoutput():
 	plt.figure(1)
 	plt.subplot(221)
 	plt.semilogy(tz,pz)
-	plt.plot(tbound,pz[0],'o')
-	plt.ylim(max(pz),min(pz))
+	# plt.plot(tz,altz/1000.)
+	# plt.plot(tbound,pz[0],'o')
+	# plt.ylim(max(pz),min(pz))
 	plt.xlabel('tz')
 	plt.ylabel('pz')
 	plt.subplot(222)
-	plt.semilogy(fnet,pz,c='b',label='total')
-	plt.semilogy(fnet_lw,pz,c='r',label='lw')
-	plt.semilogy(fnet_sw,pz,c='g',label='sw')
+	# plt.semilogy(fnet,pz,c='b',label='total')
+	# plt.semilogy(fnet_lw,pz,c='r',label='lw')
+	# plt.semilogy(fnet_sw,pz,c='g',label='sw')
+	plt.semilogy(tavel,pavel)
 	plt.ylim(max(pz),min(pz))
 	plt.xlabel('fnet')
 	plt.ylabel('pz')
@@ -111,7 +118,7 @@ def readrrtmoutput(fn):
 
 
 
-nlayers=51
+nlayers=600
 nmol=7
 
 gravity=9.81
@@ -137,7 +144,7 @@ istrm=1 			# ISTRM   flag for number of streams used in DISORT  (ISCAT must be e
 idelm=1 			# flag for outputting downwelling fluxes computed using the delta-M scaling approximation. 0=output "true" direct and diffuse downwelling fluxes, 1=output direct and diffuse downwelling fluxes computed with delta-M approximation
 icos=0 				#0:there is no need to account for instrumental cosine response, 1:to account for instrumental cosine response in the computation of the direct and diffuse fluxes, 2:2 to account for instrumental cosine response in the computation of the diffuse fluxes only
 semis=np.ones(16)	#all spectral bands the same as iemissm
-semiss=np.ones(29)*0.7 	#all spectral bands the same as iemissm (surface, I think)
+semiss=np.ones(29) 	#all spectral bands the same as iemissm (surface, I think)
 iform=1
 psurf=1000.
 pmin=0.
@@ -204,7 +211,7 @@ vol_mixh2o_max = 1e6
 ur_min=0.5
 ur_max=1.0
 eqb_maxhtr = 0.001
-timesteps=1
+timesteps=10000
 cti=0
 maxhtr=0.
 
@@ -329,22 +336,33 @@ for directory in directories:
 				for j in range(shape(x)[1]):
 					x[i,j] = f.readline()
 
-		print solvar
 
 		dfnet=np.zeros(nlayers)
 
 		for i in range(nlayers):
 			dfnet[i]=fnet[i+1]-fnet[i]
 
-		print totdflux_sw[nlayers]
-
 		plotrrtmoutput()
 
-		print tbound
-
 		#print output for easy spreadsheet transfer
-		# for i in range(nlayers):
-		# 	print '{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i])
-		# print '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],tbound)
+		for i in range(nlayers):
+			print('{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i]))
+		print('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],tbound))
+
+df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RE') #read RD's data to plot against mine
+df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
+plt.figure(1)
+plt.subplot(221)
+plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
+plt.ylim(max(pz),min(pz))
+# plt.plot(df['Tz(K)'],df['Z(km)'])
+plt.subplot(222)
+plt.semilogy(df['Tlayer'],df['Player'],'--')
+plt.ylim(max(pz),min(pz))
+plt.subplot(223)
+plt.semilogy(df['LWup'],df['Pz(mb)'],'--')
+plt.semilogy(df['LWdn'],df['Pz(mb)'],'--')
+# plt.subplot(224)
+# plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
 
 show()

@@ -9,10 +9,14 @@ import matplotlib.pyplot as plt
 from pylab import *
 import datetime
 from random import randint
+import pandas as pd
+from pandas import ExcelWriter
+from pandas import ExcelFile
 
 tstart = datetime.datetime.now()
 
 project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+
 
 def init_plotting():
 	plt.rcParams['figure.figsize'] = (10,10)
@@ -156,7 +160,10 @@ def writeformattedinputfile_lw():
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
 	f.write('$ STANDARD MID-LATITUDE SUMMER ATMOSPHERE\n')
 	f.write('{:50d}{:20d}{:13d}{:2d}{:5d}{:5d}\n'.format(iatm,ixsect,iscat,numangs,iout,icld))
-	f.write('{:16.11f} {:1d}  {:1d}\n'.format(tbound,iemiss,ireflect)) #add semis read here?
+	f.write('{:16.11f} {:1d}  {:1d}'.format(tbound,iemiss,ireflect)) #add semis read here?
+	for i in semis:
+		f.write('{:5.3f}'.format(i))
+	f.write('\n')
 	f.write('{:2d}{:3d}{:5d}  1.000000MIDLATITUDE SUMM H1=    0.00 H2=   70.00 ANG=   0.000 LEN= 0\n'.format(iform,nlayers,nmol))
 	f.write('{:21.14f}{:25.13f}{:15d}{:18.13f}{:18.12f}{:17.12f}{:17.13f}{:18.12f}{:17.12f}\n'.format(pavel[0],tavel[0],ipthak,altz[0]/1000.,pz[0],tz[0],altz[1]/1000.,pz[1],tz[1]))
 	f.write('{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}\n'.format(wkl[1,0],wkl[2,0],wkl[3,0],wkl[4,0],wkl[5,0],wkl[6,0],wkl[7,0],wbrodl[0] ))
@@ -197,8 +204,8 @@ def readrrtmoutput_sw():
 		totuflux_sw[i] =  f.readline()
 	for i in range(0,nlayers+1):
 		totdflux_sw[i] =  f.readline()
-	for i in range(0,nlayers+1):
-		fnet_sw[i] =  f.readline()
+	# for i in range(0,nlayers+1):
+	# 	fnet_sw[i] =  f.readline()
 	for i in range(0,nlayers+1):
 		htr_sw[i] =  f.readline()
 
@@ -206,36 +213,36 @@ def readrrtmoutput_sw():
 
 def plotrrtmoutput():
 	plt.figure(1)
-	plt.subplot(221)
-	plt.semilogy(tz,pz)
-	plt.plot(tbound,pz[0],'o')
-	plt.ylim(max(pz),min(pz))
-	plt.xlabel('tz')
-	plt.ylabel('pz')
-	plt.subplot(222)
+	# plt.subplot(221)
+	# plt.semilogy(tz,pz)
+	# plt.plot(tbound,pz[0],'o')
+	# plt.ylim(max(pz),min(pz))
+	# plt.xlabel('tz')
+	# plt.ylabel('pz')
+	# plt.subplot(222)
 	plt.semilogy(fnet,pz,c='b',label='total')
 	plt.semilogy(fnet_lw,pz,c='r',label='lw')
 	plt.semilogy(fnet_sw,pz,c='g',label='sw')
 	plt.ylim(max(pz),min(pz))
 	plt.xlabel('fnet')
 	plt.ylabel('pz')
-	plt.legend()
-	plt.subplot(223)
-	plt.semilogy(totuflux,pz,c='b',label='total')
-	plt.semilogy(totuflux_lw,pz,c='r',label='lw')
-	plt.semilogy(totuflux_sw,pz,c='g',label='sw')
-	plt.ylim(max(pz),min(pz))
-	plt.xlabel('totuflux')
-	plt.ylabel('pz')
-	plt.legend()
-	plt.subplot(224)
-	plt.semilogy(totdflux,pz,c='b',label='total')
-	plt.semilogy(totdflux_lw,pz,c='r',label='lw')
-	plt.semilogy(totdflux_sw,pz,c='g',label='sw')
-	plt.ylim(max(pz),min(pz))
-	plt.xlabel('totdflux')
-	plt.ylabel('pz')
-	plt.legend()
+	# plt.legend()
+	# plt.subplot(223)
+	# plt.semilogy(totuflux,pz,c='b',label='total')
+	# plt.semilogy(totuflux_lw,pz,c='r',label='lw')
+	# plt.semilogy(totuflux_sw,pz,c='g',label='sw')
+	# plt.ylim(max(pz),min(pz))
+	# plt.xlabel('totuflux')
+	# plt.ylabel('pz')
+	# plt.legend()
+	# plt.subplot(224)
+	# plt.semilogy(totdflux,pz,c='b',label='total')
+	# plt.semilogy(totdflux_lw,pz,c='r',label='lw')
+	# plt.semilogy(totdflux_sw,pz,c='g',label='sw')
+	# plt.ylim(max(pz),min(pz))
+	# plt.xlabel('totdflux')
+	# plt.ylabel('pz')
+	# plt.legend()
 	# plt.subplot(335)
 	# logpplot(tz,pz,'tz','pz')
 	# plt.plot(tbound,pz[0],'o')
@@ -257,9 +264,11 @@ def convection(T,z):
 	for i in range(1,len(T)):
 		dT = (T[i]-T[i-1])
 		dz = (z[i]-z[i-1])/1000.
-		if( (-1.0 * dT/dz > lapse or z[i]/1000. < -1) and z[i]/1000. < 15. ):
+		if( (-1.0 * dT/dz > lapse or z[i]/1000. < 5.) and z[i]/1000. < 15. ):
 			conv[i]=1.
 			T[i] = T[i-1] - lapse * dz
+	# print(conv)
+	# print(z/1000.)
 
 def writeoutputfile():
 	tlabel = datetime.datetime.now()
@@ -280,20 +289,21 @@ def writeoutputfile():
 
 
 # master switches
-master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP
-conv_on=0 #0: no convection, 1: convective adjustment
+master_input=4 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2'
+conv_on=1 #0: no convection, 1: convective adjustment
 if(master_input==3):
 	conv_on=1
-lowlay_lowlev_coupled=1 #0: lowest level and lowest layer temperature independent, 1: lowest level and lowest layer temperatures coupled (equal)
-surf_lowlev_coupled=1 #0: surface and lowest level temperatures independent, 1: lowest level temperature = surface temperature
-if(conv_on==1):
-	surf_lowlev_coupled=1
+lowlay_lowlev_coupled=0 #0: lowest level and lowest layer temperature independent, 1: lowest level and lowest layer temperatures coupled (equal)
+surf_lowlev_coupled=0 #0: surface and lowest level temperatures independent, 1: lowest level temperature = surface temperature
+lay_intp=1 #0: linear interpolation to get tavel from tz, 1: isothermal layers
+# if(conv_on==1):
+# 	surf_lowlev_coupled=1
 
 # Declare variables
-nlayers=51
+nlayers=600
 nmol=7
 lw_on=1
-sw_on=1
+sw_on=0
 gravity=9.79764 # RCEMIP value
 avogadro=6.022e23
 iatm=0 #0 for layer values, 1 for level values
@@ -307,8 +317,24 @@ iout=0 #for broadband only
 # iout=29
 icld=0 #for clear sky
 # icld=1  #for grey clouds
-tbound=288.123456789123456789 #surface temperature (K)
-iemiss=1 #surface emissivity. Keep this fixed for now.
+
+
+ur_min=0.6
+ur_max=3.0
+eqb_maxhtr=1e-4
+eqb_maxdfnet=1e-3
+toa_fnet_eqb=1.0e12
+timesteps=10000
+cti=0
+surf_rh=0.8
+vol_mixh2o_min = 1e-6
+vol_mixh2o_max = 1e6
+esat_liq=np.zeros(nlayers)
+rel_hum=np.zeros(nlayers)
+maxhtr=0.
+
+tbound=283.422 #surface temperature (K)
+iemiss=2 #surface emissivity. Keep this fixed for now.
 iemis=2
 ireflect=0 #for Lambert reflection
 iaer=0 #0=aerosols off, 1=on
@@ -317,8 +343,8 @@ istrm=1 			# ISTRM   flag for number of streams used in DISORT  (ISCAT must be e
 						#1=8 streams
 idelm=1 			# flag for outputting downwelling fluxes computed using the delta-M scaling approximation. 0=output "true" direct and diffuse downwelling fluxes, 1=output direct and diffuse downwelling fluxes computed with delta-M approximation
 icos=0 				#0:there is no need to account for instrumental cosine response, 1:to account for instrumental cosine response in the computation of the direct and diffuse fluxes, 2:2 to account for instrumental cosine response in the computation of the diffuse fluxes only
-semis=np.ones(16)*1.	#all spectral bands the same as iemissm (maybe this is the surface??)
-semiss=np.ones(29)*1. 	#surface emissivity
+semis=np.ones(16)*1.0	#all spectral bands the same as iemissm (maybe this is the surface??)
+semiss=np.ones(29)
 if(master_input==1):
 	semiss[15:29] = np.array([
 	0.881,
@@ -359,7 +385,7 @@ iform=1
 psurf=1000.
 if(master_input==3):
 	psurf=1014.8
-pmin=0.
+pmin=1.
 # secntk=0
 # cinp=1.356316e-19
 secntk='' #based on not appearing in input mls sw
@@ -382,24 +408,24 @@ if(master_input==3):
 	isolvar=2
 	# solvar=np.ones(29)*551.58/1015.98791896
 	solvar=np.ones(29)*409.6/1015.98791896 # different interpretation of 'insolation'
-print solvar
 lapse=5.7
 if(master_input==3): # RCEMIP
 	lapse=6.7
-tmin=10.
-tmax=1000.
+tmin=120
+tmax=400.
 rsp=287.04 # RCEMIP value
 gravity=9.81
 filewritten=0
 sw_freq=100
+plotted=1
 
 totuflux=np.zeros(nlayers+1)
 totdflux=np.zeros(nlayers+1)
 fnet=np.zeros(nlayers+1)
 htr=np.zeros(nlayers+1)
 pavel=np.zeros(nlayers)
-tz=np.ones(nlayers+1) * tbound
 altz=np.zeros(nlayers+1)
+tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
 tavel=np.zeros(nlayers)
 esat_liq=np.zeros(nlayers)
 rel_hum=np.zeros(nlayers)
@@ -1128,9 +1154,34 @@ if(master_input==1 or master_input==2):
 	218.1	,
 		])
 
-tbound=tz[0]
+	tbound=tz[0]
 
+if(master_input==4):
+	df=pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
+	# tz=np.array(df['Tz(K)'])
+	# tz=tz[::-1]
+	# tavel=np.array(df['Tlayer'][:-1])
+	# tavel=tavel[::-1]
+	pz=np.array(df['Pz(mb)'])
+	pz=pz[::-1]
+	pavel=np.array(df['Player'][:-1])
+	pavel=pavel[::-1]
+	altz=np.array(df['Z(km)'])*1e3
+	altz=altz[::-1]
+	fnet_sw=np.array(df['SWnet'])
+	fnet_sw=fnet_sw[::-1]
+	wkl[1,:]=np.array(df['H2O'][:-1])
+	wkl[1,:]=wkl[1,:][::-1]
+	wkl[2,:]=np.array(df['CO2'][:-1])
+	wkl[2,:]=wkl[2,:][::-1]
+	wkl[3,:]=np.array(df['O3'][:-1])
+	wkl[3,:]=wkl[3,:][::-1]
+	wbrodl=np.array(df['dry'][:-1])
+	wbrodl=wbrodl[::-1]
 
+# tbound=tz[0]
+# tbound=tz[0]-0.3625
+# tbound=tz[0]+tboundadd
 
 if(master_input==0):
 	for i in range(len(pavel)):
@@ -1160,7 +1211,6 @@ elif(master_input==3): # RCEMIP hydrostatics
 	altz=np.linspace(0.,40.,nlayers+1)
 	altz*=1.e3
 	trop_ind = np.argmin(abs(altz-15000.))
-	print trop_ind
 	q=np.zeros(nlayers+1)
 	for i in range(nlayers+1):
 		if(altz[i]<zt):
@@ -1282,7 +1332,7 @@ if(master_input==0): # manual input
 		wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]*0.
 		wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
 		wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
-	wkl = np.clip(wkl,1.,1e63) #only if wkl is molec/cm, not mixing ratio!
+	# wkl = np.clip(wkl,1.,1e63) #only if wkl is molec/cm, not mixing ratio!
 elif(master_input==3): # RCEMIP
 	g1=3.6478
 	g2=0.83209
@@ -1300,21 +1350,9 @@ elif(master_input==3): # RCEMIP
 		wkl[6,i]=1650e-9 # ch4
 		wkl[7,i]=0. # o2
 
-wkl[2,:]*=2.0
+# wkl[2,:]*=2.0
 
-ur_min=0.6
-ur_max=3.0
-eqb_maxhtr=1e-4
-eqb_maxdfnet=1e-3
-toa_fnet_eqb=1.0e12
-timesteps=4000
-cti=0
-surf_rh=0.8
-vol_mixh2o_min = 1e-6
-vol_mixh2o_max = 1e6
-esat_liq=np.zeros(nlayers)
-rel_hum=np.zeros(nlayers)
-maxhtr=0.
+
 
 params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
 params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,solvar]
@@ -1326,7 +1364,7 @@ color=[]
 for i in range(nlayers+1):
     color.append('#%06X' % randint(0, 0xFFFFFF))
 
-dmax=10.0
+dmax=1.0
 
 for ts in range(timesteps):
 
@@ -1341,39 +1379,53 @@ for ts in range(timesteps):
 		
 		conv=np.zeros(nlayers+1) #reset to zero
 		conv[0]=1
-		if(lowlay_lowlev_coupled==1):
-			tavel[0]=tz[0]
-			conv[1]=1 #couple first layer to surface
-		if(conv_on==1):
-			convection(tavel,altavel)
-		for i in range(1,nlayers):
-			# tz[i] = (tavel[i-1] + tavel[i])/2.
-			tz[i] = tavel[i]*1.0
-		if(surf_lowlev_coupled):
-			tz[0]=tbound
-		tz[nlayers] = 2.*tavel[nlayers-1]-tz[nlayers-1]
+		# if(surf_lowlev_coupled==1):
+		# 	tz[0]=tbound
+		# if(lowlay_lowlev_coupled==1):
+		# 	tavel[0]=tz[0]
+		# 	conv[1]=1 #couple first layer to surface
+		# if(master_input==4):
+			# tz[0]=tavel[1]
+			# tz[1]=tz[0]
+		# if(conv_on==1):
+		# 	convection(tavel,altavel)
+		# for i in range(1,nlayers):
+		# 	if(lay_intp==0):
+		# 		tz[i] = (tavel[i-1] + tavel[i])/2.
+		# 	else:
+		# 		tz[i] = tavel[i]*1.0
+		# if(surf_lowlev_coupled==1):
+		# 	tz[0]=tbound
+		# if(lowlay_lowlev_coupled==1):
+		# 	tavel[0]=tz[0]
+		# 	conv[1]=1 #couple first layer to surface
+		# if(master_input==4):
+		# 	tz[1]=tz[0]
+		# tz[nlayers] = 2.*tavel[nlayers-1]-tz[nlayers-1]
 		tz=np.clip(tz,tmin,tmax)
 		tavel=np.clip(tavel,tmin,tmax)
-			# convection(tz,altz)
-		for i in range(1,nlayers):
-			if(conv[i]==0):
-				cti=i-1
-				break
+		# # if(conv_on==1):
+		# # 	convection(tz,altz)
+		# for i in range(1,nlayers):
+		# 	if(conv[i]==0):
+		# 		cti=i-1
+		# 		break
 
-		if(master_input==0):
-			for i in range(nlayers):
-				esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
-				rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
-				vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
-				if(i>1 and vol_mixh2o[i] > vol_mixh2o[i-1]):
-					vol_mixh2o[i]=vol_mixh2o[i-1]
-				vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
-				wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
+		# if(master_input==0):
+		# 	for i in range(nlayers):
+		# 		esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
+		# 		rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
+		# 		vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
+		# 		if(i>1 and vol_mixh2o[i] > vol_mixh2o[i-1]):
+		# 			vol_mixh2o[i]=vol_mixh2o[i-1]
+		# 		vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
+		# 		wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
 
 	# dtbound=(fnet_sw[0]-fnet_lw[0])*0.1
 	dtbound=toa_fnet*0.1
 	dtbound=np.clip(dtbound,-dmax,dmax)
 	tbound+=dtbound
+	tz[0]=tbound
 
 	if(lw_on==1):
 		writeformattedinputfile_lw()
@@ -1399,7 +1451,8 @@ for ts in range(timesteps):
 	htr=htr_lw+htr_sw
 
 
-	toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
+	# toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
+	toa_fnet=256.731-totuflux[nlayers]+0.0077 # NJE fix later
 
 	prev_maxhtr=maxhtr*1.0
 	re_htrs = np.where(conv==0,htr,0.)
@@ -1410,28 +1463,56 @@ for ts in range(timesteps):
 	for i in range(nlayers):
 		dfnet[i]=fnet[i+1]-fnet[i]
 		dpz[i]=pz[i+1]-pz[i]
-	re_dfnets=np.where(conv[:-1]==0,dfnet,0.)
-	maxdfnet_ind=np.argmax(abs(re_dfnets))
-	maxdfnet=dfnet[maxdfnet_ind]
 	# maxdfnet=max(abs(dfnet))
 
 	prev_tz=tz*1.0
 	for i in range(nlayers):
-		dT=dfnet[i]/dpz[i]*-1.*3.0
+		dT=dfnet[i]/dpz[i]*-1.
 		# dT = htr[i]/3. #undrelax
 		dT=np.clip(dT,-dmax,dmax)
 		tavel[i]+=dT
 
 	for i in range(1,nlayers):
-		# tz[i] = (tavel[i-1] + tavel[i])/2.
-		tz[i] = tavel[i-1]*1.0
-	# print tz
-	if(surf_lowlev_coupled):
-		tz[0]=tbound
-	if(lowlay_lowlev_coupled==1):
-		tz[0]=tavel[0]
-	# tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+		if(lay_intp==0):
+			tz[i] = (tavel[i-1] + tavel[i])/2.
+		else:
+			tz[i] = tavel[i-1]*1.0
+
 	tz[nlayers]=tavel[nlayers-1]
+	# tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+
+	# altz[0] = 0.0
+	# for i in range(1,nlayers):
+	# 	altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+	# altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
+
+	conv=np.zeros(nlayers+1) #reset to zero
+	conv[0]=1
+
+	if(conv_on==1):
+		convection(tavel,altavel)
+		convection(tz,altz)
+		
+	re_dfnets=np.where(conv[:-1]==0,dfnet,0.)
+	# print(re_dfnets)
+	maxdfnet_ind=np.argmax(abs(re_dfnets))
+	maxdfnet=dfnet[maxdfnet_ind]
+
+	# if(surf_lowlev_coupled==1):
+	# 	tz[0]=tbound
+	# if(lowlay_lowlev_coupled==1):
+	# 	tz[0]=tavel[0]
+
+	# if(surf_lowlev_coupled==1):
+	# 	tz[0]=tbound
+	# if(lowlay_lowlev_coupled==1):
+	# 	tavel[0]=tz[0]
+	# 	conv[1]=1 #couple first layer to surface
+	# if(master_input==4):
+	# 	tz[1]=tz[0]
+
+	
+	# tz[nlayers]=tavel[nlayers-1]
 
 	
 	# if(maxhtr<eqb_maxhtr):
@@ -1484,7 +1565,7 @@ for ts in range(timesteps):
 	# # if(ts>950):
 	# 	plotrrtmoutput()
 
-	if(ts%1==0):
+	if(ts%10==0):
 		print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet,cti,tbound,tz[0]))
 
 
@@ -1494,7 +1575,8 @@ for ts in range(timesteps):
 
 	# if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
 	if(abs(maxdfnet) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>1):
-		plotrrtmoutput()
+		# plotrrtmoutput()
+		plotted=1
 		print('Equilibrium reached!')
 		writeoutputfile()
 		filewritten=1
@@ -1504,18 +1586,32 @@ for ts in range(timesteps):
 		writeoutputfile()
 		filewritten=1
 	
-plotrrtmoutput()
+if(plotted==0):
+	plotrrtmoutput()
 if(filewritten!=1):
 	params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
 	params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,solvar]
 	params2d=[wkl]
 	writeoutputfile()
 	
+df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
+plt.figure(1)
+# plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
+# plt.semilogy(tz,pz)
+plt.plot(df['Tz(K)'],df['Z(km)'],'--')
+plt.plot(tz,altz/1000.)
+plt.plot(tbound,0,'o')
+# plt.ylim(max(pavel),min(pavel))
+
 # plt.figure(1)
-# plt.subplot(122)
-# for i in range(nlayers):
-# 	plt.semilogy(tz[i],pz[i],'o',c=color[i])
-# 	plt.ylim(max(pz),min(pz))
+# plt.semilogy(dfnet,pavel)
+# plt.plot(df['RB(W/m2)'],df['Player'],'--')
+# # plt.semilogy(totuflux_lw,pz)
+# # plt.plot(df['LWup'],df['Pz(mb)'],'--')
+# plt.ylim(max(pavel),min(pavel))
+
+
+########################################################################################
 
 tend = datetime.datetime.now()
 ttotal = tend-tstart
