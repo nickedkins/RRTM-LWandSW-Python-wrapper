@@ -213,36 +213,36 @@ def readrrtmoutput_sw():
 
 def plotrrtmoutput():
 	plt.figure(1)
-	# plt.subplot(221)
-	# plt.semilogy(tz,pz)
-	# plt.plot(tbound,pz[0],'o')
-	# plt.ylim(max(pz),min(pz))
-	# plt.xlabel('tz')
-	# plt.ylabel('pz')
-	# plt.subplot(222)
+	plt.subplot(221)
+	plt.semilogy(tz,pz)
+	plt.plot(tbound,pz[0],'o')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('tz')
+	plt.ylabel('pz')
+	plt.subplot(222)
 	plt.semilogy(fnet,pz,c='b',label='total')
 	plt.semilogy(fnet_lw,pz,c='r',label='lw')
 	plt.semilogy(fnet_sw,pz,c='g',label='sw')
 	plt.ylim(max(pz),min(pz))
 	plt.xlabel('fnet')
 	plt.ylabel('pz')
-	# plt.legend()
-	# plt.subplot(223)
-	# plt.semilogy(totuflux,pz,c='b',label='total')
-	# plt.semilogy(totuflux_lw,pz,c='r',label='lw')
-	# plt.semilogy(totuflux_sw,pz,c='g',label='sw')
-	# plt.ylim(max(pz),min(pz))
-	# plt.xlabel('totuflux')
-	# plt.ylabel('pz')
-	# plt.legend()
-	# plt.subplot(224)
-	# plt.semilogy(totdflux,pz,c='b',label='total')
-	# plt.semilogy(totdflux_lw,pz,c='r',label='lw')
-	# plt.semilogy(totdflux_sw,pz,c='g',label='sw')
-	# plt.ylim(max(pz),min(pz))
-	# plt.xlabel('totdflux')
-	# plt.ylabel('pz')
-	# plt.legend()
+	plt.legend()
+	plt.subplot(223)
+	plt.semilogy(totuflux,pz,c='b',label='total')
+	plt.semilogy(totuflux_lw,pz,c='r',label='lw')
+	plt.semilogy(totuflux_sw,pz,c='g',label='sw')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('totuflux')
+	plt.ylabel('pz')
+	plt.legend()
+	plt.subplot(224)
+	plt.semilogy(totdflux,pz,c='b',label='total')
+	plt.semilogy(totdflux_lw,pz,c='r',label='lw')
+	plt.semilogy(totdflux_sw,pz,c='g',label='sw')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('totdflux')
+	plt.ylabel('pz')
+	plt.legend()
 	# plt.subplot(335)
 	# logpplot(tz,pz,'tz','pz')
 	# plt.plot(tbound,pz[0],'o')
@@ -293,11 +293,10 @@ master_input=4 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 
 conv_on=1 #0: no convection, 1: convective adjustment
 if(master_input==3):
 	conv_on=1
-lowlay_lowlev_coupled=0 #0: lowest level and lowest layer temperature independent, 1: lowest level and lowest layer temperatures coupled (equal)
 surf_lowlev_coupled=0 #0: surface and lowest level temperatures independent, 1: lowest level temperature = surface temperature
 lay_intp=1 #0: linear interpolation to get tavel from tz, 1: isothermal layers
-# if(conv_on==1):
-# 	surf_lowlev_coupled=1
+if(conv_on==1):
+	surf_lowlev_coupled=1
 
 # Declare variables
 nlayers=600
@@ -324,7 +323,7 @@ ur_max=3.0
 eqb_maxhtr=1e-4
 eqb_maxdfnet=1e-3
 toa_fnet_eqb=1.0e12
-timesteps=10000
+timesteps=10
 cti=0
 surf_rh=0.8
 vol_mixh2o_min = 1e-6
@@ -1379,37 +1378,6 @@ for ts in range(timesteps):
 		
 		conv=np.zeros(nlayers+1) #reset to zero
 		conv[0]=1
-		# if(surf_lowlev_coupled==1):
-		# 	tz[0]=tbound
-		# if(lowlay_lowlev_coupled==1):
-		# 	tavel[0]=tz[0]
-		# 	conv[1]=1 #couple first layer to surface
-		# if(master_input==4):
-			# tz[0]=tavel[1]
-			# tz[1]=tz[0]
-		# if(conv_on==1):
-		# 	convection(tavel,altavel)
-		# for i in range(1,nlayers):
-		# 	if(lay_intp==0):
-		# 		tz[i] = (tavel[i-1] + tavel[i])/2.
-		# 	else:
-		# 		tz[i] = tavel[i]*1.0
-		# if(surf_lowlev_coupled==1):
-		# 	tz[0]=tbound
-		# if(lowlay_lowlev_coupled==1):
-		# 	tavel[0]=tz[0]
-		# 	conv[1]=1 #couple first layer to surface
-		# if(master_input==4):
-		# 	tz[1]=tz[0]
-		# tz[nlayers] = 2.*tavel[nlayers-1]-tz[nlayers-1]
-		tz=np.clip(tz,tmin,tmax)
-		tavel=np.clip(tavel,tmin,tmax)
-		# # if(conv_on==1):
-		# # 	convection(tz,altz)
-		# for i in range(1,nlayers):
-		# 	if(conv[i]==0):
-		# 		cti=i-1
-		# 		break
 
 		# if(master_input==0):
 		# 	for i in range(nlayers):
@@ -1425,7 +1393,7 @@ for ts in range(timesteps):
 	dtbound=toa_fnet*0.1
 	dtbound=np.clip(dtbound,-dmax,dmax)
 	tbound+=dtbound
-	tz[0]=tbound
+	# tz[0]=tbound
 
 	if(lw_on==1):
 		writeformattedinputfile_lw()
@@ -1478,41 +1446,29 @@ for ts in range(timesteps):
 		else:
 			tz[i] = tavel[i-1]*1.0
 
-	tz[nlayers]=tavel[nlayers-1]
-	# tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
-
-	# altz[0] = 0.0
-	# for i in range(1,nlayers):
-	# 	altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
-	# altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
+	if(lay_intp==0):
+		tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+	else:
+		tz[nlayers]=tavel[nlayers-1]
+	
+	altz[0] = 0.0
+	for i in range(1,nlayers):
+		altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+	altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
 
 	conv=np.zeros(nlayers+1) #reset to zero
 	conv[0]=1
+
+	if(surf_lowlev_coupled==1):
+		tz[0]=tbound
 
 	if(conv_on==1):
 		convection(tavel,altavel)
 		convection(tz,altz)
 		
 	re_dfnets=np.where(conv[:-1]==0,dfnet,0.)
-	# print(re_dfnets)
 	maxdfnet_ind=np.argmax(abs(re_dfnets))
 	maxdfnet=dfnet[maxdfnet_ind]
-
-	# if(surf_lowlev_coupled==1):
-	# 	tz[0]=tbound
-	# if(lowlay_lowlev_coupled==1):
-	# 	tz[0]=tavel[0]
-
-	# if(surf_lowlev_coupled==1):
-	# 	tz[0]=tbound
-	# if(lowlay_lowlev_coupled==1):
-	# 	tavel[0]=tz[0]
-	# 	conv[1]=1 #couple first layer to surface
-	# if(master_input==4):
-	# 	tz[1]=tz[0]
-
-	
-	# tz[nlayers]=tavel[nlayers-1]
 
 	
 	# if(maxhtr<eqb_maxhtr):
@@ -1534,36 +1490,9 @@ for ts in range(timesteps):
 	# if(-0.0000000001<dmax<0.):
 	# 	dmax=-0.0000000001
 
-	# print prev_tz
-	# print tz
 	dtz = tz-prev_tz
 	maxdtz=dtz[np.argmax(abs(dtz))]
 
-	# if(ts%int((50.*(timesteps/2000.)))==0):
-	# 	plt.figure(1)
-	# 	# plt.subplot(221)
-	# 	# plt.title('maxhtr')
-	# 	# plt.plot(ts,maxhtr,'o')
-	# 	# plt.subplot(222)
-	# 	# plt.title('many htrs')
-	# 	# i_c=0
-	# 	# for i in range(nlayers):		
-	# 	# 	plt.plot(ts,htr[i],'o',color=color[i_c])
-	# 	# 	i_c+=1
-	# 	# plt.subplot(223)
-	# 	plt.subplot(121)
-	# 	plt.plot(maxhtr,maxdtz,'o',c=color[np.argmax(abs(dtz))])
-	# 	plt.xlabel('max htr')
-	# 	plt.ylabel('max dtz')
-	# 	# plt.subplot(224)
-	# 	# plt.plot(ts,-dmax,'*',c='black',alpha=0.5)
-	# 	# plt.plot(ts,dmax,'*',c='black',alpha=0.5)	
-	# 	# plt.plot(ts,maxdtz,'o',c=color[np.argmax(abs(dtz))],alpha=0.5)
-	# 	# plt.axhline(0.)
-
-	# if(ts%50==0):
-	# # if(ts>950):
-	# 	plotrrtmoutput()
 
 	if(ts%10==0):
 		print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet,cti,tbound,tz[0]))
@@ -1575,7 +1504,7 @@ for ts in range(timesteps):
 
 	# if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
 	if(abs(maxdfnet) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>1):
-		# plotrrtmoutput()
+		plotrrtmoutput()
 		plotted=1
 		print('Equilibrium reached!')
 		writeoutputfile()
@@ -1583,6 +1512,8 @@ for ts in range(timesteps):
 		break
 	elif(ts==timesteps-1):
 		print('Max timesteps')
+		plotrrtmoutput()
+		plotted=1
 		writeoutputfile()
 		filewritten=1
 	
@@ -1594,21 +1525,6 @@ if(filewritten!=1):
 	params2d=[wkl]
 	writeoutputfile()
 	
-df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
-plt.figure(1)
-# plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
-# plt.semilogy(tz,pz)
-plt.plot(df['Tz(K)'],df['Z(km)'],'--')
-plt.plot(tz,altz/1000.)
-plt.plot(tbound,0,'o')
-# plt.ylim(max(pavel),min(pavel))
-
-# plt.figure(1)
-# plt.semilogy(dfnet,pavel)
-# plt.plot(df['RB(W/m2)'],df['Player'],'--')
-# # plt.semilogy(totuflux_lw,pz)
-# # plt.plot(df['LWup'],df['Pz(mb)'],'--')
-# plt.ylim(max(pavel),min(pavel))
 
 
 ########################################################################################
