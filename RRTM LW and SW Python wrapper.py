@@ -173,6 +173,16 @@ def writeformattedinputfile_lw():
 	f.write('%%%%%\n')
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
 
+def writeformattedcloudfile():
+	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/IN_CLD_RRTM NJE','w+')
+	f.write('   {:2d}    {:1d}    {:1d}\n'.format(inflag,iceflag,liqflag))
+	f.write('{} {:3d}{:10.5f}{:10.5f}{:10.5f}{:10.5f}{:10.5f}\n'.format(ctest,lay,frac,taucld,ssacld,radice,radliq))
+	# 9100 FORMAT (A1,1X,I3,1E10.5,19E10.5)
+	f.write('%\n')
+	f.write('123456789-123456789-123456789-123456789-123456789-123456789-\n')
+	f.write('\n')
+	f.write('\n')
+
 def callrrtmlw():
 	loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw'
 	os.chdir(project_dir+'/LW')
@@ -204,8 +214,8 @@ def readrrtmoutput_sw():
 		totuflux_sw[i] =  f.readline()
 	for i in range(0,nlayers+1):
 		totdflux_sw[i] =  f.readline()
-	# for i in range(0,nlayers+1):
-	# 	fnet_sw[i] =  f.readline()
+	for i in range(0,nlayers+1):
+		fnet_sw[i] =  f.readline()
 	for i in range(0,nlayers+1):
 		htr_sw[i] =  f.readline()
 
@@ -289,7 +299,7 @@ def writeoutputfile():
 
 
 # master switches
-master_input=4 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2'
+master_input=0 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2'
 conv_on=1 #0: no convection, 1: convective adjustment
 if(master_input==3):
 	conv_on=1
@@ -299,10 +309,10 @@ if(conv_on==1):
 	surf_lowlev_coupled=1
 
 # Declare variables
-nlayers=600
+nlayers=100
 nmol=7
 lw_on=1
-sw_on=0
+sw_on=1
 gravity=9.79764 # RCEMIP value
 avogadro=6.022e23
 iatm=0 #0 for layer values, 1 for level values
@@ -314,16 +324,27 @@ numangs=3 #can be 0-4 for higher precision 3 for SW, 0 for LW
 iout=0 #for broadband only
 # iout=-1 #for broadband, no printings
 # iout=29
-icld=0 #for clear sky
-# icld=1  #for grey clouds
+# icld=0 #for clear sky
+icld=1  #for grey clouds
 
+#cloudflags
+inflag=2
+iceflag=2
+liqflag=1
+lay=80
+frac=1.
+ctest=' '
+taucld=1.0
+ssacld=0.123*2.0
+radice=90.
+radliq=7.
 
 ur_min=0.6
 ur_max=3.0
 eqb_maxhtr=1e-4
 eqb_maxdfnet=1e-3
 toa_fnet_eqb=1.0e12
-timesteps=10
+timesteps=2
 cti=0
 surf_rh=0.8
 vol_mixh2o_min = 1e-6
@@ -1395,6 +1416,8 @@ for ts in range(timesteps):
 	tbound+=dtbound
 	# tz[0]=tbound
 
+	writeformattedcloudfile()
+
 	if(lw_on==1):
 		writeformattedinputfile_lw()
 		callrrtmlw()
@@ -1494,7 +1517,7 @@ for ts in range(timesteps):
 	maxdtz=dtz[np.argmax(abs(dtz))]
 
 
-	if(ts%10==0):
+	if(ts%1==0):
 		print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet,cti,tbound,tz[0]))
 
 

@@ -630,6 +630,8 @@ C               cloud properties.
 C       OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RR
 C      &TM-LWandSW-Python-wrapper/LW/run_examples/in_cld_rrtm_MLS-cld1',FO
 C      &RM='FORMATTED')
+      OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RR
+     &TM-LWandSW-Python-wrapper/IN_CLD_RRTM NJE',FORM='FORMATTED')
       
 
 C     Read in cloud input option.  
