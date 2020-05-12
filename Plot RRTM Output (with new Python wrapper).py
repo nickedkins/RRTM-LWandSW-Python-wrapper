@@ -4,18 +4,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pylab import *
 from os import listdir
-import pandas as pd
-from pandas import ExcelWriter
-from pandas import ExcelFile
+# import pandas as pd
+# from pandas import ExcelWriter
+# from pandas import ExcelFile
 
 directories = [
 '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/mls/re/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/rcemip/conv off z>15/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/rcemip/conv on z>15/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/mls rd mods/re/run 2/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RD replication from my original inputs/'
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RD replication from my original inputs/v2/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/p_cld/taucld=1, ssacld=0.5/'
 ]
 
 def init_plotting():
@@ -69,15 +64,14 @@ def plotrrtmoutput():
 	plt.subplot(221)
 	plt.semilogy(tz,pz)
 	# plt.plot(tz,altz/1000.)
-	# plt.plot(tbound,pz[0],'o')
-	# plt.ylim(max(pz),min(pz))
+	plt.plot(tbound,pz[0],'o')
+	plt.ylim(max(pz),min(pz))
 	plt.xlabel('tz')
 	plt.ylabel('pz')
 	plt.subplot(222)
-	# plt.semilogy(fnet,pz,c='b',label='total')
-	# plt.semilogy(fnet_lw,pz,c='r',label='lw')
-	# plt.semilogy(fnet_sw,pz,c='g',label='sw')
-	plt.semilogy(tavel,pavel)
+	plt.semilogy(fnet,pz,c='b',label='total')
+	plt.semilogy(fnet_lw,pz,c='r',label='lw')
+	plt.semilogy(fnet_sw,pz,c='g',label='sw')
 	plt.ylim(max(pz),min(pz))
 	plt.xlabel('fnet')
 	plt.ylabel('pz')
@@ -117,9 +111,20 @@ def readrrtmoutput(fn):
 	f = open(fn)
 
 
+ndirs=len(directories)
+a = sorted(listdir(directories[0]))
+if('.DS_Store' in a):
+	a.remove('.DS_Store')
+nfiles=len(a)
 
-nlayers=600
+nlayers=60
 nmol=7
+
+totuflux_lw_master=np.zeros((nlayers+1,nfiles,ndirs))
+totuflux_sw_master=np.zeros((nlayers+1,nfiles,ndirs))
+pz_master=np.zeros((nlayers+1,nfiles,ndirs))
+cld_lay_master=np.zeros((1,nfiles,ndirs))
+
 
 gravity=9.81
 avogadro=6.022e23
@@ -214,41 +219,41 @@ eqb_maxhtr = 0.001
 timesteps=10000
 cti=0
 maxhtr=0.
+cld_lay=0.
 
-pz=np.linspace(psurf,pmin,nlayers+1)
-totuflux=np.zeros(nlayers+1)
-totdflux=np.zeros(nlayers+1)
-fnet=np.zeros(nlayers+1)
-htr=np.zeros(nlayers+1)
-pavel=np.zeros(nlayers)
-tz=np.ones(nlayers+1) * tbound
-altz=np.zeros(nlayers+1)
-tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
-tavel=np.zeros(nlayers)
-esat_liq=np.zeros(nlayers)
-rel_hum=np.zeros(nlayers)
-mperlayr = np.zeros(nlayers)
-mperlayr_air = np.zeros(nlayers)
-wbrodl = np.zeros(nlayers)
-wkl = np.zeros((nmol+1,nlayers))
-totuflux_lw=np.zeros(nlayers+1)
-totdflux_lw=np.zeros(nlayers+1)
-fnet_lw=np.zeros(nlayers+1)
-htr_lw=np.zeros(nlayers+1)
-totuflux_sw=np.zeros(nlayers+1)
-totdflux_sw=np.zeros(nlayers+1)
-fnet_sw=np.zeros(nlayers+1)
-htr_sw=np.zeros(nlayers+1)
-conv=np.zeros(nlayers+1)
-altavel = np.zeros(nlayers)
-vol_mixh2o = np.ones(nlayers) * molec_h2o / totmolec
-vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
-solvar=np.zeros(29)
+# pz=np.linspace(psurf,pmin,nlayers+1)
+# totuflux=np.zeros(nlayers+1)
+# totdflux=np.zeros(nlayers+1)
+# fnet=np.zeros(nlayers+1)
+# htr=np.zeros(nlayers+1)
+# pavel=np.zeros(nlayers)
+# tz=np.ones(nlayers+1) * tbound
+# altz=np.zeros(nlayers+1)
+# tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
+# tavel=np.zeros(nlayers)
+# esat_liq=np.zeros(nlayers)
+# rel_hum=np.zeros(nlayers)
+# mperlayr = np.zeros(nlayers)
+# mperlayr_air = np.zeros(nlayers)
+# wbrodl = np.zeros(nlayers)
+# wkl = np.zeros((nmol+1,nlayers))
+# totuflux_lw=np.zeros(nlayers+1)
+# totdflux_lw=np.zeros(nlayers+1)
+# fnet_lw=np.zeros(nlayers+1)
+# htr_lw=np.zeros(nlayers+1)
+# totuflux_sw=np.zeros(nlayers+1)
+# totdflux_sw=np.zeros(nlayers+1)
+# fnet_sw=np.zeros(nlayers+1)
+# htr_sw=np.zeros(nlayers+1)
+# conv=np.zeros(nlayers+1)
+# altavel = np.zeros(nlayers)
+# vol_mixh2o = np.ones(nlayers) * molec_h2o / totmolec
+# vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
+# solvar=np.zeros(29)
 
-params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
-params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,solvar]
-params2d=[wkl]
+vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
 
+i_dir=0
 for directory in directories:
 
 	filenames = []
@@ -259,6 +264,7 @@ for directory in directories:
 	if('.DS_Store' in a):
 		a.remove('.DS_Store')
 
+	i_file=0
 	for fn in a:
 		print(fn)
 		output_file = directory + fn
@@ -323,45 +329,106 @@ for directory in directories:
 		timesteps	=	int	(	f.readline().rstrip('\n')	)
 		cti	=	int	(	f.readline().rstrip('\n')	)
 		maxhtr	=	float	(	f.readline().rstrip('\n')	)
+		cld_lay	=	float	(	f.readline().rstrip('\n')	)
+
+		pz=np.linspace(psurf,pmin,nlayers+1)
+		totuflux=np.zeros(nlayers+1)
+		totdflux=np.zeros(nlayers+1)
+		fnet=np.zeros(nlayers+1)
+		htr=np.zeros(nlayers+1)
+		pavel=np.zeros(nlayers)
+		tz=np.ones(nlayers+1) * tbound
+		altz=np.zeros(nlayers+1)
+		tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
+		tavel=np.zeros(nlayers)
+		esat_liq=np.zeros(nlayers)
+		rel_hum=np.zeros(nlayers)
+		mperlayr = np.zeros(nlayers)
+		mperlayr_air = np.zeros(nlayers)
+		wbrodl = np.zeros(nlayers)
+		wkl = np.zeros((nmol+1,nlayers))
+		totuflux_lw=np.zeros(nlayers+1)
+		totdflux_lw=np.zeros(nlayers+1)
+		fnet_lw=np.zeros(nlayers+1)
+		htr_lw=np.zeros(nlayers+1)
+		totuflux_sw=np.zeros(nlayers+1)
+		totdflux_sw=np.zeros(nlayers+1)
+		fnet_sw=np.zeros(nlayers+1)
+		htr_sw=np.zeros(nlayers+1)
+		conv=np.zeros(nlayers+1)
+		altavel = np.zeros(nlayers)
+		vol_mixh2o = np.ones(nlayers) * molec_h2o / totmolec
+		vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
+		solvar=np.zeros(29)
+
+		vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
+		vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
+		vars_lev=[totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,tz,altz]
+		vars_misc_1d=[semis,semiss,solvar]
+		vars_misc_1d_lens=[16,29,29]
+		vars_lay_nmol=[wkl]
 
 
-
-		for x in params1d:
-			for i in range(shape(x)[0]):
+		for x in vars_lay:
+			for i in range(nlayers):
 				x[i] = f.readline()
 
+		for x in vars_lev:
+			for i in range(nlayers+1):
+				x[i] = f.readline()
 
-		for x in params2d:
+		i_lens=0
+		for x in vars_misc_1d:
+			for i in range(vars_misc_1d_lens[i_lens]):
+				x[i] = f.readline()
+			i_lens+=1
+
+
+		for x in vars_lay_nmol:
 			for i in range(shape(x)[0]):
 				for j in range(shape(x)[1]):
 					x[i,j] = f.readline()
-
 
 		dfnet=np.zeros(nlayers)
 
 		for i in range(nlayers):
 			dfnet[i]=fnet[i+1]-fnet[i]
 
-		plotrrtmoutput()
+		# plotrrtmoutput()
 
 		#print output for easy spreadsheet transfer
-		for i in range(nlayers):
-			print('{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i]))
-		print('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],tbound))
+		# for i in range(nlayers):
+		# 	print('{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i]))
+		# print('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],tbound))
 
-df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RE') #read RD's data to plot against mine
-df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
+		totuflux_lw_master[:,i_file,i_dir]=totuflux_lw
+		totuflux_sw_master[:,i_file,i_dir]=totuflux_sw
+		pz_master[:,i_file,i_dir]=pz
+		cld_lay_master[:,i_file,i_dir]=cld_lay
+
+		i_file+=1
+	i_dir+=1	
+
+cld_lay_master=cld_lay_master.astype('int')
+
 plt.figure(1)
-plt.subplot(221)
-plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
-plt.ylim(max(pz),min(pz))
+plt.plot(pz_master[cld_lay_master[0,:,0],:,0][:,0],totuflux_lw_master[nlayers,:,:][:,0]-totuflux_lw_master[nlayers,:,:][:,0][0],'-o',c='r')
+plt.plot(pz_master[cld_lay_master[0,:,0],:,0][:,0],-1.0*(totuflux_sw_master[nlayers,:,:][:,0]-totuflux_sw_master[nlayers,:,:][:,0][0]),'-o',c='b')
+
+# df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RE') #read RD's data to plot against mine
+# df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
+# plt.figure(1)
+# plt.subplot(221)
+# plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
+# plt.semilogy(tz,pz)
+# plt.ylim(max(pz),min(pz))
 # plt.plot(df['Tz(K)'],df['Z(km)'])
-plt.subplot(222)
-plt.semilogy(df['Tlayer'],df['Player'],'--')
-plt.ylim(max(pz),min(pz))
-plt.subplot(223)
-plt.semilogy(df['LWup'],df['Pz(mb)'],'--')
-plt.semilogy(df['LWdn'],df['Pz(mb)'],'--')
+# plt.subplot(222)
+# plt.semilogy(df['Tlayer'],df['Player'],'--')
+# plt.ylim(max(pz),min(pz))
+# plt.subplot(223)
+# plt.semilogy(df['LWup'],df['Pz(mb)'],'--')
+# plt.semilogy(df['LWdn'],df['Pz(mb)'],'--')
 # plt.subplot(224)
 # plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
 
