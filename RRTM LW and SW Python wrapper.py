@@ -270,7 +270,6 @@ def plotrrtmoutput():
 	# logpplot(wkl[3,:],pavel,'wkl3 (o3)','pavel')
 
 def convection(T,z):
-	# print T[0]
 	T[0]=tbound
 	for i in range(1,len(T)):
 		dT = (T[i]-T[i-1])
@@ -278,8 +277,6 @@ def convection(T,z):
 		if( (-1.0 * dT/dz > lapse or z[i]/1000. < -1. or i < cld_lay*0.-1) and z[i]/1000. < 15. ):
 			conv[i]=1.
 			T[i] = T[i-1] - lapse * dz
-	# print(conv)
-	# print(z/1000.)
 
 def writeoutputfile():
 	tlabel = datetime.datetime.now()
@@ -309,6 +306,34 @@ def writeoutputfile():
 				f.write('\n')
 
 
+nlayers=60
+ncloudcols=1
+nmol=7
+
+tz_master=np.zeros((nlayers+1,ncloudcols))
+tavel_master=np.zeros((nlayers,ncloudcols))
+pz_master=np.zeros((nlayers+1,ncloudcols))
+pavel_master=np.zeros((nlayers,ncloudcols))
+altz_master=np.zeros((nlayers+1,ncloudcols))
+
+totuflux_master=np.zeros((nlayers+1,ncloudcols))
+totuflux_lw_master=np.zeros((nlayers+1,ncloudcols))
+totuflux_sw_master=np.zeros((nlayers+1,ncloudcols))
+totdflux_master=np.zeros((nlayers+1,ncloudcols))
+totdflux_lw_master=np.zeros((nlayers+1,ncloudcols))
+totdflux_sw_master=np.zeros((nlayers+1,ncloudcols))
+fnet_master=np.zeros((nlayers+1,ncloudcols))
+fnet_lw_master=np.zeros((nlayers+1,ncloudcols))
+fnet_sw_master=np.zeros((nlayers+1,ncloudcols))
+htr_master=np.zeros((nlayers+1,ncloudcols))
+htr_lw_master=np.zeros((nlayers+1,ncloudcols))
+htr_sw_master=np.zeros((nlayers+1,ncloudcols))
+wbrodl_master=np.zeros((nlayers+1,ncloudcols))
+
+wkl_master=np.zeros((nlayers+1,ncloudcols,nmol))
+
+for i_cld in range(ncloudcols):
+
 # master switches
 master_input=0 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2'
 conv_on=1 #0: no convection, 1: convective adjustment
@@ -320,8 +345,6 @@ if(conv_on==1):
 	surf_lowlev_coupled=1
 
 # Declare variables
-nlayers=60
-nmol=7
 lw_on=1
 sw_on=1
 gravity=9.79764 # RCEMIP value
@@ -338,17 +361,6 @@ iout=0 #for broadband only
 # icld=0 #for clear sky
 icld=1  #for grey clouds
 
-#cloudflags
-inflag=2
-iceflag=2
-liqflag=1
-cld_lay=1
-frac=1.0
-ctest=' '
-taucld=3.0
-ssacld=0.5
-radice=90.
-radliq=7.
 
 ur_min=0.6
 ur_max=3.0
@@ -1383,19 +1395,13 @@ elif(master_input==3): # RCEMIP
 
 # wkl[2,:]*=2.0
 
-cld_lays_pz=np.linspace(400,900,4)
-cld_lays=np.zeros(len(cld_lays_pz))
-for i in range(len(cld_lays)):
-	cld_lays[i]=np.argmin(abs(cld_lays_pz[i]-pz))
+# cld_lays_pz=np.linspace(400,900,4)
+# cld_lays=np.zeros(len(cld_lays_pz))
+# for i in range(len(cld_lays)):
+# 	cld_lays[i]=np.argmin(abs(cld_lays_pz[i]-pz))
 # cld_lays=[4,8,12,16,20,24]
 # cld_lays=[10]
 
-vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
-vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
-vars_lev=[totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,tz,altz]
-vars_misc_1d=[semis,semiss,solvar]
-vars_misc_1d_lens=[16,29,29]
-vars_lay_nmol=[wkl]
 
 toa_fnet=0
 
@@ -1405,180 +1411,234 @@ for i in range(nlayers+1):
 
 dmax=1.0
 
+# cldflags
+# inflag=2
+inflags=(np.ones(ncloudcols)*2).astype(int)
+# iceflag=2
+iceflags=(np.ones(ncloudcols)*2).astype(int)
+# liqflag=1
+liqflags=(np.ones(ncloudcols)*1).astype(int)
+# cld_lay=1
+# cld_lays=np.array((10,20))
+cld_lays_pz=np.linspace(400,900,ncloudcols)
+cld_lays=np.zeros(len(cld_lays_pz))
+for i in range(len(cld_lays)):
+	cld_lays[i]=np.argmin(abs(cld_lays_pz[i]-pz))
+# frac=1.0
+cld_fracs=np.ones(ncloudcols)*1.
+ctest=' '
+# taucld=3.0
+tauclds=np.ones(ncloudcols)*1.5
+# ssacld=0.5
+ssaclds=np.ones(ncloudcols)*0.5
+radice=90.
+radliq=7.
+
+for i_cld in range(ncloudcols):
 
 
-for cld_lay in cld_lays:
+inflag=inflags[i_cld]
+iceflag=iceflags[i_cld]
+liqflag=liqflags[i_cld]
+cld_lay=cld_lays[i_cld]
+frac=cld_fracs[i_cld]
+taucld=tauclds[i_cld]
+ssacld=ssaclds[i_cld]
 
-	for ts in range(timesteps):
+vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
+vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
+vars_lev=[totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,tz,altz]
+vars_misc_1d=[semis,semiss,solvar]
+vars_misc_1d_lens=[16,29,29]
+vars_lay_nmol=[wkl]
 
-		# if((maxhtr<eqb_maxhtr*10. and abs(toa_fnet)>toa_fnet_eqb)):
-		# 	tz+=toa_fnet*0.2
-		# 	tavel+=toa_fnet*0.2
-		# 	tbound+=toa_fnet*0.2
+for ts in range(timesteps):
 
-		if(ts>0):
-			for i in range(1,nlayers):
-				ur[i] = ur_min
-			
-			conv=np.zeros(nlayers+1) #reset to zero
-			conv[0]=1
+	# if((maxhtr<eqb_maxhtr*10. and abs(toa_fnet)>toa_fnet_eqb)):
+	# 	tz+=toa_fnet*0.2
+	# 	tavel+=toa_fnet*0.2
+	# 	tbound+=toa_fnet*0.2
 
-			# if(master_input==0):
-			# 	for i in range(nlayers):
-			# 		esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
-			# 		rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
-			# 		vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
-			# 		if(i>1 and vol_mixh2o[i] > vol_mixh2o[i-1]):
-			# 			vol_mixh2o[i]=vol_mixh2o[i-1]
-			# 		vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
-			# 		wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
-
-		dtbound=toa_fnet*0.1*0.
-		dtbound=np.clip(dtbound,-dmax,dmax)
-		tbound+=dtbound
-		# tz[0]=tbound
-
-		writeformattedcloudfile()
-
-		if(lw_on==1):
-			writeformattedinputfile_lw()
-			callrrtmlw()
-			totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
-
-		if(ts==1 and sw_on==1):
-		# 	if(maxhtr<eqb_maxhtr):
-			writeformattedinputfile_sw()
-			callrrtmsw()
-			totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
-
-		prev_htr=htr
-
-		if(ts>1 and master_input==2):
-			totuflux_sw*=(238./fnet_sw[nlayers])
-			totdflux_sw*=(238./fnet_sw[nlayers])
-			htr_sw*=(238./fnet_sw[nlayers])
-			fnet_sw*=(238./fnet_sw[nlayers])
-		totuflux=totuflux_lw+totuflux_sw
-		totdflux=totdflux_lw+totdflux_sw
-		fnet=fnet_sw-fnet_lw
-		htr=htr_lw+htr_sw
-
-
-		toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
-		# toa_fnet=256.731-totuflux[nlayers]+0.0077 # NJE fix later
-
-		prev_maxhtr=maxhtr*1.0
-		re_htrs = np.where(conv==0,htr,0.)
-		maxhtr=max(abs(re_htrs))
-		maxhtr_ind=np.argmax(abs(re_htrs))
-		dfnet=np.zeros(nlayers)
-		dpz=np.zeros(nlayers)
-		for i in range(nlayers):
-			dfnet[i]=fnet[i+1]-fnet[i]
-			dpz[i]=pz[i+1]-pz[i]
-		# maxdfnet=max(abs(dfnet))
-
-		prev_tz=tz*1.0
-		for i in range(nlayers):
-			dT=dfnet[i]/dpz[i]*-1.*0.0
-			# dT = htr[i]/3. #undrelax
-			dT=np.clip(dT,-dmax,dmax)
-			tavel[i]+=dT
-
+	if(ts>0):
 		for i in range(1,nlayers):
-			if(lay_intp==0):
-				tz[i] = (tavel[i-1] + tavel[i])/2.
-			else:
-				tz[i] = tavel[i-1]*1.0
-
-		if(lay_intp==0):
-			tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
-		else:
-			tz[nlayers]=tavel[nlayers-1]
+			ur[i] = ur_min
 		
-		altz[0] = 0.0
-		for i in range(1,nlayers):
-			altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
-		altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
-
 		conv=np.zeros(nlayers+1) #reset to zero
 		conv[0]=1
 
-		if(surf_lowlev_coupled==1):
-			tz[0]=tbound
+		# if(master_input==0):
+		# 	for i in range(nlayers):
+		# 		esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
+		# 		rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
+		# 		vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
+		# 		if(i>1 and vol_mixh2o[i] > vol_mixh2o[i-1]):
+		# 			vol_mixh2o[i]=vol_mixh2o[i-1]
+		# 		vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
+		# 		wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
 
-		if(conv_on==1):
-			convection(tavel,altavel)
-			convection(tz,altz)
-			
-		re_dfnets=np.where(conv[:-1]==0,dfnet,0.)
-		maxdfnet_ind=np.argmax(abs(re_dfnets))
-		maxdfnet=dfnet[maxdfnet_ind]
+	dtbound=toa_fnet*0.1*0.
+	dtbound=np.clip(dtbound,-dmax,dmax)
+	tbound+=dtbound
+	# tz[0]=tbound
 
-		
-		# if(maxhtr<eqb_maxhtr):
-		# 	dT_toaeqb = np.clip(toa_fnet*0.3,-50,50)
-		# 	tbound+=dT_toaeqb
-		# 	tz[0]=tbound
+	# writeformattedcloudfile()
 
-		# if (maxhtr>0.002):
-		# 	if(maxhtr<prev_maxhtr and maxhtr/prev_maxhtr>0.):
-		# 		dmax*=1.1
-		# 		dmax=np.clip(dmax,-10.,10.)
-		# 		prev_maxhtr=maxhtr
-		# 	else:
-		# 		dmax*=0.95
-		# elif(maxhtr/prev_maxhtr>0.):
-		# 	dmax*=0.95
-		# if(0.<dmax<0.0000000001):
-		# 	dmax=0.0000000001
-		# if(-0.0000000001<dmax<0.):
-		# 	dmax=-0.0000000001
+	if(lw_on==1):
+		writeformattedinputfile_lw()
+		callrrtmlw()
+		totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
 
-		dtz = tz-prev_tz
-		maxdtz=dtz[np.argmax(abs(dtz))]
+	if(ts==1 and sw_on==1):
+	# 	if(maxhtr<eqb_maxhtr):
+		writeformattedinputfile_sw()
+		callrrtmsw()
+		totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
 
+	prev_htr=htr
 
-		if(ts%10==0):
-			print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet,cti,tbound,tz[0]))
+	if(ts>1 and master_input==2):
+		totuflux_sw*=(238./fnet_sw[nlayers])
+		totdflux_sw*=(238./fnet_sw[nlayers])
+		htr_sw*=(238./fnet_sw[nlayers])
+		fnet_sw*=(238./fnet_sw[nlayers])
+	totuflux=totuflux_lw+totuflux_sw
+	totdflux=totdflux_lw+totdflux_sw
+	fnet=fnet_sw-fnet_lw
+	htr=htr_lw+htr_sw
 
 
-		vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
-		vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
-		vars_lev=[totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,tz,altz]
-		vars_misc_1d=[semis,semiss,solvar]
-		vars_misc_1d_lens=[16,29,29]
-		vars_lay_nmol=[wkl]
+	toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
+	# toa_fnet=256.731-totuflux[nlayers]+0.0077 # NJE fix later
 
-		# if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
-		if(abs(maxdfnet) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>1):
-			plotrrtmoutput()
-			plotted=1
-			print('Equilibrium reached!')
-			writeoutputfile()
-			filewritten=1
-			break
-		elif(ts==timesteps-1):
-			print('Max timesteps')
-			plotrrtmoutput()
-			plotted=1
-			writeoutputfile()
-			filewritten=1
-		
-	if(plotted==0):
-		plotrrtmoutput()
-	if(filewritten!=1):
-		vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
-		vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
-		vars_lev=[totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,tz,altz]
-		vars_misc_1d=[semis,semiss,solvar]
-		vars_misc_1d_lens=[16,29,29]
-		vars_lay_nmol=[wkl]
-		writeoutputfile()
+	prev_maxhtr=maxhtr*1.0
+	re_htrs = np.where(conv==0,htr,0.)
+	maxhtr=max(abs(re_htrs))
+	maxhtr_ind=np.argmax(abs(re_htrs))
+	dfnet=np.zeros(nlayers)
+	dpz=np.zeros(nlayers)
+	for i in range(nlayers):
+		dfnet[i]=fnet[i+1]-fnet[i]
+		dpz[i]=pz[i+1]-pz[i]
+	# maxdfnet=max(abs(dfnet))
 
-	# print(cld_lay,altz[cld_lay]/1000.,tz[cld_lay],pz[cld_lay],tbound,tz[0],totuflux[nlayers])
+	prev_tz=tz*1.0
+	for i in range(nlayers):
+		dT=dfnet[i]/dpz[i]*-1.*0.0
+		# dT = htr[i]/3. #undrelax
+		dT=np.clip(dT,-dmax,dmax)
+		tavel[i]+=dT
+
+	for i in range(1,nlayers):
+		if(lay_intp==0):
+			tz[i] = (tavel[i-1] + tavel[i])/2.
+		else:
+			tz[i] = tavel[i-1]*1.0
+
+	if(lay_intp==0):
+		tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+	else:
+		tz[nlayers]=tavel[nlayers-1]
+	
+	altz[0] = 0.0
+	for i in range(1,nlayers):
+		altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+	altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
+
+	conv=np.zeros(nlayers+1) #reset to zero
+	conv[0]=1
+
+	if(surf_lowlev_coupled==1):
+		tz[0]=tbound
+
+	if(conv_on==1):
+		convection(tavel,altavel)
+		convection(tz,altz)
 	
 
+	tz_master[:,i_cld]=tz
+	tavel_master[:,i_cld]=tavel
+	pz_master[:,i_cld]=pz
+	pavel_master[:,i_cld]=pavel
+	totuflux_master[:,i_cld]=totuflux
+	totuflux_lw_master[:,i_cld]=totuflux_lw
+	totuflux_sw_master[:,i_cld]=totuflux_sw
+	totdflux_master[:,i_cld]=totdflux
+	totdflux_lw_master[:,i_cld]=totdflux_lw
+	totdflux_sw_master[:,i_cld]=totdflux_sw
+	fnet_master[:,i_cld]=fnet
+	fnet_lw_master[:,i_cld]=fnet_lw
+	fnet_sw_master[:,i_cld]=fnet_sw
+	htr_master[:,i_cld]=htr
+	htr_lw_master[:,i_cld]=htr_lw
+	htr_sw_master[:,i_cld]=htr_sw
+
+	# re_dfnets=np.where(conv[:-1]==0,dfnet,0.)
+	# maxdfnet_ind=np.argmax(abs(re_dfnets))
+	# maxdfnet=dfnet[maxdfnet_ind]
+
+	
+	# if(maxhtr<eqb_maxhtr):
+	# 	dT_toaeqb = np.clip(toa_fnet*0.3,-50,50)
+	# 	tbound+=dT_toaeqb
+	# 	tz[0]=tbound
+
+	# if (maxhtr>0.002):
+	# 	if(maxhtr<prev_maxhtr and maxhtr/prev_maxhtr>0.):
+	# 		dmax*=1.1
+	# 		dmax=np.clip(dmax,-10.,10.)
+	# 		prev_maxhtr=maxhtr
+	# 	else:
+	# 		dmax*=0.95
+	# elif(maxhtr/prev_maxhtr>0.):
+	# 	dmax*=0.95
+	# if(0.<dmax<0.0000000001):
+	# 	dmax=0.0000000001
+	# if(-0.0000000001<dmax<0.):
+	# 	dmax=-0.0000000001
+
+	dtz = tz-prev_tz
+	maxdtz=dtz[np.argmax(abs(dtz))]
+
+
+	if(ts%10==0):
+		print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet,cti,tbound,tz[0]))
+
+
+
+
+
+# 	vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
+# 	vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
+# 	vars_lev=[totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,tz,altz]
+# 	vars_misc_1d=[semis,semiss,solvar]
+# 	vars_misc_1d_lens=[16,29,29]
+# 	vars_lay_nmol=[wkl]
+
+# 	# if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
+# 	if(abs(maxdfnet) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>1):
+# 		plotrrtmoutput()
+# 		plotted=1
+# 		print('Equilibrium reached!')
+# 		writeoutputfile()
+# 		filewritten=1
+# 		break
+# 	elif(ts==timesteps-1):
+# 		print('Max timesteps')
+# 		plotrrtmoutput()
+# 		plotted=1
+# 		writeoutputfile()
+# 		filewritten=1
+	
+# if(plotted==0):
+# 	plotrrtmoutput()
+# if(filewritten!=1):
+# 	vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
+# 	vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
+# 	vars_lev=[totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,tz,altz]
+# 	vars_misc_1d=[semis,semiss,solvar]
+# 	vars_misc_1d_lens=[16,29,29]
+# 	vars_lay_nmol=[wkl]
+# 	writeoutputfile()	
 
 ########################################################################################
 

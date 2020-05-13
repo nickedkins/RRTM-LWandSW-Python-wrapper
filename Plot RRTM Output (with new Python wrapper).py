@@ -9,7 +9,9 @@ from os import listdir
 # from pandas import ExcelFile
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cld tests/old/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cld tests/new/'
 # '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/p_cld/taucld=1, ssacld=0.5/'
 ]
 
@@ -412,8 +414,15 @@ for directory in directories:
 cld_lay_master=cld_lay_master.astype('int')
 
 plt.figure(1)
-plt.plot(pz_master[cld_lay_master[0,:,0],:,0][:,0],totuflux_lw_master[nlayers,:,:][:,0]-totuflux_lw_master[nlayers,:,:][:,0][0],'-o',c='r')
-plt.plot(pz_master[cld_lay_master[0,:,0],:,0][:,0],-1.0*(totuflux_sw_master[nlayers,:,:][:,0]-totuflux_sw_master[nlayers,:,:][:,0][0]),'-o',c='b')
+plt.plot(pz_master[cld_lay_master[0,:,0],:,0],totuflux_lw_master[nlayers,:,0]-totuflux_lw_master[nlayers,:,0][0],'-o',c='r')
+plt.plot(pz_master[cld_lay_master[0,:,1],:,1],totuflux_lw_master[nlayers,:,1]-totuflux_lw_master[nlayers,:,1][0],'--',c='r')
+plt.plot(pz_master[cld_lay_master[0,:,0],:,0],totuflux_sw_master[nlayers,:,0]-totuflux_sw_master[nlayers,:,0][0],'-o',c='b')
+plt.plot(pz_master[cld_lay_master[0,:,1],:,1],totuflux_sw_master[nlayers,:,1]-totuflux_sw_master[nlayers,:,1][0],'--',c='b')
+
+
+print(totuflux_lw_master[nlayers,:,0]-totuflux_lw_master[nlayers,:,0][0])
+print(totuflux_lw_master[nlayers,:,1]-totuflux_lw_master[nlayers,:,1][0])
+# print(totuflux_lw_master[nlayers,:,1][:,0]-totuflux_lw_master[nlayers,:,1][:,0][0])
 
 # df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RE') #read RD's data to plot against mine
 # df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
