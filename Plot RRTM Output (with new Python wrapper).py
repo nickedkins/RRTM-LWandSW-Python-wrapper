@@ -69,15 +69,14 @@ def plotrrtmoutput():
 	plt.subplot(221)
 	plt.semilogy(tz,pz)
 	# plt.plot(tz,altz/1000.)
-	# plt.plot(tbound,pz[0],'o')
-	# plt.ylim(max(pz),min(pz))
+	plt.plot(tbound,pz[0],'o')
+	plt.ylim(max(pz),min(pz))
 	plt.xlabel('tz')
 	plt.ylabel('pz')
 	plt.subplot(222)
-	# plt.semilogy(fnet,pz,c='b',label='total')
-	# plt.semilogy(fnet_lw,pz,c='r',label='lw')
-	# plt.semilogy(fnet_sw,pz,c='g',label='sw')
-	plt.semilogy(tavel,pavel)
+	plt.semilogy(fnet,pz,c='b',label='total')
+	plt.semilogy(fnet_lw,pz,c='r',label='lw')
+	plt.semilogy(fnet_sw,pz,c='g',label='sw')
 	plt.ylim(max(pz),min(pz))
 	plt.xlabel('fnet')
 	plt.ylabel('pz')
@@ -245,9 +244,7 @@ vol_mixh2o = np.ones(nlayers) * molec_h2o / totmolec
 vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
 solvar=np.zeros(29)
 
-params0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
-params1d=[semis,semiss,totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,pavel,tz,tavel,altz,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel,solvar]
-params2d=[wkl]
+vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
 
 for directory in directories:
 
@@ -324,12 +321,59 @@ for directory in directories:
 		cti	=	int	(	f.readline().rstrip('\n')	)
 		maxhtr	=	float	(	f.readline().rstrip('\n')	)
 
-		for x in params1d:
-			for i in range(shape(x)[0]):
-				x[i] = f.readline()
-				print x[i]
+		pz=np.linspace(psurf,pmin,nlayers+1)
+		totuflux=np.zeros(nlayers+1)
+		totdflux=np.zeros(nlayers+1)
+		fnet=np.zeros(nlayers+1)
+		htr=np.zeros(nlayers+1)
+		pavel=np.zeros(nlayers)
+		tz=np.ones(nlayers+1) * tbound
+		altz=np.zeros(nlayers+1)
+		tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
+		tavel=np.zeros(nlayers)
+		esat_liq=np.zeros(nlayers)
+		rel_hum=np.zeros(nlayers)
+		mperlayr = np.zeros(nlayers)
+		mperlayr_air = np.zeros(nlayers)
+		wbrodl = np.zeros(nlayers)
+		wkl = np.zeros((nmol+1,nlayers))
+		totuflux_lw=np.zeros(nlayers+1)
+		totdflux_lw=np.zeros(nlayers+1)
+		fnet_lw=np.zeros(nlayers+1)
+		htr_lw=np.zeros(nlayers+1)
+		totuflux_sw=np.zeros(nlayers+1)
+		totdflux_sw=np.zeros(nlayers+1)
+		fnet_sw=np.zeros(nlayers+1)
+		htr_sw=np.zeros(nlayers+1)
+		conv=np.zeros(nlayers+1)
+		altavel = np.zeros(nlayers)
+		vol_mixh2o = np.ones(nlayers) * molec_h2o / totmolec
+		vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
+		solvar=np.zeros(29)
 
-		for x in params2d:
+		vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr]
+		vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
+		vars_lev=[totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,tz,altz]
+		vars_misc_1d=[semis,semiss,solvar]
+		vars_misc_1d_lens=[16,29,29]
+		vars_lay_nmol=[wkl]
+
+
+		for x in vars_lay:
+			for i in range(nlayers):
+				x[i] = f.readline()
+
+		for x in vars_lev:
+			for i in range(nlayers+1):
+				x[i] = f.readline()
+
+		i_lens=0
+		for x in vars_misc_1d:
+			for i in range(vars_misc_1d_lens[i_lens]):
+				x[i] = f.readline()
+			i_lens+=1
+
+		for x in vars_lay_nmol:
 			for i in range(shape(x)[0]):
 				for j in range(shape(x)[1]):
 					x[i,j] = f.readline()
