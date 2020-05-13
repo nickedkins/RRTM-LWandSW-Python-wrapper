@@ -3,7 +3,8 @@ C     author:    $Author: jdelamer $
 C     revision:  $Revision: 2.3 $
 C     created:   $Date: 2001/10/11 17:53:22 $
 
-	parameter (mxlay = 203, nbands = 29)
+C 	parameter (mxlay = 203, nbands = 29)
+        parameter (mxlay = 600, nbands = 29) !NJE
 	parameter (ib1 = 16, ib2 = 29)
         parameter (mg = 16)
 	parameter (mxstr = 16)

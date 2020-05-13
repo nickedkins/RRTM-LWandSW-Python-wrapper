@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 from pylab import *
 import datetime
 from random import randint
-import pandas as pd
-from pandas import ExcelWriter
-from pandas import ExcelFile
+# import pandas as pd
+# from pandas import ExcelWriter
+# from pandas import ExcelFile
 
 tstart = datetime.datetime.now()
 
@@ -204,8 +204,8 @@ def readrrtmoutput_sw():
 		totuflux_sw[i] =  f.readline()
 	for i in range(0,nlayers+1):
 		totdflux_sw[i] =  f.readline()
-	# for i in range(0,nlayers+1):
-	# 	fnet_sw[i] =  f.readline()
+	for i in range(0,nlayers+1):
+		fnet_sw[i] =  f.readline()
 	for i in range(0,nlayers+1):
 		htr_sw[i] =  f.readline()
 
@@ -213,36 +213,36 @@ def readrrtmoutput_sw():
 
 def plotrrtmoutput():
 	plt.figure(1)
-	# plt.subplot(221)
-	# plt.semilogy(tz,pz)
-	# plt.plot(tbound,pz[0],'o')
-	# plt.ylim(max(pz),min(pz))
-	# plt.xlabel('tz')
-	# plt.ylabel('pz')
-	# plt.subplot(222)
+	plt.subplot(221)
+	plt.semilogy(tz,pz)
+	plt.plot(tbound,pz[0],'o')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('tz')
+	plt.ylabel('pz')
+	plt.subplot(222)
 	plt.semilogy(fnet,pz,c='b',label='total')
 	plt.semilogy(fnet_lw,pz,c='r',label='lw')
 	plt.semilogy(fnet_sw,pz,c='g',label='sw')
 	plt.ylim(max(pz),min(pz))
 	plt.xlabel('fnet')
 	plt.ylabel('pz')
-	# plt.legend()
-	# plt.subplot(223)
-	# plt.semilogy(totuflux,pz,c='b',label='total')
-	# plt.semilogy(totuflux_lw,pz,c='r',label='lw')
-	# plt.semilogy(totuflux_sw,pz,c='g',label='sw')
-	# plt.ylim(max(pz),min(pz))
-	# plt.xlabel('totuflux')
-	# plt.ylabel('pz')
-	# plt.legend()
-	# plt.subplot(224)
-	# plt.semilogy(totdflux,pz,c='b',label='total')
-	# plt.semilogy(totdflux_lw,pz,c='r',label='lw')
-	# plt.semilogy(totdflux_sw,pz,c='g',label='sw')
-	# plt.ylim(max(pz),min(pz))
-	# plt.xlabel('totdflux')
-	# plt.ylabel('pz')
-	# plt.legend()
+	plt.legend()
+	plt.subplot(223)
+	plt.semilogy(totuflux,pz,c='b',label='total')
+	plt.semilogy(totuflux_lw,pz,c='r',label='lw')
+	plt.semilogy(totuflux_sw,pz,c='g',label='sw')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('totuflux')
+	plt.ylabel('pz')
+	plt.legend()
+	plt.subplot(224)
+	plt.semilogy(totdflux,pz,c='b',label='total')
+	plt.semilogy(totdflux_lw,pz,c='r',label='lw')
+	plt.semilogy(totdflux_sw,pz,c='g',label='sw')
+	plt.ylim(max(pz),min(pz))
+	plt.xlabel('totdflux')
+	plt.ylabel('pz')
+	plt.legend()
 	# plt.subplot(335)
 	# logpplot(tz,pz,'tz','pz')
 	# plt.plot(tbound,pz[0],'o')
@@ -264,7 +264,7 @@ def convection(T,z):
 	for i in range(1,len(T)):
 		dT = (T[i]-T[i-1])
 		dz = (z[i]-z[i-1])/1000.
-		if( (-1.0 * dT/dz > lapse or z[i]/1000. < 5.) and z[i]/1000. < 15. ):
+		if( (-1.0 * dT/dz > lapse or z[i]/1000. < -1.) and z[i]/1000. < 15. ):
 			conv[i]=1.
 			T[i] = T[i-1] - lapse * dz
 	# print(conv)
@@ -289,7 +289,7 @@ def writeoutputfile():
 
 
 # master switches
-master_input=4 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2'
+master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2'
 conv_on=1 #0: no convection, 1: convective adjustment
 if(master_input==3):
 	conv_on=1
@@ -300,10 +300,10 @@ lay_intp=1 #0: linear interpolation to get tavel from tz, 1: isothermal layers
 # 	surf_lowlev_coupled=1
 
 # Declare variables
-nlayers=600
+nlayers=100
 nmol=7
 lw_on=1
-sw_on=0
+sw_on=1
 gravity=9.79764 # RCEMIP value
 avogadro=6.022e23
 iatm=0 #0 for layer values, 1 for level values
@@ -322,9 +322,9 @@ icld=0 #for clear sky
 ur_min=0.6
 ur_max=3.0
 eqb_maxhtr=1e-4
-eqb_maxdfnet=1e-3
+eqb_maxdfnet=1e-2
 toa_fnet_eqb=1.0e12
-timesteps=10000
+timesteps=1000
 cti=0
 surf_rh=0.8
 vol_mixh2o_min = 1e-6
@@ -1433,6 +1433,7 @@ for ts in range(timesteps):
 		totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
 
 	if(ts==1 and sw_on==1):
+	# if(ts%100==0 and sw_on==1):
 	# 	if(maxhtr<eqb_maxhtr):
 		writeformattedinputfile_sw()
 		callrrtmsw()
@@ -1440,7 +1441,7 @@ for ts in range(timesteps):
 
 	prev_htr=htr
 
-	if(ts>1 and master_input==2):
+	if(ts>1 and (master_input==2 or master_input==3) ):
 		totuflux_sw*=(238./fnet_sw[nlayers])
 		totdflux_sw*=(238./fnet_sw[nlayers])
 		htr_sw*=(238./fnet_sw[nlayers])
@@ -1451,8 +1452,8 @@ for ts in range(timesteps):
 	htr=htr_lw+htr_sw
 
 
-	# toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
-	toa_fnet=256.731-totuflux[nlayers]+0.0077 # NJE fix later
+	toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
+	# toa_fnet=256.731-totuflux[nlayers]+0.0077 # NJE fix later
 
 	prev_maxhtr=maxhtr*1.0
 	re_htrs = np.where(conv==0,htr,0.)
@@ -1467,7 +1468,7 @@ for ts in range(timesteps):
 
 	prev_tz=tz*1.0
 	for i in range(nlayers):
-		dT=dfnet[i]/dpz[i]*-1.
+		dT=dfnet[i]/dpz[i]*-1.*3.
 		# dT = htr[i]/3. #undrelax
 		dT=np.clip(dT,-dmax,dmax)
 		tavel[i]+=dT
@@ -1565,7 +1566,7 @@ for ts in range(timesteps):
 	# # if(ts>950):
 	# 	plotrrtmoutput()
 
-	if(ts%10==0):
+	if(ts%1==0):
 		print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet,cti,tbound,tz[0]))
 
 
@@ -1575,13 +1576,15 @@ for ts in range(timesteps):
 
 	# if(maxhtr < eqb_maxhtr and abs(toa_fnet) < toa_fnet_eqb):
 	if(abs(maxdfnet) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>1):
-		# plotrrtmoutput()
+		plotrrtmoutput()
 		plotted=1
 		print('Equilibrium reached!')
 		writeoutputfile()
 		filewritten=1
 		break
 	elif(ts==timesteps-1):
+		plotrrtmoutput()
+		plotted=1
 		print('Max timesteps')
 		writeoutputfile()
 		filewritten=1
@@ -1594,14 +1597,14 @@ if(filewritten!=1):
 	params2d=[wkl]
 	writeoutputfile()
 	
-df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
-plt.figure(1)
-# plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
-# plt.semilogy(tz,pz)
-plt.plot(df['Tz(K)'],df['Z(km)'],'--')
-plt.plot(tz,altz/1000.)
-plt.plot(tbound,0,'o')
-# plt.ylim(max(pavel),min(pavel))
+# df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
+# plt.figure(1)
+# # plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
+# # plt.semilogy(tz,pz)
+# plt.plot(df['Tz(K)'],df['Z(km)'],'--')
+# plt.plot(tz,altz/1000.)
+# plt.plot(tbound,0,'o')
+# # plt.ylim(max(pavel),min(pavel))
 
 # plt.figure(1)
 # plt.semilogy(dfnet,pavel)

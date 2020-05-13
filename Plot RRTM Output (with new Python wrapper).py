@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pylab import *
 from os import listdir
-import pandas as pd
-from pandas import ExcelWriter
-from pandas import ExcelFile
+# import pandas as pd
+# from pandas import ExcelWriter
+# from pandas import ExcelFile
 
 directories = [
 '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
@@ -118,7 +118,7 @@ def readrrtmoutput(fn):
 
 
 
-nlayers=600
+nlayers=590
 nmol=7
 
 gravity=9.81
@@ -324,12 +324,10 @@ for directory in directories:
 		cti	=	int	(	f.readline().rstrip('\n')	)
 		maxhtr	=	float	(	f.readline().rstrip('\n')	)
 
-
-
 		for x in params1d:
 			for i in range(shape(x)[0]):
 				x[i] = f.readline()
-
+				print x[i]
 
 		for x in params2d:
 			for i in range(shape(x)[0]):
@@ -345,23 +343,23 @@ for directory in directories:
 		plotrrtmoutput()
 
 		#print output for easy spreadsheet transfer
-		for i in range(nlayers):
-			print('{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i]))
-		print('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],tbound))
+		# for i in range(nlayers):
+		# 	print('{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i]))
+		# print('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],tbound))
 
-df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RE') #read RD's data to plot against mine
-df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
-plt.figure(1)
-plt.subplot(221)
-plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
-plt.ylim(max(pz),min(pz))
-# plt.plot(df['Tz(K)'],df['Z(km)'])
-plt.subplot(222)
-plt.semilogy(df['Tlayer'],df['Player'],'--')
-plt.ylim(max(pz),min(pz))
-plt.subplot(223)
-plt.semilogy(df['LWup'],df['Pz(mb)'],'--')
-plt.semilogy(df['LWdn'],df['Pz(mb)'],'--')
+# df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RE') #read RD's data to plot against mine
+# df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
+# plt.figure(1)
+# plt.subplot(221)
+# plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
+# plt.ylim(max(pz),min(pz))
+# # plt.plot(df['Tz(K)'],df['Z(km)'])
+# plt.subplot(222)
+# plt.semilogy(df['Tlayer'],df['Player'],'--')
+# plt.ylim(max(pz),min(pz))
+# plt.subplot(223)
+# plt.semilogy(df['LWup'],df['Pz(mb)'],'--')
+# plt.semilogy(df['LWdn'],df['Pz(mb)'],'--')
 # plt.subplot(224)
 # plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
 

@@ -359,11 +359,16 @@ c +-------------------------------------------------------------------+
 
 c     .. Parameters ..
 
-      INTEGER   MXCLY, MXULV, MXCMU, MXUMU, MXPHI, MI, MI9M2, NNLYRI,
+C       INTEGER   MXCLY, MXULV, MXCMU, MXUMU, MXPHI, MI, MI9M2, NNLYRI,
+C      &          MXSQT
+C       PARAMETER ( MXCLY = 110, MXULV = 110, MXCMU = 32, MXUMU = 32,
+C      &          MXPHI = 3, MI = MXCMU / 2, MI9M2 = 9*MI - 2,
+C      &          NNLYRI = MXCMU*MXCLY, MXSQT = 1000 )
+       INTEGER   MXCLY, MXULV, MXCMU, MXUMU, MXPHI, MI, MI9M2, NNLYRI,
      &          MXSQT
-      PARAMETER ( MXCLY = 110, MXULV = 110, MXCMU = 32, MXUMU = 32,
+      PARAMETER ( MXCLY = 600, MXULV = 600, MXCMU = 32, MXUMU = 32,
      &          MXPHI = 3, MI = MXCMU / 2, MI9M2 = 9*MI - 2,
-     &          NNLYRI = MXCMU*MXCLY, MXSQT = 1000 )
+     &          NNLYRI = MXCMU*MXCLY, MXSQT = 1000 ) ! NJE
 
 c ejm - original
 c      PARAMETER ( MXCLY = 6, MXULV = 5, MXCMU = 48, MXUMU = 10,
