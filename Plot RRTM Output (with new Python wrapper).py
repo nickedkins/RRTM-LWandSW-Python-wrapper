@@ -9,13 +9,8 @@ from os import listdir
 # from pandas import ExcelFile
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/mls/re/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/rcemip/conv off z>15/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/rcemip/conv on z>15/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2/mls rd mods/re/run 2/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RD replication from my original inputs/'
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RD replication from my original inputs/v2/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2 rcemip/'
 ]
 
 def init_plotting():
@@ -70,6 +65,7 @@ def plotrrtmoutput():
 	plt.semilogy(tz,pz)
 	# plt.plot(tz,altz/1000.)
 	plt.plot(tbound,pz[0],'o')
+	plt.plot(tz[cti],pz[cti],'o')
 	plt.ylim(max(pz),min(pz))
 	plt.xlabel('tz')
 	plt.ylabel('pz')
@@ -378,6 +374,25 @@ for directory in directories:
 				for j in range(shape(x)[1]):
 					x[i,j] = f.readline()
 
+		for i in range(1,nlayers):
+			if(conv[i]==0):
+				cti=i-1
+				break
+
+		# nearest levels
+		# print('tbound = {:6.4f}'.format(tbound))
+		# print('ttrop = {:6.4f} (+{:6.4f} -{:6.4f}) (nearest levels)'.format(tz[cti], abs(tz[cti+1]-tz[cti]), abs(tz[cti]-tz[cti-1]) ))
+		# print('ptrop = {:6.4f} (+{:6.4f} -{:6.4f}) (nearest levels)'.format(pz[cti], abs(pz[cti+1]-pz[cti]), abs(pz[cti]-pz[cti-1]) ))
+		# print('ztrop = {:6.4f} (+{:6.4f} -{:6.4f}) (nearest levels)'.format(altz[cti]*1e-3, abs(altz[cti+1]*1e-3-altz[cti]*1e-3), abs(altz[cti]*1e-3-altz[cti-1]*1e-3) ))
+		# print
+
+		# mean of trop and nearest level
+		print('tbound = {:6.4f}'.format(tbound))
+		print('ttrop = {:6.4f} (+{:6.4f} -{:6.4f}) (nearest levels)'.format(tz[cti], abs(tz[cti]-np.mean(tz[cti:cti+2]) ), abs(tz[cti]-np.mean(tz[cti-1:cti+1] ) ) ) )
+		print('ptrop = {:6.4f} (+{:6.4f} -{:6.4f}) (nearest levels)'.format(pz[cti], abs(pz[cti]-np.mean(pz[cti:cti+2]) ), abs(pz[cti]-np.mean(pz[cti-1:cti+1] ) ) ) )
+		print('ztrop = {:6.4f} (+{:6.4f} -{:6.4f}) (nearest levels)'.format(altz[cti]*1e-3, abs(altz[cti]*1e-3-np.mean(altz[cti:cti+2]*1e-3) ), abs(altz[cti]*1e-3-np.mean(altz[cti-1:cti+1]*1e-3 ) ) ) )
+		print
+
 
 		dfnet=np.zeros(nlayers)
 
@@ -407,4 +422,4 @@ for directory in directories:
 # plt.subplot(224)
 # plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
 
-show()
+# show()

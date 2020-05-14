@@ -310,7 +310,7 @@ lay_intp=1 #0: linear interpolation to get tavel from tz, 1: isothermal layers
 # 	surf_lowlev_coupled=1
 
 # Declare variables
-nlayers=100
+nlayers=590
 nmol=7
 lw_on=1
 sw_on=1
@@ -332,9 +332,9 @@ icld=0 #for clear sky
 ur_min=0.6
 ur_max=3.0
 eqb_maxhtr=1e-4
-eqb_maxdfnet=1e-2
+eqb_maxdfnet=1e-3
 toa_fnet_eqb=1.0e12
-timesteps=2
+timesteps=10000
 cti=0
 surf_rh=0.8
 vol_mixh2o_min = 1e-6
@@ -1247,6 +1247,7 @@ elif(master_input==3): # RCEMIP hydrostatics
 	for i in range(len(pavel)):
 		tavel[i]=(tz[i]+tz[i+1])/2.
 
+
 for i in range(nlayers):
 	altavel[i]=(altz[i]+altz[i+1])/2.
 
@@ -1360,7 +1361,7 @@ elif(master_input==3): # RCEMIP
 		wkl[6,i]=1650e-9 # ch4
 		wkl[7,i]=0. # o2
 
-# wkl[2,:]*=2.0
+wkl[2,:]*=4.0
 
 
 
@@ -1506,6 +1507,20 @@ for ts in range(timesteps):
 	if(conv_on==1):
 		convection(tavel,altavel)
 		convection(tz,altz)
+
+	for i in range(1,nlayers):
+		if(conv[i]==0):
+			cti=i-1
+			break
+		
+	for i in range(nlayers+1):
+		if(altz[i]<zt):
+			pz[i]=psurf*( ( tv0-lapse*altz[i]/1000. )/tv0 ) ** ( gravity/( rsp*lapse/1000. ) )
+		else:
+			pt=psurf*(tv[trop_ind]/tv0)**(gravity/(rsp*lapse/1000.))
+			pz[i]=pt*np.exp( -( gravity*( altz[i]-altz[trop_ind] ) / ( rsp*tv[trop_ind] ) ) )
+	for i in range(len(pavel)):
+		pavel[i]=(pz[i]+pz[i+1])/2.
 		
 	re_dfnets=np.where(conv[:-1]==0,dfnet,0.)
 	# print(re_dfnets)
