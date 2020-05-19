@@ -9,8 +9,8 @@ from os import listdir
 # from pandas import ExcelFile
 
 directories = [
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2 rcemip/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/2xco2 rcemip/'
 ]
 
 def init_plotting():
@@ -61,7 +61,7 @@ def logpplot(x,p,xlab,ylab):
 
 def plotrrtmoutput():
 	plt.figure(1)
-	plt.subplot(221)
+	plt.subplot(331)
 	plt.semilogy(tz,pz)
 	# plt.plot(tz,altz/1000.)
 	plt.plot(tbound,pz[0],'o')
@@ -69,7 +69,7 @@ def plotrrtmoutput():
 	plt.ylim(max(pz),min(pz))
 	plt.xlabel('tz')
 	plt.ylabel('pz')
-	plt.subplot(222)
+	plt.subplot(332)
 	plt.semilogy(fnet,pz,c='b',label='total')
 	plt.semilogy(fnet_lw,pz,c='r',label='lw')
 	plt.semilogy(fnet_sw,pz,c='g',label='sw')
@@ -77,7 +77,7 @@ def plotrrtmoutput():
 	plt.xlabel('fnet')
 	plt.ylabel('pz')
 	plt.legend()
-	plt.subplot(223)
+	plt.subplot(333)
 	plt.semilogy(totuflux,pz,c='b',label='total')
 	plt.semilogy(totuflux_lw,pz,c='r',label='lw')
 	plt.semilogy(totuflux_sw,pz,c='g',label='sw')
@@ -85,7 +85,7 @@ def plotrrtmoutput():
 	plt.xlabel('totuflux')
 	plt.ylabel('pz')
 	plt.legend()
-	plt.subplot(224)
+	plt.subplot(334)
 	plt.semilogy(totdflux,pz,c='b',label='total')
 	plt.semilogy(totdflux_lw,pz,c='r',label='lw')
 	plt.semilogy(totdflux_sw,pz,c='g',label='sw')
@@ -93,19 +93,35 @@ def plotrrtmoutput():
 	plt.xlabel('totdflux')
 	plt.ylabel('pz')
 	plt.legend()
-	# plt.subplot(335)
-	# logpplot(tz,pz,'tz','pz')
-	# plt.plot(tbound,pz[0],'o')
-	# # plt.semilogy(tz,pz,'o',c='g')
-	# # plt.semilogy(tavel,pavel,'o',c='b')
-	# plt.ylim(max(pz),min(pz))
-	# plt.subplot(336)
+	plt.subplot(335)
+	logpplot(tz,pz,'tz','pz')
+	plt.plot(tbound,pz[0],'o')
+	# plt.semilogy(tz,pz,'o',c='g')
+	# plt.semilogy(tavel,pavel,'o',c='b')
+	plt.ylim(max(pz),min(pz))
+	plt.subplot(336)
 	# logpplot(wbrodl,pavel,'wbrodl','pavel')
-	# plt.subplot(337)
+	plt.loglog(wbrodl,pavel)
+	plt.ylim(max(pavel),min(pavel))
+	plt.xlabel('wbrodl')
+	plt.ylabel('pavel')
+	plt.subplot(337)
 	# logpplot(wkl[1,:],pavel,'wkl1 (h2o)','pavel')
-	# plt.subplot(338)
+	plt.loglog(wkl[1,:],pavel)
+	plt.ylim(max(pavel),min(pavel))
+	plt.xlabel('wkl1')
+	plt.ylabel('pavel')
+	plt.subplot(338)
+	plt.loglog(wkl[2,:],pavel)
+	plt.ylim(max(pavel),min(pavel))
+	plt.xlabel('wkl2')
+	plt.ylabel('pavel')
 	# logpplot(wkl[2,:],pavel,'wkl2 (co2)','pavel')
-	# plt.subplot(339)
+	plt.subplot(339)
+	plt.loglog(wkl[3,:],pavel)
+	plt.ylim(max(pavel),min(pavel))
+	plt.xlabel('wkl3')
+	plt.ylabel('pavel')
 	# logpplot(wkl[3,:],pavel,'wkl3 (o3)','pavel')
 
 def readrrtmoutput(fn):
@@ -402,9 +418,9 @@ for directory in directories:
 		plotrrtmoutput()
 
 		#print output for easy spreadsheet transfer
-		# for i in range(nlayers):
-		# 	print('{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i]))
-		# print('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],tbound))
+		for i in range(nlayers):
+			print('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[i],pavel[i],altz[i]/1000.,tz[i],tavel[i],totuflux[i],totuflux_lw[i],totuflux_sw[i],totdflux[i],totdflux_lw[i],totdflux_sw[i],fnet[i],fnet_lw[i],fnet_sw[i],wkl[1,i]))
+		print('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(pz[nlayers],'na',altz[nlayers]/1000.,tz[nlayers],'na',totuflux[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers],totdflux[nlayers],totdflux_lw[nlayers],totdflux_sw[nlayers],fnet[nlayers],fnet_lw[nlayers],fnet_sw[nlayers],'na',tbound))
 
 # df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RE') #read RD's data to plot against mine
 # df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
@@ -422,4 +438,4 @@ for directory in directories:
 # plt.subplot(224)
 # plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
 
-# show()
+show()

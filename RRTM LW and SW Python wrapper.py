@@ -343,7 +343,7 @@ esat_liq=np.zeros(nlayers)
 rel_hum=np.zeros(nlayers)
 maxhtr=0.
 
-tbound=283.422 #surface temperature (K)
+tbound=295. #surface temperature (K)
 iemiss=2 #surface emissivity. Keep this fixed for now.
 iemis=2
 ireflect=0 #for Lambert reflection
@@ -391,6 +391,7 @@ elif(master_input==2):
 	])
 elif(master_input==3):
 	semiss=np.ones(29)*0.93
+	# semiss=np.ones(29)*0.1
 iform=1
 psurf=1000.
 if(master_input==3):
@@ -1217,7 +1218,8 @@ elif(master_input==3): # RCEMIP hydrostatics
 	zq1=4000.
 	zq2=7500.
 	zt=15000.
-	qt=1.e-11
+	# qt=1e-8 #needs to be 1e-11, but is multiplied by 1e-3 later
+	qt=1e-11 #needs to be 1e-11, but is multiplied by 1e-3 later
 	altz=np.linspace(0.,40.,nlayers+1)
 	altz*=1.e3
 	trop_ind = np.argmin(abs(altz-15000.))
@@ -1351,9 +1353,11 @@ elif(master_input==3): # RCEMIP
 	for i in range(nlayers):
 		wbrodl[i] = mperlayr_air[i] * 1.0e-4
 		if(altz[i]/1000.<15.):
-			wkl[1,i]=q[i]*1e-3
+			# wkl[1,i]=q[i]*1e-3
+			wkl[1,i]=q[i]
 		else:
-			wkl[1,i]=qt*1e-3
+			# wkl[1,i]=qt*1e-3
+			wkl[1,i]=qt
 		wkl[2,i]=348e-6 # co2
 		wkl[3,i]=g1*pz[i]**(g2)*np.exp(-1.0*(pz[i]/g3))*1e-6 # o3
 		wkl[4,i]=306e-9 # n2o
@@ -1361,7 +1365,7 @@ elif(master_input==3): # RCEMIP
 		wkl[6,i]=1650e-9 # ch4
 		wkl[7,i]=0. # o2
 
-wkl[2,:]*=4.0
+# wkl[2,:]*=4.0
 
 
 
@@ -1436,7 +1440,7 @@ for ts in range(timesteps):
 		# 		wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
 
 	# dtbound=(fnet_sw[0]-fnet_lw[0])*0.1
-	dtbound=toa_fnet*0.1
+	dtbound=toa_fnet*0.1*0.
 	dtbound=np.clip(dtbound,-dmax,dmax)
 	tbound+=dtbound
 	tz[0]=tbound
