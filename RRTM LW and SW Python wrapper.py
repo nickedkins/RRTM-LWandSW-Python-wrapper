@@ -307,6 +307,37 @@ def writeoutputfile():
 				f.write('\n')
 
 
+def writeoutputfile_masters():
+	tlabel = datetime.datetime.now()
+	tlabelstr = str(tlabel.strftime('%Y_%m_%d %H_%M_%S'))
+	f = open(project_dir+'_Raw Output Data/'+tlabelstr,'w+')
+	for x in vars_0d:
+		f.write(str(x))
+		f.write('\n')
+	for x in vars_master_lay_cld:
+		for j in range(ncloudcols):
+			for i in range(nlayers):
+				f.write(str(x[i,j]))
+				f.write('\n')
+	for x in vars_master_lev_cld:
+		for j in range(ncloudcols):
+			for i in range(nlayers+1):
+				f.write(str(x[i,j]))
+				f.write('\n')
+	# i_lens=0
+	# for x in vars_misc_1d:
+	# 	for i in range(vars_misc_1d_lens[i_lens]):
+	# 		f.write(str(x[i]))
+	# 		f.write('\n')
+	# 	i_lens+=1
+	for x in vars_master_lay_cld_nmol:
+		for k in range(nmol):
+			for j in range(ncloudcols):
+				for i in range(nlayers):
+					f.write(str(x[i,j,k]))
+					f.write('\n')
+
+
 nlayers=60
 ncloudcols=2
 nmol=7
@@ -332,7 +363,12 @@ htr_sw_master=np.zeros((nlayers+1,ncloudcols))
 wbrodl_master=np.zeros((nlayers+1,ncloudcols))
 conv_master=np.zeros((nlayers+1,ncloudcols))
 
-wkl_master=np.zeros((nlayers+1,ncloudcols,nmol))
+wkl_master=np.zeros((nlayers,ncloudcols,nmol))
+
+# vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
+# vars_master_lev_cld=[tz_master,pz_master,altz_master,totuflux_master,totuflux_lw_master,totuflux_sw_master,totdflux_master,totdflux_lw_master,totdflux_sw_master,fnet_master,fnet_lw_master,fnet_sw_master,htr_master,htr_lw_master,htr_sw_master,wbrodl_master,conv_master]
+# vars_master_lay_cld=[tavel_master,pavel_master]
+# vars_master_lev_cld_nmol=[wkl_master]
 
 # master switches
 master_input=0 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2'
@@ -367,7 +403,7 @@ ur_max=3.0
 eqb_maxhtr=1e-4
 eqb_maxdfnet=1e-3
 toa_fnet_eqb=1.0e12
-timesteps=1000
+timesteps=10
 cti=0
 surf_rh=0.8
 vol_mixh2o_min = 1e-6
@@ -1455,12 +1491,18 @@ for ts in range(timesteps):
 		taucld=tauclds[i_cld]
 		ssacld=ssaclds[i_cld]
 
-		vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
-		vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
-		vars_lev=[totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,tz,altz]
-		vars_misc_1d=[semis,semiss,solvar]
-		vars_misc_1d_lens=[16,29,29]
-		vars_lay_nmol=[wkl]
+		# vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
+		# vars_cld=[inflags,iceflags,liqflags,cld_lays,tauclds,ssaclds]
+		# vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
+		# vars_lev=[totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,tz,altz]
+		# vars_misc_1d=[semis,semiss,solvar]
+		# vars_misc_1d_lens=[16,29,29]
+		# vars_lay_nmol=[wkl]
+
+		vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,ncloudcols]
+		vars_master_lev_cld=[tz_master,pz_master,altz_master,totuflux_master,totuflux_lw_master,totuflux_sw_master,totdflux_master,totdflux_lw_master,totdflux_sw_master,fnet_master,fnet_lw_master,fnet_sw_master,htr_master,htr_lw_master,htr_sw_master,wbrodl_master,conv_master]
+		vars_master_lay_cld=[tavel_master,pavel_master]
+		vars_master_lay_cld_nmol=[wkl_master]
 
 		if(ts>0):
 			for i in range(1,nlayers):
@@ -1627,7 +1669,8 @@ for ts in range(timesteps):
 			plotrrtmoutput()
 			plotted=1
 		print('Equilibrium reached!')
-		writeoutputfile()
+		# writeoutputfile()
+		writeoutputfile_masters()
 		filewritten=1
 		break
 	elif(ts==timesteps-1):
@@ -1635,7 +1678,8 @@ for ts in range(timesteps):
 		if(plotted!=1):
 			plotrrtmoutput()
 			plotted=1
-		writeoutputfile()
+		# writeoutputfile()
+		writeoutputfile_masters()
 		filewritten=1
 
 	# end timesteps loop
@@ -1661,6 +1705,8 @@ for ts in range(timesteps):
 
 	# dtz = tz-prev_tz
 	# maxdtz=dtz[np.argmax(abs(dtz))]
+
+
 
 
 
