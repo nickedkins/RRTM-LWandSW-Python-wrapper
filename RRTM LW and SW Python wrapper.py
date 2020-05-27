@@ -264,7 +264,7 @@ def convection(T,z):
 	for i in range(1,len(T)):
 		dT = (T[i]-T[i-1])
 		dz = (z[i]-z[i-1])/1000.
-		if( (-1.0 * dT/dz > lapse or z[i]/1000. < -1.) and z[i]/1000. < 15. ):
+		if( (-1.0 * dT/dz > lapse or z[i]/1000. < -1.) and z[i]/1000. < 25. ):
 			conv[i]=1.
 			T[i] = T[i-1] - lapse * dz
 	# print(conv)
@@ -299,13 +299,13 @@ def writeoutputfile():
 
 
 # master switches
-master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2'
+master_input=5 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: RCEMIP mods
 conv_on=1 #0: no convection, 1: convective adjustment
-if(master_input==3):
+if(master_input==3 or master_input==5):
 	conv_on=1
 lowlay_lowlev_coupled=0 #0: lowest level and lowest layer temperature independent, 1: lowest level and lowest layer temperatures coupled (equal)
 surf_lowlev_coupled=0 #0: surface and lowest level temperatures independent, 1: lowest level temperature = surface temperature
-lay_intp=1 #0: linear interpolation to get tavel from tz, 1: isothermal layers
+lay_intp=2 #0: linear interpolation to get tavel from tz, 1: isothermal layers, 2: lev = geometric mean of lays
 # if(conv_on==1):
 # 	surf_lowlev_coupled=1
 
@@ -333,7 +333,7 @@ ur_min=0.6
 ur_max=3.0
 eqb_maxhtr=1e-4
 eqb_maxdfnet=1e-3
-toa_fnet_eqb=1.0e12
+toa_fnet_eqb=1e-1
 timesteps=10000
 cti=0
 surf_rh=0.8
@@ -389,12 +389,12 @@ elif(master_input==2):
 	0.64,
 	0.64,
 	])
-elif(master_input==3):
+elif(master_input==3 or master_input==5):
 	semiss=np.ones(29)*0.93
 	# semiss=np.ones(29)*0.1
 iform=1
 psurf=1000.
-if(master_input==3):
+if(master_input==3 or master_input==5):
 	psurf=1014.8
 pmin=1.
 # secntk=0
@@ -409,18 +409,18 @@ if(master_input==1):
 	sza=65. 			#Solar zenith angle in degrees (0 deg is overhead).
 elif(master_input==2):
 	sza=45. #(RD repl) 			#Solar zenith angle in degrees (0 deg is overhead).
-elif(master_input==3): # RCEMIP
+elif(master_input==3 or master_input==5): # RCEMIP
 	sza=42.05
 isolvar=0 		#= 0 each band uses standard solar source function, corresponding to present day conditions. 
 				#= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
 				#= 2 scale solar source function, each band has different scale factors (for band IB, equal to SOLVAR(IB))			
 solvar=np.ones(29)
-if(master_input==3):
+if(master_input==3 or master_input==5):
 	isolvar=2
 	# solvar=np.ones(29)*551.58/1015.98791896
 	solvar=np.ones(29)*409.6/1015.98791896 # different interpretation of 'insolation'
 lapse=5.7
-if(master_input==3): # RCEMIP
+if(master_input==3 or master_input==5): # RCEMIP
 	lapse=6.7
 tmin=120
 tmax=400.
@@ -1204,22 +1204,22 @@ if(master_input==0):
 	for i in range(1,nlayers):
 		altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
 	altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
-	tz=np.ones(nlayers+1) * tbound-5.7*altz/1000.
+	tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
 	tz=np.clip(tz,tmin,tmax)
 	for i in range(nlayers):
 		tavel[i]=(tz[i]+tz[i+1])/2.
 	tavel[nlayers-1] = tavel[nlayers-2]
-elif(master_input==3): # RCEMIP hydrostatics
+elif(master_input==3 or master_input==5): # RCEMIP hydrostatics
 	tbound=295.
 	g1=3.6478
 	g2=0.83209
 	g3=11.3515
-	q0295=12e-3 # other values for different tbounds
+	# q0295=12e-3 # other values for different tbounds
+	q0295=12. # other values for different tbounds
 	zq1=4000.
 	zq2=7500.
 	zt=15000.
-	# qt=1e-8 #needs to be 1e-11, but is multiplied by 1e-3 later
-	qt=1e-11 #needs to be 1e-11, but is multiplied by 1e-3 later
+	qt=1e-11
 	altz=np.linspace(0.,40.,nlayers+1)
 	altz*=1.e3
 	trop_ind = np.argmin(abs(altz-15000.))
@@ -1229,7 +1229,7 @@ elif(master_input==3): # RCEMIP hydrostatics
 			q[i]=q0295*exp(-altz[i]/zq1)*exp(-(altz[i]/zq2)**2.)
 		else:
 			q[i]=qt
-	tv0=tbound*(1.+0.608*q0295)
+	tv0=tbound*(1.+0.608*q0295*1e-3)
 	tv=np.zeros(nlayers+1)
 	for i in range(nlayers):
 		if(altz[i]<zt):
@@ -1346,24 +1346,26 @@ if(master_input==0): # manual input
 		wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
 		wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
 	# wkl = np.clip(wkl,1.,1e63) #only if wkl is molec/cm, not mixing ratio!
-elif(master_input==3): # RCEMIP
-	g1=3.6478
+elif(master_input==3 or master_input==5): # RCEMIP
+	g1=3.6478**0.83209
 	g2=0.83209
 	g3=11.3515
 	for i in range(nlayers):
 		wbrodl[i] = mperlayr_air[i] * 1.0e-4
 		if(altz[i]/1000.<15.):
-			# wkl[1,i]=q[i]*1e-3
-			wkl[1,i]=q[i]
+			wkl[1,i]=q[i]*1e-3*1.6
 		else:
-			# wkl[1,i]=qt*1e-3
-			wkl[1,i]=qt
+			wkl[1,i]=qt*1e-3*1.6
 		wkl[2,i]=348e-6 # co2
 		wkl[3,i]=g1*pz[i]**(g2)*np.exp(-1.0*(pz[i]/g3))*1e-6 # o3
 		wkl[4,i]=306e-9 # n2o
 		wkl[5,i]=0.# co
 		wkl[6,i]=1650e-9 # ch4
-		wkl[7,i]=0. # o2
+		if(master_input==3):
+			wkl[7,i]=0. # o2
+		elif(master_input==5):
+			# wkl[7,i]=0.209 # o2
+			wkl[7,i]=0.0 # o2
 
 # wkl[2,:]*=4.0
 
@@ -1440,7 +1442,7 @@ for ts in range(timesteps):
 		# 		wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]*0.
 
 	# dtbound=(fnet_sw[0]-fnet_lw[0])*0.1
-	dtbound=toa_fnet*0.1*0.
+	dtbound=toa_fnet*0.1
 	dtbound=np.clip(dtbound,-dmax,dmax)
 	tbound+=dtbound
 	tz[0]=tbound
@@ -1459,7 +1461,7 @@ for ts in range(timesteps):
 
 	prev_htr=htr
 
-	if(ts>1 and (master_input==2 or master_input==3) ):
+	if(ts>1 and (master_input==2 or master_input==3 or master_input==5) ):
 		totuflux_sw*=(238./fnet_sw[nlayers])
 		totdflux_sw*=(238./fnet_sw[nlayers])
 		htr_sw*=(238./fnet_sw[nlayers])
@@ -1494,8 +1496,10 @@ for ts in range(timesteps):
 	for i in range(1,nlayers):
 		if(lay_intp==0):
 			tz[i] = (tavel[i-1] + tavel[i])/2.
-		else:
+		elif(lay_intp==1):
 			tz[i] = tavel[i-1]*1.0
+		elif(lay_intp==2):
+			tz[i]=(tavel[i-1]*tavel[i])**0.5
 
 	tz[nlayers]=tavel[nlayers-1]
 	# tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
