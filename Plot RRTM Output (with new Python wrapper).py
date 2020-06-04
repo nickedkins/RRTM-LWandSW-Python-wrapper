@@ -1,4 +1,4 @@
-# Plot RRTM Output (with new Python wrapper)
+	# Plot RRTM Output (with new Python wrapper)
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -65,7 +65,6 @@ def plotrrtmoutput():
 	plt.figure(1)
 	plt.subplot(221)
 	plt.semilogy(tz,pz)
-	# plt.plot(tz,altz/1000.)
 	plt.plot(tbound,pz[0],'o')
 	plt.ylim(max(pz),min(pz))
 	plt.xlabel('tz')
@@ -108,6 +107,44 @@ def plotrrtmoutput():
 	# logpplot(wkl[2,:],pavel,'wkl2 (co2)','pavel')
 	# plt.subplot(339)
 	# logpplot(wkl[3,:],pavel,'wkl3 (o3)','pavel')
+
+def plotrrtmoutput_masters():
+	plt.figure(1)
+	for i_cld in range(ncloudcols):
+		plt.subplot(331)
+		plt.plot(tz_master[:,i_cld],altz_master[:,i_cld])
+		# plt.semilogy(tavel_master[:,i_cld],pavel_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('tz')
+		plt.subplot(332)
+		plt.semilogy(totuflux_master[:,i_cld],pz_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('totuflux')
+		plt.subplot(333)
+		plt.semilogy(totdflux_lw_master[:,i_cld],pz_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('totdflux')
+		plt.subplot(334)
+		plt.semilogy(fnet_master[:,i_cld],pz_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('fnet')
+		plt.subplot(335)
+		plt.semilogy(wkl_master[:,i_cld,0],pavel_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('wkl1')
+		plt.subplot(336)
+		plt.semilogy(wkl_master[:,i_cld,1],pavel_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('wkl2')
+		plt.subplot(337)
+		plt.semilogy(wkl_master[:,i_cld,2],pavel_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('wkl3')
+		plt.subplot(338)
+		plt.semilogy(wbrodl_master[:,i_cld],pz_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('wbrodl')
+
 
 def readrrtmoutput(fn):
 	f = open(fn)
@@ -224,6 +261,16 @@ cti=0
 maxhtr=0.
 cld_lay=0.
 
+master_input=0
+conv_on=0
+surf_lowlev_coupled=0
+lay_intp=0
+lw_on=0
+sw_on=0
+eqb_maxdfnet=0
+toa_fnet_eqb=0
+
+
 # pz=np.linspace(psurf,pmin,nlayers+1)
 # totuflux=np.zeros(nlayers+1)
 # totdflux=np.zeros(nlayers+1)
@@ -254,7 +301,7 @@ cld_lay=0.
 # vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
 # solvar=np.zeros(29)
 
-vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,ncloudcols]
+vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,ncloudcols,master_input,conv_on,surf_lowlev_coupled,lay_intp,lw_on,sw_on,eqb_maxdfnet,toa_fnet_eqb]
 
 i_dir=0
 for directory in directories:
@@ -334,6 +381,19 @@ for directory in directories:
 		maxhtr	=	float	(	f.readline().rstrip('\n')	)
 		cld_lay	=	float	(	f.readline().rstrip('\n')	)
 		ncloudcols	=	int	(	f.readline().rstrip('\n')	)
+		master_input =	float	(	f.readline().rstrip('\n')	)
+		conv_on=float	(	f.readline().rstrip('\n')	)
+		surf_lowlev_coupled=float	(	f.readline().rstrip('\n')	)
+		lay_intp=float	(	f.readline().rstrip('\n')	)
+		lw_on=float	(	f.readline().rstrip('\n')	)
+		sw_on=float	(	f.readline().rstrip('\n')	)
+		eqb_maxdfnet=float	(	f.readline().rstrip('\n')	)
+		toa_fnet_eqb=float	(	f.readline().rstrip('\n')	)
+		
+
+
+
+		print ncloudcols
 
 		pz=np.linspace(psurf,pmin,nlayers+1)
 		totuflux=np.zeros(nlayers+1)
@@ -343,6 +403,7 @@ for directory in directories:
 		pavel=np.zeros(nlayers)
 		tz=np.ones(nlayers+1) * tbound
 		altz=np.zeros(nlayers+1)
+		altavel=np.zeros(nlayers)
 		tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
 		tavel=np.zeros(nlayers)
 		esat_liq=np.zeros(nlayers)
@@ -365,11 +426,20 @@ for directory in directories:
 		vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
 		solvar=np.zeros(29)
 
+		inflags=np.ones(ncloudcols)
+		iceflags=np.ones(ncloudcols)
+		liqflags=np.ones(ncloudcols)
+		cld_lays=np.ones(ncloudcols)
+		cld_fracs=np.ones(ncloudcols)
+		tauclds=np.array((3.0,0.0))
+		ssaclds=np.array((0.5,0.0))
+
 		tz_master=np.zeros((nlayers+1,ncloudcols))
 		tavel_master=np.zeros((nlayers,ncloudcols))
 		pz_master=np.zeros((nlayers+1,ncloudcols))
 		pavel_master=np.zeros((nlayers,ncloudcols))
 		altz_master=np.zeros((nlayers+1,ncloudcols))
+		altavel_master=np.zeros((nlayers,ncloudcols))
 
 		totuflux_master=np.zeros((nlayers+1,ncloudcols))
 		totuflux_lw_master=np.zeros((nlayers+1,ncloudcols))
@@ -386,7 +456,7 @@ for directory in directories:
 		wbrodl_master=np.zeros((nlayers+1,ncloudcols))
 		conv_master=np.zeros((nlayers+1,ncloudcols))
 
-		wkl_master=np.zeros((nlayers,ncloudcols,nmol))
+		wkl_master=np.zeros((nlayers,ncloudcols,nmol+1))
 
 		# vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
 		# vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
@@ -395,10 +465,13 @@ for directory in directories:
 		# vars_misc_1d_lens=[16,29,29]
 		# vars_lay_nmol=[wkl]
 
-		vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,ncloudcols]
-		vars_master_lay_cld=[tavel_master,pavel_master]
-		vars_master_lev_cld=[tz_master,pz_master,altz_master,totuflux_master,totuflux_lw_master,totuflux_sw_master,totdflux_master,totdflux_lw_master,totdflux_sw_master,fnet_master,fnet_lw_master,fnet_sw_master,htr_master,htr_lw_master,htr_sw_master,wbrodl_master,conv_master]
+		vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,ncloudcols,master_input,conv_on,surf_lowlev_coupled,lay_intp,lw_on,sw_on,eqb_maxdfnet,toa_fnet_eqb]
+		vars_master_lay_cld=[tavel_master,pavel_master,altavel_master,wbrodl_master]
+		vars_master_lev_cld=[tz_master,pz_master,altz_master,totuflux_master,totuflux_lw_master,totuflux_sw_master,totdflux_master,totdflux_lw_master,totdflux_sw_master,fnet_master,fnet_lw_master,fnet_sw_master,htr_master,htr_lw_master,htr_sw_master,conv_master]
+		vars_misc_1d=[semis,semiss,solvar]
+		vars_misc_1d_lens=[16,29,29]
 		vars_master_lay_cld_nmol=[wkl_master]
+		vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds]
 
 
 		# for x in vars_lay:
@@ -432,18 +505,22 @@ for directory in directories:
 				for i in range(nlayers+1):
 					x[i,j] = f.readline()
 
-		# i_lens=0
-		# for x in vars_misc_1d:
-		# 	for i in range(vars_misc_1d_lens[i_lens]):
-		# 		x[i] = f.readline()
-		# 	i_lens+=1
+		i_lens=0
+		for x in vars_misc_1d:
+			for i in range(vars_misc_1d_lens[i_lens]):
+				x[i] = f.readline()
+			i_lens+=1
 
 
 		for x in vars_master_lay_cld_nmol:
-			for k in range(nmol):
+			for k in range(nmol+1):
 				for j in range(ncloudcols):
 					for i in range(nlayers):
 						x[i,j,k] = f.readline()
+
+		for x in vars_master_cld:
+			for i in range(ncloudcols):
+				x[i]=f.readline()
 
 
 		dfnet=np.zeros(nlayers)
@@ -451,7 +528,6 @@ for directory in directories:
 		for i in range(nlayers):
 			dfnet[i]=fnet[i+1]-fnet[i]
 
-		# plotrrtmoutput()
 
 		#print output for easy spreadsheet transfer
 		# for i in range(nlayers):
@@ -464,13 +540,11 @@ for directory in directories:
 		# cld_lay_master[:,i_file,i_dir]=cld_lay
 
 		i_file+=1
+		plotrrtmoutput_masters()
+		print semis
 	i_dir+=1	
 
 
-plt.figure(1)
-plt.semilogy(totuflux_master[:,0],pz_master[:,0])
-plt.semilogy(totuflux_master[:,1],pz_master[:,1])
-plt.ylim(1000,1)
 
 # print(totuflux_lw_master[nlayers,:,1][:,0]-totuflux_lw_master[nlayers,:,1][:,0][0])
 

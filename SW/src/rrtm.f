@@ -458,8 +458,9 @@ C     No cross-sections implemented in shortwave.
 C     If clouds are present, read in appropriate input file, IN_CLD_RRTM.
       IF (ICLD .EQ. 1) CALL READCLD
 
-
-      READ (IRD,9020) JULDAT, SZA, ISOLVAR, (SOLVAR(IB),IB=IB1,IB2)
+      
+!      READ (IRD,9020) JULDAT, SZA, ISOLVAR, (SOLVAR(IB),IB=IB1,IB2)
+      READ (IRD,9020) JULDAT, SZA, ISOLVAR, (SOLVAR(IB),IB=16,29)
 
       ZENITH = COS(SZA * PI / 180.)
       IF (JULDAT .EQ. 0) THEN
