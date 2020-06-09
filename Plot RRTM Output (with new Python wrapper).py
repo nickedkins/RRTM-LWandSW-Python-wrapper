@@ -9,8 +9,8 @@ from os import listdir
 # from pandas import ExcelFile
 
 directories = [
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/trop perts from eqb/nl=590/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/radiator fin wkl1 perts/'
 ]
 
 def init_plotting():
@@ -119,7 +119,7 @@ def plotrrtmoutput_masters():
 		# plt.legend()
 		# plt.grid(which='both')
 		# plt.subplot(332)
-		# plt.semilogy(totuflux_master[:,i_cld],pz_master[:,i_cld])
+		# plt.semilogy(totuflux_lw_master[:,i_cld],pz_master[:,i_cld])
 		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
 		# plt.xlabel('totuflux')
 		# plt.subplot(333)
@@ -149,12 +149,12 @@ def plotrrtmoutput_masters():
 		# plt.subplot(339)
 		# plt.semilogy(dfnet,pavel_master[:,i_cld])
 		# plt.subplot(122)
-		plt.plot(dfnet,pavel_master[:,i_cld],'-o',label=str(fn))
+		plt.plot(dfnet_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(fn)+str(i_cld))
 		plt.axvline(-eqb_maxdfnet,linestyle='--')
 		plt.axvline(eqb_maxdfnet,linestyle='--')
-		plt.ylim(275,0)
-		plt.xlim(-0.0002,0.0002)
-		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.ylim(275,0)
+		# plt.xlim(-0.0002,0.0002)
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
 		plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
 		plt.ylabel('Pressure (hPa)')
 		plt.grid(which='both')
@@ -443,6 +443,8 @@ for directory in directories:
 		cld_fracs=np.ones(ncloudcols)
 		tauclds=np.array((3.0,0.0))
 		ssaclds=np.array((0.5,0.0))
+		tbound_master=np.ones(ncloudcols)
+		toa_fnet_master=np.ones(ncloudcols)
 
 		tz_master=np.zeros((nlayers+1,ncloudcols))
 		tavel_master=np.zeros((nlayers,ncloudcols))
@@ -481,7 +483,7 @@ for directory in directories:
 		vars_misc_1d=[semis,semiss,solvar]
 		vars_misc_1d_lens=[16,29,29]
 		vars_master_lay_cld_nmol=[wkl_master]
-		vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds]
+		vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master]
 
 
 		# for x in vars_lay:
@@ -533,10 +535,11 @@ for directory in directories:
 				x[i]=f.readline()
 
 
-		dfnet=np.zeros(nlayers)
+		dfnet_master=np.zeros((nlayers,ncloudcols))
 
-		for i in range(nlayers):
-			dfnet[i]=fnet_master[i+1,0]-fnet_master[i,0]
+		for i_cld in range(ncloudcols):
+			for i in range(nlayers):
+				dfnet_master[i,i_cld]=fnet_master[i+1,i_cld]-fnet_master[i,i_cld]
 
 
 		#print output for easy spreadsheet transfer
@@ -550,9 +553,12 @@ for directory in directories:
 		# cld_lay_master[:,i_file,i_dir]=cld_lay
 
 		i_file+=1
-		plotrrtmoutput_masters()
+		# plotrrtmoutput_masters()
+		plt.plot(wkl_master[0,1,0],tbound_master[0],'o',c='r',label='warm pool')
+		plt.plot(wkl_master[0,1,0],tbound_master[1],'o',c='b',label='cold pool')
+		if(i_file==1):
+			plt.legend()
 	i_dir+=1	
-
 
 
 # print(totuflux_lw_master[nlayers,:,1][:,0]-totuflux_lw_master[nlayers,:,1][:,0][0])
