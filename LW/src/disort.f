@@ -374,7 +374,8 @@ c     .. Parameters ..
       INTEGER   MXCLY, MXULV, MXCMU, MXUMU, MXPHI, MI, MI9M2, NNLYRI,
      &          MXSQT
 caer  Increased these parameter values
-      PARAMETER ( MXCLY = 110, MXULV = 110, MXCMU = 32, MXUMU = 32,
+C       PARAMETER ( MXCLY = 110, MXULV = 110, MXCMU = 32, MXUMU = 32,
+      PARAMETER ( MXCLY = 600, MXULV = 600, MXCMU = 32, MXUMU = 32, !NJE
      &          MXPHI = 3, MI = MXCMU / 2, MI9M2 = 9*MI - 2,
      &          NNLYRI = MXCMU*MXCLY, MXSQT = 1000 )
 c     ..

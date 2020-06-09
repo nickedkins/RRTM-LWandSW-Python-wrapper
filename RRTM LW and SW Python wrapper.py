@@ -262,6 +262,7 @@ def plotrrtmoutput():
 	# plt.semilogy(tavel,pavel,'o',c='b')
 	plt.ylim(max(pz),min(pz))
 	plt.subplot(336)
+	# logpplot(wbrodl,pz,'wbrodl','pavel')
 	logpplot(wbrodl,pavel,'wbrodl','pavel')
 	plt.subplot(337)
 	logpplot(wkl[1,:],pavel,'wkl1 (h2o)','pavel')
@@ -270,13 +271,14 @@ def plotrrtmoutput():
 	plt.subplot(339)
 	logpplot(wkl[3,:],pavel,'wkl3 (o3)','pavel')
 
-def convection(T,z):
+def convection(T,z,conv_log):
 	T[0]=tbound
 	for i in range(1,len(T)):
 		dT = (T[i]-T[i-1])
 		dz = (z[i]-z[i-1])/1000.
 		if( (-1.0 * dT/dz > lapse or z[i]/1000. < -1.) and z[i]/1000. < 15. ):
-			conv[i]=1.
+			if(conv_log==1):
+				conv[i]=1.
 			T[i] = T[i-1] - lapse * dz
 
 def writeoutputfile():
@@ -340,7 +342,7 @@ def writeoutputfile_masters():
 		for i in range(ncloudcols):
 			f.write(str(x[i]))
 			f.write('\n')
-nlayers=60
+nlayers=590
 ncloudcols=1
 nmol=7
 
@@ -471,7 +473,7 @@ rsp=287.04 # RCEMIP value
 gravity=9.81
 filewritten=0
 sw_freq=100
-plotted=1
+plotted=0
 
 pin2 = 0.79 * 1e5 #convert the input in bar to Pa
 pico2 = 400e-6 * 1e5 #convert the input in bar to Pa
@@ -539,6 +541,10 @@ dmax=1.
 radice=90.
 radliq=7.
 
+maxdfnet=10.
+maxdfnet_ind=0
+stepssinceswcalled=0
+
 # init arrays
 
 tz_master=np.zeros((nlayers+1,ncloudcols))
@@ -597,15 +603,15 @@ ur=np.ones(nlayers)
 inflags=(np.ones(ncloudcols)*2).astype(int)
 iceflags=(np.ones(ncloudcols)*2).astype(int)
 liqflags=(np.ones(ncloudcols)*1).astype(int)
-cld_lays=np.ones(ncloudcols)*nlayers/5.
+cld_lays=np.ones(ncloudcols)*nlayers/20.
 cld_fracs=np.ones(ncloudcols)*1.
 ctest=' '
-tauclds=np.array((3.0,0.0))
+tauclds=np.array((0.5,0.0))
 # tauclds=np.array((0.0,0.0))
-ssaclds=np.array((0.5,0.0))
+ssaclds=np.array((0.25,0.0))
 
-input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run
-prev_output_file='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/2020_06_04 10_25_18'
+input_source=1 # 0: set inputs here, 1: use inputs from output file of previous run
+prev_output_file='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/2020_06_09 12_50_54'
 
 
 
@@ -638,7 +644,7 @@ if(input_source==1):
 	cinp	=	str	(	f.readline().rstrip('\n')	)
 	ipthak	=	int	(	f.readline().rstrip('\n')	)
 	ipthrk	=	float	(	f.readline().rstrip('\n')	)
-	juldat	=	float	(	f.readline().rstrip('\n')	)
+	juldat	=	int	(	f.readline().rstrip('\n')	)
 	sza	=	float	(	f.readline().rstrip('\n')	)
 	isolvar	=	int	(	f.readline().rstrip('\n')	)
 	lapse	=	float	(	f.readline().rstrip('\n')	)
@@ -669,7 +675,7 @@ if(input_source==1):
 	ur_max	=	float	(	f.readline().rstrip('\n')	)
 	eqb_maxhtr	=	float	(	f.readline().rstrip('\n')	)
 	timesteps	=	int	(	f.readline().rstrip('\n')	)
-	timesteps=1
+	timesteps=2
 	cti	=	int	(	f.readline().rstrip('\n')	)
 	maxhtr	=	float	(	f.readline().rstrip('\n')	)
 	cld_lay	=	float	(	f.readline().rstrip('\n')	)
@@ -678,8 +684,8 @@ if(input_source==1):
 	conv_on=float	(	f.readline().rstrip('\n')	)
 	surf_lowlev_coupled=float	(	f.readline().rstrip('\n')	)
 	lay_intp=float	(	f.readline().rstrip('\n')	)
-	lw_on=float	(	f.readline().rstrip('\n')	)
-	sw_on=float	(	f.readline().rstrip('\n')	)
+	lw_on=int	(	f.readline().rstrip('\n')	)
+	sw_on=int	(	f.readline().rstrip('\n')	)
 	eqb_maxdfnet=float	(	f.readline().rstrip('\n')	)
 	toa_fnet_eqb=float	(	f.readline().rstrip('\n')	)
 
@@ -721,8 +727,8 @@ if(input_source==1):
 	liqflags=np.ones(ncloudcols)
 	cld_lays=np.ones(ncloudcols)
 	cld_fracs=np.ones(ncloudcols)
-	tauclds=np.array((3.0,0.0))
-	ssaclds=np.array((0.5,0.0))
+	tauclds=np.array((0.5,0.0))
+	ssaclds=np.array((0.25,0.0))
 
 	tz_master=np.zeros((nlayers+1,ncloudcols))
 	tavel_master=np.zeros((nlayers,ncloudcols))
@@ -743,7 +749,7 @@ if(input_source==1):
 	htr_master=np.zeros((nlayers+1,ncloudcols))
 	htr_lw_master=np.zeros((nlayers+1,ncloudcols))
 	htr_sw_master=np.zeros((nlayers+1,ncloudcols))
-	wbrodl_master=np.zeros((nlayers+1,ncloudcols))
+	wbrodl_master=np.zeros((nlayers,ncloudcols))
 	conv_master=np.zeros((nlayers+1,ncloudcols))
 
 	wkl_master=np.zeros((nlayers,ncloudcols,nmol+1))
@@ -755,8 +761,6 @@ if(input_source==1):
 	vars_misc_1d_lens=[16,29,29]
 	vars_master_lay_cld_nmol=[wkl_master]
 	vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds]
-
-
 
 
 	for x in vars_master_lay_cld:
@@ -786,8 +790,6 @@ if(input_source==1):
 	for x in vars_master_cld:
 		for i in range(ncloudcols):
 			x[i]=f.readline()
-
-	print 'tavel: {}'.format(tavel_master[nlayers-1,0])	
 
 elif(input_source==0):
 
@@ -1690,8 +1692,9 @@ for ts in range(timesteps):
 			for i in range(1,nlayers):
 				ur[i] = ur_min
 			
-			conv=np.zeros(nlayers+1) #reset to zero
-			conv[0]=1
+			if(input_source==0):
+				conv=np.zeros(nlayers+1) #reset to zero
+				conv[0]=1
 
 			# if(master_input==0):
 			# 	for i in range(nlayers):
@@ -1709,19 +1712,39 @@ for ts in range(timesteps):
 			tbound+=dtbound
 			# tz[0]=tbound
 
-		writeformattedcloudfile()
+		cti=0
+		for i in range(len(conv_master[:,i_cld])):
+			if(conv_master[i,i_cld]==1):
+				cti=i
+			else:
+				continue
 
+		print 'cti: {}'.format(cti)
+
+		if(input_source==1):
+			dttrop=-0.04
+			dptrop=gravity*pz[cti]*dttrop/(rsp*lapse*1e-3*tz[cti])
+			print dptrop, 'dptrop'
+			print pz[cti]
+			tz[cti]+=dttrop
+			pz[cti]+=dptrop
+
+		writeformattedcloudfile()
 
 		if(lw_on==1):
 			writeformattedinputfile_lw()
 			callrrtmlw()
 			totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
 
-		if(ts==1 and sw_on==1):
+		if((ts==1 or (abs(maxdfnet) < eqb_maxdfnet*10. and stepssinceswcalled>500)) and sw_on==1):
 		# 	if(maxhtr<eqb_maxhtr):
 			writeformattedinputfile_sw()
 			callrrtmsw()
+			print 'RRTM SW Called'
+			stepssinceswcalled=0
 			totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
+		stepssinceswcalled+=1
+
 
 		prev_htr=htr
 
@@ -1735,7 +1758,7 @@ for ts in range(timesteps):
 		fnet=fnet_sw-fnet_lw
 		htr=htr_lw+htr_sw
 
-		writeoutputfile_masters()
+		# writeoutputfile_masters()
 
 		toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
 		# toa_fnet=256.731-totuflux[nlayers]+0.0077 # NJE fix later
@@ -1781,8 +1804,8 @@ for ts in range(timesteps):
 				tz[0]=tbound
 
 			if(conv_on==1):
-				convection(tavel,altavel)
-				convection(tz,altz)
+				convection(tavel,altavel,1)
+				convection(tz,altz,1)
 
 			tavel=np.clip(tavel,tmin,tmax)
 			tz=np.clip(tz,tmin,tmax)
@@ -1806,7 +1829,8 @@ for ts in range(timesteps):
 		htr_master[:,i_cld]=htr
 		htr_lw_master[:,i_cld]=htr_lw
 		htr_sw_master[:,i_cld]=htr_sw
-		conv_master[:,i_cld]=conv
+		if(input_source==0):
+			conv_master[:,i_cld]=conv
 		wbrodl_master[:,i_cld]=wbrodl
 
 		for i_mol in range(nmol+1):
@@ -1821,18 +1845,16 @@ for ts in range(timesteps):
 			dfnet_master[i,i_cld]=fnet_master[i+1,i_cld]-fnet_master[i,i_cld]
 			dpz_master[i,i_cld]=pz_master[i+1,i_cld]-pz_master[i,i_cld]
 
-	plt.figure(1)
-	plt.semilogy(dfnet_master[:,0]/dpz_master[:,0],pavel)
-	# plt.semilogy(tz,pz)
-	plt.ylim(1000,1)
+	# plt.figure(1)
+	# plt.plot(dfnet_master[:,0],pavel_master[:,0])
+	# plt.ylim(1000,1)
 
-	maxdfnet=10.
-	maxdfnet_ind=15
 
 	# for i_cld in range(ncloudcols):
 	if(input_source==0):
 		for i in range(nlayers):
-			dT=np.mean(dfnet_master[i,:]/dpz_master[i,:])*-1.*3.
+			cldweights=[0.2,0.8]
+			dT=np.mean(dfnet_master[i,:]/dpz_master[i,:]*cldweights)*-1.*3.
 			dT=np.clip(dT,-dmax,dmax)
 			# dT = htr[i]/3. #undrelax
 			# dT=np.clip(dT,-dmax,dmax)
@@ -1866,6 +1888,8 @@ for ts in range(timesteps):
 		filewritten=1
 
 	# end timesteps loop
+
+writeoutputfile_masters()
 
 
 if(plotted==0):

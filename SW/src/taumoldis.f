@@ -134,7 +134,8 @@ C  --------------------------------------------------------------------------
 
 C     BAND 16:  2600-3250 cm-1 (low - H2O,CH4; high - CH4)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+      PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38) !NJE
 
 C  Output
 
@@ -260,7 +261,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 17:  3250-4000 cm-1 (low - H2O,CO2; high - H2O,CO2)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+        PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38)
 
 C  Output
 
@@ -424,7 +426,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 18:  4000-4650 cm-1 (low - H2O,CH4; high - CH4)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+        PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38)
 
 C  Output
 
@@ -581,7 +584,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 19:  4650-5150 cm-1 (low - H2O,CO2; high - CO2)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+      PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38) !NJE
 
 C  Output
 
@@ -740,7 +744,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 20:  5150-6150 cm-1 (low - H2O; high - H2O)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+      PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38) !NJE
 
 C  Output
 
@@ -857,7 +862,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 21:  6150-7700 cm-1 (low - H2O,CO2; high - H2O,CO2)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+      PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38) !NJE
 
 C  Output
 
@@ -1037,7 +1043,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 22:  7700-8050 cm-1 (low - H2O,O2; high - O2)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+        PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38)
 
 C  Output
 
@@ -1202,7 +1209,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 23:  8050-12850 cm-1 (low - H2O; high - nothing)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+      PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38) !NJE
 
 C  Output
 
@@ -1300,7 +1308,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 24:  12850-16000 cm-1 (low - H2O,O2; high - O2)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+        PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38) !NJE
 
 C  Output
 
@@ -1513,7 +1522,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 25:  16000-22650 cm-1 (low - H2O; high - nothing)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+      PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38) !NJE
 
 C  Output
 
@@ -1616,7 +1626,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 26:  22650-29000 cm-1 (low - nothing; high - nothing)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+      PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38) !NJE
 
 C  Output
 
@@ -1690,7 +1701,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 27:  29000-38000 cm-1 (low - O3; high - O3)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+        PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38) !NJE
 
 C  Output
 
@@ -1796,7 +1808,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 28:  38000-50000 cm-1 (low - O3,O2; high - O3,O2)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+      PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38) !NJE
 
 C  Output
 
@@ -1941,7 +1954,8 @@ C----------------------------------------------------------------------------
 
 C     BAND 29:  820-2600 cm-1 (low - H2O; high - CO2)
 
-      PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+C       PARAMETER (MG=16, MXLAY=203, NBANDS=14, MXMOL=38)
+      PARAMETER (MG=16, MXLAY=603, NBANDS=14, MXMOL=38) !NJE
 
 C  Output
 

@@ -18,7 +18,8 @@ C     Purpose:  For a given atmosphere, calculate the indices and
 C     fractions related to the pressure and temperature interpolations.
 
       PARAMETER (MXMOL=38)
-      PARAMETER (MXLAY = 203)
+C       PARAMETER (MXLAY = 203)
+      PARAMETER (MXLAY = 603) !NJE
       PARAMETER (MG =16)
 
 C  Input      

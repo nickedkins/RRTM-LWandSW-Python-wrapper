@@ -9,15 +9,13 @@ from os import listdir
 # from pandas import ExcelFile
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cld tests/old/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cld tests/new/'
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/p_cld/taucld=1, ssacld=0.5/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/trop perts from eqb/nl=590/'
 ]
 
 def init_plotting():
 	plt.rcParams['figure.figsize'] = (10,10)
-	plt.rcParams['font.size'] = 10
+	plt.rcParams['font.size'] = 20
 	plt.rcParams['font.family'] = 'Times New Roman'
 	plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
 	plt.rcParams['axes.titlesize'] = 1.2*plt.rcParams['font.size']
@@ -111,39 +109,56 @@ def plotrrtmoutput():
 def plotrrtmoutput_masters():
 	plt.figure(1)
 	for i_cld in range(ncloudcols):
-		plt.subplot(331)
-		plt.plot(tz_master[:,i_cld],altz_master[:,i_cld])
-		# plt.semilogy(tavel_master[:,i_cld],pavel_master[:,i_cld])
+		# plt.subplot(331)
+		# plt.subplot(121)
+		# plt.plot(tz_master[:,i_cld],altz_master[:,i_cld])
+		# plt.semilogy(tz_master[:,i_cld],pz_master[:,i_cld],'-o',label=str(fn))
 		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('tz')
-		plt.subplot(332)
-		plt.semilogy(totuflux_master[:,i_cld],pz_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('totuflux')
-		plt.subplot(333)
-		plt.semilogy(totdflux_lw_master[:,i_cld],pz_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('totdflux')
-		plt.subplot(334)
-		plt.semilogy(fnet_master[:,i_cld],pz_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('fnet')
-		plt.subplot(335)
-		plt.semilogy(wkl_master[:,i_cld,0],pavel_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('wkl1')
-		plt.subplot(336)
-		plt.semilogy(wkl_master[:,i_cld,1],pavel_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('wkl2')
-		plt.subplot(337)
-		plt.semilogy(wkl_master[:,i_cld,2],pavel_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('wkl3')
-		plt.subplot(338)
-		plt.semilogy(wbrodl_master[:,i_cld],pz_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('wbrodl')
+		# plt.xlabel('T (K)')
+		# plt.ylabel('Pressure (hPa)')
+		# plt.legend()
+		# plt.grid(which='both')
+		# plt.subplot(332)
+		# plt.semilogy(totuflux_master[:,i_cld],pz_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('totuflux')
+		# plt.subplot(333)
+		# plt.semilogy(totdflux_lw_master[:,i_cld],pz_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('totdflux')
+		# plt.subplot(334)
+		# plt.semilogy(fnet_master[:,i_cld],pz_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('fnet')
+		# plt.subplot(335)
+		# plt.semilogy(wkl_master[:,i_cld,0],pavel_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('wkl1')
+		# plt.subplot(336)
+		# plt.semilogy(wkl_master[:,i_cld,1],pavel_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('wkl2')
+		# plt.subplot(337)
+		# plt.semilogy(wkl_master[:,i_cld,2],pavel_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('wkl3')
+		# plt.subplot(338)
+		# plt.semilogy(wbrodl_master[:,i_cld],pz_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('wbrodl')
+		# plt.subplot(339)
+		# plt.semilogy(dfnet,pavel_master[:,i_cld])
+		# plt.subplot(122)
+		plt.plot(dfnet,pavel_master[:,i_cld],'-o',label=str(fn))
+		plt.axvline(-eqb_maxdfnet,linestyle='--')
+		plt.axvline(eqb_maxdfnet,linestyle='--')
+		plt.ylim(275,0)
+		plt.xlim(-0.0002,0.0002)
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
+		plt.ylabel('Pressure (hPa)')
+		plt.grid(which='both')
+		plt.legend()
 
 
 def readrrtmoutput(fn):
@@ -389,11 +404,6 @@ for directory in directories:
 		sw_on=float	(	f.readline().rstrip('\n')	)
 		eqb_maxdfnet=float	(	f.readline().rstrip('\n')	)
 		toa_fnet_eqb=float	(	f.readline().rstrip('\n')	)
-		
-
-
-
-		print ncloudcols
 
 		pz=np.linspace(psurf,pmin,nlayers+1)
 		totuflux=np.zeros(nlayers+1)
@@ -526,7 +536,7 @@ for directory in directories:
 		dfnet=np.zeros(nlayers)
 
 		for i in range(nlayers):
-			dfnet[i]=fnet[i+1]-fnet[i]
+			dfnet[i]=fnet_master[i+1,0]-fnet_master[i,0]
 
 
 		#print output for easy spreadsheet transfer
@@ -541,7 +551,6 @@ for directory in directories:
 
 		i_file+=1
 		plotrrtmoutput_masters()
-		print semis
 	i_dir+=1	
 
 
