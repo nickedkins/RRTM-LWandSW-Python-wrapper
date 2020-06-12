@@ -17,7 +17,8 @@ tstart = datetime.datetime.now()
 
 project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
-wklfacs=np.linspace(0.1,10.,10)
+# wklfacs=np.linspace(0.1,10.,10)
+wklfacs=[0.01]
 for wklfac in wklfacs:
 
 	def init_plotting():
@@ -352,7 +353,7 @@ for wklfac in wklfacs:
 	zonal_transps = [-0.,0.]
 
 	# master switches
-	master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2'
+	master_input=5 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins
 	conv_on=1 #0: no convection, 1: convective adjustment
 	if(master_input==3):
 		conv_on=1
@@ -363,7 +364,7 @@ for wklfac in wklfacs:
 
 	# Declare variables
 	lw_on=1
-	sw_on=1
+	sw_on=0
 	gravity=9.79764 # RCEMIP value
 	avogadro=6.022e23
 	iatm=0 #0 for layer values, 1 for level values
@@ -385,7 +386,7 @@ for wklfac in wklfacs:
 	# eqb_maxdfnet=1e-4
 	eqb_maxdfnet=1e-1
 	toa_fnet_eqb=1.0e12
-	timesteps=10000
+	timesteps=3
 	cti=0
 	surf_rh=0.8
 	vol_mixh2o_min = 1e-6
@@ -395,7 +396,7 @@ for wklfac in wklfacs:
 	maxhtr=0.
 	toa_fnet=0
 
-	tbound=283.422 #surface temperature (K)
+	tbound=335. #surface temperature (K)
 	iemiss=2 #surface emissivity. Keep this fixed for now.
 	iemis=2
 	ireflect=0 #for Lambert reflection
@@ -473,7 +474,11 @@ for wklfac in wklfacs:
 	lapse=5.7
 	if(master_input==3): # RCEMIP
 		lapse=6.7
+	elif(master_input==5):
+		lapse=6.2
 	tmin=120
+	if(master_input==5):
+		tmin=200.
 	tmax=400.
 	rsp=287.04 # RCEMIP value
 	gravity=9.81
@@ -1590,12 +1595,28 @@ for wklfac in wklfacs:
 			tavel=np.zeros(nlayers)
 			for i in range(len(pavel)):
 				tavel[i]=(tz[i]+tz[i+1])/2.
+		elif(master_input==5):
+			pz=np.linspace(psurf,pmin,nlayers+1)
+			for i in range(len(pavel)):
+				pavel[i]=(pz[i]+pz[i+1])/2.
+			altz[0] = 0.0
+			for k in range(3):
+				for i in range(1,nlayers):
+					altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+				altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
+				tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
+				tz=np.clip(tz,tmin,tmax)
+				tavel=np.zeros(nlayers)
+				for i in range(nlayers):
+					tavel[i]=(tz[i]+tz[i+1])/2.
+				tavel[nlayers-1] = tavel[nlayers-2]
+
 
 		for i in range(nlayers):
 			altavel[i]=(altz[i]+altz[i+1])/2.
 
 		for i in range(nlayers):
-			# h2o
+			# h2o (manabe mw67)
 			esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
 			rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
 			vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
@@ -1644,13 +1665,28 @@ for wklfac in wklfacs:
 				wkl[5,i]=0.# co
 				wkl[6,i]=1650e-9 # ch4
 				wkl[7,i]=0. # o2
-
-
+		elif(master_input==5):
+			esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
+			surf_rh=0.8
+			for i in range(nlayers):
+				rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
+				vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
+				if(i>1 and vol_mixh2o[i] > vol_mixh2o[i-1]):
+					vol_mixh2o[i]=vol_mixh2o[i-1]
+				vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
+				wbrodl[i] = mperlayr_air[i] * 1.0e-4
+				wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
+				# wkl[1,i] = mperlayr[i] * 1.0e-4 * 123e-6
+				# wkl[2,i] = mperlayr[i] * 1.0e-4 * vol_mixco2
+				wkl[2,i] = mperlayr[i] * 1.0e-4 * 400e-6
+				wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]*0.
+				# wkl[3,i] = mperlayr[i] * 1.0e-4 * 456e-6
+				wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
+				wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
 
 		color=[]
 		for i in range(nlayers+1):
 		    color.append('#%06X' % randint(0, 0xFFFFFF))
-
 
 
 	# main loop (timestepping)
@@ -1681,14 +1717,11 @@ for wklfac in wklfacs:
 
 				toa_fnet=toa_fnet_master[i_cld]
 
-				if(i_cld==1 and ts==2):
-					wkl[1,:]=wkl_master[:,i_cld,0]*wklfac
-
-				zonal_transps[0]=(tbound_master[1]-tbound_master[0])*10.
+				zonal_transps[0]=(tbound_master[1]-tbound_master[0])*0.
 				zonal_transps[1]=zonal_transps[0]*-1.
 
-
-			# print wkl[2,:]
+			if(i_cld==1 and ts==1):
+				wkl[1,:]=wkl_master[:,i_cld,0]*wklfac
 
 			inflag=inflags[i_cld].astype('int')
 			iceflag=iceflags[i_cld].astype('int')
@@ -1731,9 +1764,11 @@ for wklfac in wklfacs:
 			# 	tbound+=dtbound
 
 			if(input_source==0):
-				dtbound=toa_fnet*0.1*0.5
+				dtbound=toa_fnet*0.1*0.5*0.
 				dtbound=np.clip(dtbound,-dmax,dmax)
 				tbound+=dtbound
+
+			# if(input_source==0 and master_input==5)
 
 			cti=0
 			for i in range(len(conv_master[:,i_cld])):
@@ -1826,7 +1861,7 @@ for wklfac in wklfacs:
 					tz[0]=tbound
 
 				if(conv_on==1):
-					convection(tavel,altavel,1)
+					# convection(tavel,altavel,1)
 					convection(tz,altz,1)
 
 				tavel=np.clip(tavel,tmin,tmax)
@@ -1879,7 +1914,7 @@ for wklfac in wklfacs:
 			for i_cld in range(ncloudcols):
 				for i in range(nlayers):
 					cldweights=[0.5,0.5]
-					dT=np.mean(dfnet_master[i,:]/dpz_master[i,:]*cldweights)*-1.*3.*2.
+					dT=np.mean(dfnet_master[i,:]/dpz_master[i,:]*cldweights)*-1.*3.*2.*0.
 					dT=np.clip(dT,-dmax,dmax)
 					# dT = htr[i]/3. #undrelax
 					# dT=np.clip(dT,-dmax,dmax)
@@ -1894,8 +1929,8 @@ for wklfac in wklfacs:
 		# maxdfnet_ind=np.argmax(abs(re_dfnets))
 		# maxdfnet=dfnet[maxdfnet_ind]
 
-		if(ts%1==0):
-			print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet_master[0],toa_fnet_master[1],cti,tbound_master[0],tbound_master[1]))
+		# if(ts%1==0):
+		# 	print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet_master[0],toa_fnet_master[1],cti,tbound_master[0],tbound_master[1]))
 
 		if(abs(maxdfnet) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>1):
 			if(plotted!=1):

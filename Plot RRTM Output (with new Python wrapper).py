@@ -109,46 +109,43 @@ def plotrrtmoutput():
 def plotrrtmoutput_masters():
 	plt.figure(1)
 	for i_cld in range(ncloudcols):
-		# plt.subplot(331)
-		# plt.subplot(121)
-		# plt.plot(tz_master[:,i_cld],altz_master[:,i_cld])
-		# plt.semilogy(tz_master[:,i_cld],pz_master[:,i_cld],'-o',label=str(fn))
-		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		# plt.xlabel('T (K)')
-		# plt.ylabel('Pressure (hPa)')
-		# plt.legend()
-		# plt.grid(which='both')
-		# plt.subplot(332)
-		# plt.semilogy(totuflux_lw_master[:,i_cld],pz_master[:,i_cld])
-		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		# plt.xlabel('totuflux')
-		# plt.subplot(333)
-		# plt.semilogy(totdflux_lw_master[:,i_cld],pz_master[:,i_cld])
-		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		# plt.xlabel('totdflux')
-		# plt.subplot(334)
-		# plt.semilogy(fnet_master[:,i_cld],pz_master[:,i_cld])
-		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		# plt.xlabel('fnet')
-		# plt.subplot(335)
-		# plt.semilogy(wkl_master[:,i_cld,0],pavel_master[:,i_cld])
-		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		# plt.xlabel('wkl1')
-		# plt.subplot(336)
-		# plt.semilogy(wkl_master[:,i_cld,1],pavel_master[:,i_cld])
-		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		# plt.xlabel('wkl2')
-		# plt.subplot(337)
-		# plt.semilogy(wkl_master[:,i_cld,2],pavel_master[:,i_cld])
-		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		# plt.xlabel('wkl3')
-		# plt.subplot(338)
-		# plt.semilogy(wbrodl_master[:,i_cld],pz_master[:,i_cld])
-		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		# plt.xlabel('wbrodl')
-		# plt.subplot(339)
-		# plt.semilogy(dfnet,pavel_master[:,i_cld])
-		# plt.subplot(122)
+		plt.subplot(331)
+		plt.semilogy(tz_master[:,i_cld],pz_master[:,i_cld],'-o',label=str(i_cld))
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('T (K)')
+		plt.legend()
+		plt.ylabel('Pressure (hPa)')
+		plt.legend()
+		plt.grid(which='both')
+		plt.subplot(332)
+		plt.semilogy(totuflux_lw_master[:,i_cld],pz_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('totuflux')
+		plt.subplot(333)
+		plt.semilogy(totdflux_lw_master[:,i_cld],pz_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('totdflux')
+		plt.subplot(334)
+		plt.semilogy(fnet_master[:,i_cld],pz_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('fnet')
+		plt.subplot(335)
+		plt.semilogy(wkl_master[:,i_cld,0],pavel_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('wkl1')
+		plt.subplot(336)
+		plt.semilogy(wkl_master[:,i_cld,1],pavel_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('wkl2')
+		plt.subplot(337)
+		plt.semilogy(wkl_master[:,i_cld,2],pavel_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('wkl3')
+		plt.subplot(338)
+		plt.semilogy(wbrodl_master[:,i_cld],pz_master[:,i_cld])
+		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		plt.xlabel('wbrodl')
+		plt.subplot(339)
 		plt.plot(dfnet_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(fn)+str(i_cld))
 		plt.axvline(-eqb_maxdfnet,linestyle='--')
 		plt.axvline(eqb_maxdfnet,linestyle='--')
@@ -552,13 +549,38 @@ for directory in directories:
 		# pz_master[:,i_file,i_dir]=pz
 		# cld_lay_master[:,i_file,i_dir]=cld_lay
 
+		Q=np.zeros(ncloudcols)
+		Qv=np.zeros(ncloudcols)
+		esat_lowlay=np.zeros(ncloudcols)
+		esat_bound=np.zeros(ncloudcols)
+		qsat_lowlay=np.zeros(ncloudcols)
+		qsat_bound=np.zeros(ncloudcols)
+		qstar=np.zeros(ncloudcols)
+		Evap=np.zeros(ncloudcols)
+		deltheta=85.
+		cp=1.003
+		L=2429.8
+		r=0.8
+		for k in range(2):
+			for i_cld in range(ncloudcols):
+				Q[i_cld]=(fnet_master[nlayers,i_cld]-fnet_master[0,i_cld])
+				esat_lowlay[i_cld] = 6.1094*exp(17.625*(tz_master[0,i_cld]-273.15)/(tz_master[0,i_cld]-273.15+243.04))
+				esat_bound[i_cld] = 6.1094*exp(17.625*(tbound_master[i_cld]-273.15)/(tbound_master[i_cld]-273.15+243.04))
+				qsat_lowlay[i_cld]=0.622*esat_lowlay[i_cld]/(pz_master[0,i_cld]-esat_lowlay[i_cld])
+				qsat_bound[i_cld]=0.622*esat_bound[i_cld]/(pz_master[0,i_cld]-esat_bound[i_cld])
+				qstar[i_cld]=qsat_bound[i_cld]-r*qsat_lowlay[i_cld]
+				b=L*qstar[1]/(cp*deltheta)
+				Qv[i_cld]=(1-b)*Q[i_cld]
+				Evap[i_cld]=-b*Q[i_cld]
+				if(k==1):
+					print 'i_cld: {:d} Q: {:4.2f} b: {:4.2f} Qv: {:4.2f} E: {:4.2f} tbound: {:4.2f}'.format(i_cld,Q[i_cld],b,Qv[i_cld],Evap[i_cld],tbound_master[i_cld])
+
+		plotrrtmoutput_masters()
 		i_file+=1
-		# plotrrtmoutput_masters()
-		plt.plot(wkl_master[0,1,0],tbound_master[0],'o',c='r',label='warm pool')
-		plt.plot(wkl_master[0,1,0],tbound_master[1],'o',c='b',label='cold pool')
-		if(i_file==1):
-			plt.legend()
+		
 	i_dir+=1	
+
+
 
 
 # print(totuflux_lw_master[nlayers,:,1][:,0]-totuflux_lw_master[nlayers,:,1][:,0][0])
@@ -580,4 +602,4 @@ for directory in directories:
 # plt.subplot(224)
 # plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
 
-show()
+# show()
