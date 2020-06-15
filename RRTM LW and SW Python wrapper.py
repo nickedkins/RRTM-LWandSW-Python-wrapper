@@ -350,10 +350,10 @@ for wklfac in wklfacs:
 	ncloudcols=2
 	nmol=7
 
-	zonal_transps = [-0.,0.]
+	zonal_transps = [-20.,20.]
 
 	# master switches
-	master_input=5 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins
+	master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins
 	conv_on=1 #0: no convection, 1: convective adjustment
 	if(master_input==3):
 		conv_on=1
@@ -364,7 +364,7 @@ for wklfac in wklfacs:
 
 	# Declare variables
 	lw_on=1
-	sw_on=0
+	sw_on=1
 	gravity=9.79764 # RCEMIP value
 	avogadro=6.022e23
 	iatm=0 #0 for layer values, 1 for level values
@@ -384,9 +384,9 @@ for wklfac in wklfacs:
 	ur_max=3.0
 	eqb_maxhtr=1e-4
 	# eqb_maxdfnet=1e-4
-	eqb_maxdfnet=1e-1
+	eqb_maxdfnet=1e-2
 	toa_fnet_eqb=1.0e12
-	timesteps=3
+	timesteps=10000
 	cti=0
 	surf_rh=0.8
 	vol_mixh2o_min = 1e-6
@@ -396,7 +396,7 @@ for wklfac in wklfacs:
 	maxhtr=0.
 	toa_fnet=0
 
-	tbound=335. #surface temperature (K)
+	tbound=280. #surface temperature (K)
 	iemiss=2 #surface emissivity. Keep this fixed for now.
 	iemis=2
 	ireflect=0 #for Lambert reflection
@@ -476,7 +476,7 @@ for wklfac in wklfacs:
 		lapse=6.7
 	elif(master_input==5):
 		lapse=6.2
-	tmin=120
+	tmin=180
 	if(master_input==5):
 		tmin=200.
 	tmax=400.
@@ -560,6 +560,7 @@ for wklfac in wklfacs:
 
 	tbound_master=np.zeros(ncloudcols)
 	toa_fnet_master=np.zeros(ncloudcols)
+	column_budgets=np.zeros(ncloudcols)
 
 	tz_master=np.zeros((nlayers+1,ncloudcols))
 	tavel_master=np.zeros((nlayers,ncloudcols))
@@ -1667,7 +1668,7 @@ for wklfac in wklfacs:
 				wkl[7,i]=0. # o2
 		elif(master_input==5):
 			esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
-			surf_rh=0.8
+			surf_rh=0.2
 			for i in range(nlayers):
 				rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
 				vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
@@ -1717,8 +1718,8 @@ for wklfac in wklfacs:
 
 				toa_fnet=toa_fnet_master[i_cld]
 
-				zonal_transps[0]=(tbound_master[1]-tbound_master[0])*0.
-				zonal_transps[1]=zonal_transps[0]*-1.
+				# zonal_transps[0]=(tbound_master[1]-tbound_master[0])*0.
+				# zonal_transps[1]=zonal_transps[0]*-1.
 
 			if(i_cld==1 and ts==1):
 				wkl[1,:]=wkl_master[:,i_cld,0]*wklfac
@@ -1764,7 +1765,8 @@ for wklfac in wklfacs:
 			# 	tbound+=dtbound
 
 			if(input_source==0):
-				dtbound=toa_fnet*0.1*0.5*0.
+				# dtbound=toa_fnet*0.1*0.5*0.
+				dtbound=column_budgets[i_cld]*0.1*0.5
 				dtbound=np.clip(dtbound,-dmax,dmax)
 				tbound+=dtbound
 
@@ -1817,7 +1819,7 @@ for wklfac in wklfacs:
 			# writeoutputfile_masters()
 
 			toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
-			toa_fnet=totdflux[nlayers]-totuflux[nlayers]+zonal_transps[i_cld] #net total downward flux at TOA  NJE now accounting for zonal transport
+			# toa_fnet=totdflux[nlayers]-totuflux[nlayers]+zonal_transps[i_cld] #net total downward flux at TOA  NJE now accounting for zonal transport
 			# toa_fnet=256.731-totuflux[nlayers]+0.0077 # NJE fix later
 
 			prev_maxhtr=maxhtr*1.0
@@ -1867,6 +1869,8 @@ for wklfac in wklfacs:
 				tavel=np.clip(tavel,tmin,tmax)
 				tz=np.clip(tz,tmin,tmax)
 
+			column_budgets[i_cld]=fnet[nlayers]+zonal_transps[i_cld]
+
 
 			tbound_master[i_cld]=tbound
 			tz_master[:,i_cld]=tz
@@ -1914,7 +1918,7 @@ for wklfac in wklfacs:
 			for i_cld in range(ncloudcols):
 				for i in range(nlayers):
 					cldweights=[0.5,0.5]
-					dT=np.mean(dfnet_master[i,:]/dpz_master[i,:]*cldweights)*-1.*3.*2.*0.
+					dT=np.mean(dfnet_master[i,:]/dpz_master[i,:]*cldweights)*-1.*3.*2.
 					dT=np.clip(dT,-dmax,dmax)
 					# dT = htr[i]/3. #undrelax
 					# dT=np.clip(dT,-dmax,dmax)
@@ -1922,17 +1926,16 @@ for wklfac in wklfacs:
 			tavel_master=np.clip(tavel_master,tmin,tmax)
 
 		re_dfnets=np.where(conv_master[:-1]==0,dfnet_master,0.)
-		# print re_dfnets
 		maxdfnet=np.max(np.mean(re_dfnets,axis=1))
 		# maxdfnet=np.max(re_dfnets)
 
 		# maxdfnet_ind=np.argmax(abs(re_dfnets))
 		# maxdfnet=dfnet[maxdfnet_ind]
 
-		# if(ts%1==0):
-		# 	print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet_master[0],toa_fnet_master[1],cti,tbound_master[0],tbound_master[1]))
+		if(ts%1==0):
+			print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet_master[0],toa_fnet_master[1],cti,tbound_master[0],tbound_master[1],column_budgets[0],column_budgets[1]))
 
-		if(abs(maxdfnet) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>1):
+		if(abs(maxdfnet) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>100):
 			if(plotted!=1):
 				plotrrtmoutput()
 				plotted=1

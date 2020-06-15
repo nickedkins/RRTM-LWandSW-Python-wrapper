@@ -10,7 +10,6 @@ from os import listdir
 
 directories = [
 '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/radiator fin wkl1 perts/'
 ]
 
 def init_plotting():
@@ -557,10 +556,14 @@ for directory in directories:
 		qsat_bound=np.zeros(ncloudcols)
 		qstar=np.zeros(ncloudcols)
 		Evap=np.zeros(ncloudcols)
+		Fah=np.zeros(ncloudcols)
+		col_budg=np.zeros(ncloudcols)
 		deltheta=85.
 		cp=1.003
 		L=2429.8
 		r=0.8
+		A1=1.
+		A2=1.
 		for k in range(2):
 			for i_cld in range(ncloudcols):
 				Q[i_cld]=(fnet_master[nlayers,i_cld]-fnet_master[0,i_cld])
@@ -572,9 +575,12 @@ for directory in directories:
 				b=L*qstar[1]/(cp*deltheta)
 				Qv[i_cld]=(1-b)*Q[i_cld]
 				Evap[i_cld]=-b*Q[i_cld]
-				if(k==1):
-					print 'i_cld: {:d} Q: {:4.2f} b: {:4.2f} Qv: {:4.2f} E: {:4.2f} tbound: {:4.2f}'.format(i_cld,Q[i_cld],b,Qv[i_cld],Evap[i_cld],tbound_master[i_cld])
-
+		Fah[0]=A2/A1*Qv[1]
+		Fah[1]=-1.*Fah[0]
+		col_budg[0]=fnet_master[nlayers,0]+Fah[0]+Evap[1]
+		col_budg[1]=fnet_master[nlayers,1]+Fah[1]
+		for i_cld in range(ncloudcols):
+			print 'i_cld: {:d} Q: {:4.2f} b: {:4.2f} Qv: {:4.2f} E: {:4.2f} tbound: {:4.2f} Fah1: {:4.2f} fnet at toa: {:4.2f}'.format(i_cld,Q[i_cld],b,Qv[i_cld],Evap[i_cld],tbound_master[i_cld],Fah[0],fnet_master[nlayers,i_cld])
 		plotrrtmoutput_masters()
 		i_file+=1
 		
@@ -602,4 +608,4 @@ for directory in directories:
 # plt.subplot(224)
 # plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
 
-# show()
+show()
