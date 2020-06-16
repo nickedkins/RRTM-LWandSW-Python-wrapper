@@ -17,8 +17,8 @@ tstart = datetime.datetime.now()
 
 project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
-# wklfacs=np.linspace(0.1,10.,10)
-wklfacs=[0.01]
+# wklfacs=np.linspace(0.1,1.,10)
+wklfacs=[0.1]
 for wklfac in wklfacs:
 
 	def init_plotting():
@@ -215,7 +215,6 @@ for wklfac in wklfacs:
 	def readrrtmoutput_sw():
 		f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/My Live Output RRTM')
 		for i in range(0,nlayers+1):
-			# print '{} totuflu_sw'.format(f.readline())
 			totuflux_sw[i] =  f.readline()
 		for i in range(0,nlayers+1):
 			totdflux_sw[i] =  f.readline()
@@ -260,10 +259,10 @@ for wklfac in wklfacs:
 		plt.ylabel('pz')
 		plt.legend()
 		plt.subplot(335)
-		logpplot(tz,pz,'tz','pz')
-		plt.plot(tbound,pz[0],'o')
+		# logpplot(tz,pz,'tz','pz')
+		# plt.plot(tbound,pz[0],'o')
 		# plt.semilogy(tz,pz,'o',c='g')
-		# plt.semilogy(tavel,pavel,'o',c='b')
+		plt.semilogy(tavel,pavel,'o',c='b')
 		plt.ylim(max(pz),min(pz))
 		plt.subplot(336)
 		# logpplot(wbrodl,pz,'wbrodl','pavel')
@@ -347,13 +346,16 @@ for wklfac in wklfacs:
 				f.write(str(x[i]))
 				f.write('\n')
 	nlayers=60
+
 	ncloudcols=2
 	nmol=7
 
 	zonal_transps = [-20.,20.]
 
 	# master switches
-	master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins
+	master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins
+	if(master_input==1):
+		nlayers=51
 	conv_on=1 #0: no convection, 1: convective adjustment
 	if(master_input==3):
 		conv_on=1
@@ -470,7 +472,8 @@ for wklfac in wklfacs:
 	if(master_input==3):
 		isolvar=2
 		# solvar=np.ones(29)*551.58/1015.98791896
-		solvar=np.ones(29)*409.6/1015.98791896 # different interpretation of 'insolation'
+		# solvar=np.ones(29)*409.6/1015.98791896 # different interpretation of 'insolation'
+		solvar=np.ones(29)*0.5 # different interpretation of 'insolation'
 	lapse=5.7
 	if(master_input==3): # RCEMIP
 		lapse=6.7
@@ -561,6 +564,7 @@ for wklfac in wklfacs:
 	tbound_master=np.zeros(ncloudcols)
 	toa_fnet_master=np.zeros(ncloudcols)
 	column_budgets=np.zeros(ncloudcols)
+	zonal_transps=np.zeros(ncloudcols)
 
 	tz_master=np.zeros((nlayers+1,ncloudcols))
 	tavel_master=np.zeros((nlayers,ncloudcols))
@@ -777,7 +781,7 @@ for wklfac in wklfacs:
 		vars_misc_1d=[semis,semiss,solvar]
 		vars_misc_1d_lens=[16,29,29]
 		vars_master_lay_cld_nmol=[wkl_master]
-		vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master]
+		vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master,zonal_transps]
 
 
 		for x in vars_master_lay_cld:
@@ -1718,8 +1722,8 @@ for wklfac in wklfacs:
 
 				toa_fnet=toa_fnet_master[i_cld]
 
-				# zonal_transps[0]=(tbound_master[1]-tbound_master[0])*0.
-				# zonal_transps[1]=zonal_transps[0]*-1.
+				zonal_transps[0]=(tbound_master[1]-tbound_master[0])*1.0
+				zonal_transps[1]=zonal_transps[0]*-1.
 
 			if(i_cld==1 and ts==1):
 				wkl[1,:]=wkl_master[:,i_cld,0]*wklfac
@@ -1738,7 +1742,7 @@ for wklfac in wklfacs:
 			vars_misc_1d=[semis,semiss,solvar]
 			vars_misc_1d_lens=[16,29,29]
 			vars_master_lay_cld_nmol=[wkl_master]
-			vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master]
+			vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master,zonal_transps]
 
 
 			if(ts>0):
@@ -1763,6 +1767,8 @@ for wklfac in wklfacs:
 			# 	dtbound=toa_fnet*0.1*0.5
 			# 	dtbound=np.clip(dtbound,-dmax,dmax)
 			# 	tbound+=dtbound
+
+
 
 			if(input_source==0):
 				# dtbound=toa_fnet*0.1*0.5*0.
@@ -1863,14 +1869,51 @@ for wklfac in wklfacs:
 					tz[0]=tbound
 
 				if(conv_on==1):
-					# convection(tavel,altavel,1)
+					convection(tavel,altavel,1)
 					convection(tz,altz,1)
 
 				tavel=np.clip(tavel,tmin,tmax)
 				tz=np.clip(tz,tmin,tmax)
 
-			column_budgets[i_cld]=fnet[nlayers]+zonal_transps[i_cld]
+			Q=np.zeros(ncloudcols)
+			Qv=np.zeros(ncloudcols)
+			esat_lowlay=np.zeros(ncloudcols)
+			esat_bound=np.zeros(ncloudcols)
+			qsat_lowlay=np.zeros(ncloudcols)
+			qsat_bound=np.zeros(ncloudcols)
+			qstar=np.zeros(ncloudcols)
+			Evap=np.zeros(ncloudcols)
+			Fah=np.zeros(ncloudcols)
+			col_budg=np.zeros(ncloudcols)
+			deltheta=85.
+			cp=1.003
+			L=2429.8
+			r=0.8
+			A1=1.
+			A2=1.
 
+			for k in range(2):
+				for i_cld2 in range(ncloudcols):
+					Q[i_cld2]=(fnet_master[nlayers,i_cld2]-fnet_master[0,i_cld2])
+					esat_lowlay[i_cld2] = 6.1094*exp(17.625*(tz_master[0,i_cld2]-273.15)/(tz_master[0,i_cld2]-273.15+243.04))
+					esat_bound[i_cld2] = 6.1094*exp(17.625*(tbound_master[i_cld2]-273.15)/(tbound_master[i_cld2]-273.15+243.04))
+					qsat_lowlay[i_cld2]=0.622*esat_lowlay[i_cld2]/(pz_master[0,i_cld2]-esat_lowlay[i_cld2])
+					qsat_bound[i_cld2]=0.622*esat_bound[i_cld2]/(pz_master[0,i_cld2]-esat_bound[i_cld2])
+					qstar[i_cld2]=qsat_bound[i_cld2]-r*qsat_lowlay[i_cld2]
+					b=L*qstar[1]/(cp*deltheta)
+					Qv[i_cld2]=(1-b)*Q[i_cld2]
+					Evap[i_cld2]=-b*Q[i_cld2]
+			Fah[0]=A2/A1*Qv[1]
+			Fah[1]=-1.*Fah[0]
+
+			zonal_transps=Fah
+			# zonal_transps[0]=(tbound_master[1]-tbound_master[0])*1.0
+			# zonal_transps[1]=zonal_transps[0]*-1.
+			column_budgets[i_cld]=fnet[nlayers]+zonal_transps[i_cld]
+			if(i_cld==0):
+				column_budgets[i_cld]+=Evap[1]
+			else:
+				column_budgets[i_cld]-=Evap[1]
 
 			tbound_master[i_cld]=tbound
 			tz_master[:,i_cld]=tz
@@ -1932,8 +1975,9 @@ for wklfac in wklfacs:
 		# maxdfnet_ind=np.argmax(abs(re_dfnets))
 		# maxdfnet=dfnet[maxdfnet_ind]
 
-		if(ts%1==0):
-			print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f} '.format(ts,maxdfnet,maxdfnet_ind,toa_fnet_master[0],toa_fnet_master[1],cti,tbound_master[0],tbound_master[1],column_budgets[0],column_budgets[1]))
+		if(ts%10==0):
+			print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f}| {:12.8f}'.format(ts,maxdfnet,maxdfnet_ind,toa_fnet_master[0],toa_fnet_master[1],cti,tbound_master[0],tbound_master[1],column_budgets[0],column_budgets[1],zonal_transps[0],zonal_transps[1],Evap[1],b))
+			# print('{:4d} | {:12.8f} | {:3d}  '.format(ts,maxdfnet,maxdfnet_ind))
 
 		if(abs(maxdfnet) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>100):
 			if(plotted!=1):
@@ -1968,5 +2012,6 @@ ttotal = tend-tstart
 print(ttotal)
 
 print('Done')
+os.system('say "Done"')
 # plt.tight_layout()
 show()

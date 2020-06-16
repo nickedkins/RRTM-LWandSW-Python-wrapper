@@ -10,6 +10,8 @@ from os import listdir
 
 directories = [
 '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/radiator fin perts/sc vary/wklfac=1/',
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/radiator fin perts/sc vary/wklfac=0.1/',
 ]
 
 def init_plotting():
@@ -110,6 +112,7 @@ def plotrrtmoutput_masters():
 	for i_cld in range(ncloudcols):
 		plt.subplot(331)
 		plt.semilogy(tz_master[:,i_cld],pz_master[:,i_cld],'-o',label=str(i_cld))
+		# plt.semilogy(tavel_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(i_cld))
 		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
 		plt.xlabel('T (K)')
 		plt.legend()
@@ -117,11 +120,11 @@ def plotrrtmoutput_masters():
 		plt.legend()
 		plt.grid(which='both')
 		plt.subplot(332)
-		plt.semilogy(totuflux_lw_master[:,i_cld],pz_master[:,i_cld])
+		plt.semilogy(totuflux_master[:,i_cld],pz_master[:,i_cld])
 		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
 		plt.xlabel('totuflux')
 		plt.subplot(333)
-		plt.semilogy(totdflux_lw_master[:,i_cld],pz_master[:,i_cld])
+		plt.semilogy(totdflux_master[:,i_cld],pz_master[:,i_cld])
 		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
 		plt.xlabel('totdflux')
 		plt.subplot(334)
@@ -441,6 +444,7 @@ for directory in directories:
 		ssaclds=np.array((0.5,0.0))
 		tbound_master=np.ones(ncloudcols)
 		toa_fnet_master=np.ones(ncloudcols)
+		zonal_transps=np.zeros(ncloudcols)
 
 		tz_master=np.zeros((nlayers+1,ncloudcols))
 		tavel_master=np.zeros((nlayers,ncloudcols))
@@ -479,7 +483,7 @@ for directory in directories:
 		vars_misc_1d=[semis,semiss,solvar]
 		vars_misc_1d_lens=[16,29,29]
 		vars_master_lay_cld_nmol=[wkl_master]
-		vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master]
+		vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master,zonal_transps]
 
 
 		# for x in vars_lay:
@@ -578,9 +582,20 @@ for directory in directories:
 		Fah[0]=A2/A1*Qv[1]
 		Fah[1]=-1.*Fah[0]
 		col_budg[0]=fnet_master[nlayers,0]+Fah[0]+Evap[1]
-		col_budg[1]=fnet_master[nlayers,1]+Fah[1]
+		col_budg[1]=fnet_master[nlayers,1]+Fah[1]-Evap[1]
 		for i_cld in range(ncloudcols):
-			print 'i_cld: {:d} Q: {:4.2f} b: {:4.2f} Qv: {:4.2f} E: {:4.2f} tbound: {:4.2f} Fah1: {:4.2f} fnet at toa: {:4.2f}'.format(i_cld,Q[i_cld],b,Qv[i_cld],Evap[i_cld],tbound_master[i_cld],Fah[0],fnet_master[nlayers,i_cld])
+			# print 'i_cld: {:d} Q: {:4.0f} b: {:4.2f} Qv: {:4.0f} E: {:4.0f} tbound: {:4.0f} Fah1: {:4.0f} fnet at toa: {:4.0f} col budg 1 {:4.0f} col budg 2 {:4.0f} sum col budg {:4.0f} fdown {:4.0f} olr {:4.0f}'.format(i_cld,Q[i_cld],b,Qv[i_cld],Evap[i_cld],tbound_master[i_cld],Fah[0],fnet_master[nlayers,i_cld],col_budg[0],col_budg[1],np.sum(col_budg),totdflux_sw_master[nlayers,i_cld],totuflux_lw_master[nlayers,i_cld])
+			print 'fdown {:4.0f} olr {:4.0f} fah {:4.0f} evap {:4.0f}'.format(totdflux_master[nlayers,i_cld],totuflux_master[nlayers,i_cld],Fah[i_cld],Evap[i_cld])
+		# plt.figure(1)
+		# plt.subplot(121+i_dir)
+		# plt.plot(wkl_master[0,1,0],tbound_master[0],'o',c='r',label='Twarm')			
+		# plt.plot(wkl_master[0,1,0],tbound_master[1],'o',c='b',label='Tcold')
+		# plt.plot(wkl_master[0,1,0],np.mean(tbound_master),'o',c='g',label='Tavg')
+		# plt.xlabel('wklfac')
+		# plt.ylabel('Temperature (K)')
+		# plt.ylim(295,307)
+		if(i_file==0):
+			plt.legend()
 		plotrrtmoutput_masters()
 		i_file+=1
 		
