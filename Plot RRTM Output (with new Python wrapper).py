@@ -9,9 +9,9 @@ from os import listdir
 # from pandas import ExcelFile
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/radiator fin perts/sc vary/wklfac=1/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/radiator fin perts/sc vary/wklfac=0.1/',
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simplified dtbound vs dolr/wklfac=0.1/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simplified dtbound vs dolr/wklfac=1/'
 ]
 
 def init_plotting():
@@ -110,49 +110,49 @@ def plotrrtmoutput():
 def plotrrtmoutput_masters():
 	plt.figure(1)
 	for i_cld in range(ncloudcols):
-		plt.subplot(331)
-		plt.semilogy(tz_master[:,i_cld],pz_master[:,i_cld],'-o',label=str(i_cld))
-		# plt.semilogy(tavel_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(i_cld))
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('T (K)')
-		plt.legend()
-		plt.ylabel('Pressure (hPa)')
-		plt.legend()
-		plt.grid(which='both')
-		plt.subplot(332)
-		plt.semilogy(totuflux_master[:,i_cld],pz_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('totuflux')
-		plt.subplot(333)
-		plt.semilogy(totdflux_master[:,i_cld],pz_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('totdflux')
-		plt.subplot(334)
-		plt.semilogy(fnet_master[:,i_cld],pz_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('fnet')
-		plt.subplot(335)
-		plt.semilogy(wkl_master[:,i_cld,0],pavel_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('wkl1')
-		plt.subplot(336)
-		plt.semilogy(wkl_master[:,i_cld,1],pavel_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('wkl2')
-		plt.subplot(337)
-		plt.semilogy(wkl_master[:,i_cld,2],pavel_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('wkl3')
-		plt.subplot(338)
-		plt.semilogy(wbrodl_master[:,i_cld],pz_master[:,i_cld])
-		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-		plt.xlabel('wbrodl')
-		plt.subplot(339)
-		plt.plot(dfnet_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(fn)+str(i_cld))
+		# plt.subplot(331)
+		# plt.semilogy(tz_master[:,i_cld],pz_master[:,i_cld],'-o',label=str(i_cld))
+		# # plt.semilogy(tavel_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(i_cld))
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('T (K)')
+		# plt.legend()
+		# plt.ylabel('Pressure (hPa)')
+		# plt.legend()
+		# plt.grid(which='both')
+		# plt.subplot(332)
+		# plt.semilogy(totuflux_master[:,i_cld],pz_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('totuflux')
+		# plt.subplot(333)
+		# plt.semilogy(totdflux_master[:,i_cld],pz_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('totdflux')
+		# plt.subplot(334)
+		# plt.semilogy(fnet_master[:,i_cld],pz_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('fnet')
+		# plt.subplot(335)
+		# plt.semilogy(wkl_master[:,i_cld,0],pavel_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('wkl1')
+		# plt.subplot(336)
+		# plt.semilogy(wkl_master[:,i_cld,1],pavel_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('wkl2')
+		# plt.subplot(337)
+		# plt.semilogy(wkl_master[:,i_cld,2],pavel_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('wkl3')
+		# plt.subplot(338)
+		# plt.semilogy(wbrodl_master[:,i_cld],pz_master[:,i_cld])
+		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+		# plt.xlabel('wbrodl')
+		# plt.subplot(339)
+		# plt.plot(dfnet_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(fn)+str(i_cld))
+		plt.plot(np.mean(dfnet_master[:,:],axis=1),pavel_master[:,i_cld],'-o',label=str(fn)+str(i_cld))
+		plt.plot(conv_master[:,i_cld],pz_master[:,i_cld])
 		plt.axvline(-eqb_maxdfnet,linestyle='--')
 		plt.axvline(eqb_maxdfnet,linestyle='--')
-		# plt.ylim(275,0)
-		# plt.xlim(-0.0002,0.0002)
 		plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
 		plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
 		plt.ylabel('Pressure (hPa)')
@@ -317,12 +317,24 @@ toa_fnet_eqb=0
 
 vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,ncloudcols,master_input,conv_on,surf_lowlev_coupled,lay_intp,lw_on,sw_on,eqb_maxdfnet,toa_fnet_eqb]
 
+# nlayers, ncloudcols, nfiles, ndirs
+
+nlayers_dirfil=200
+ncloudcols_dirfil=2
+nfiles=5
+# ndirs=1
+
+tbound_all_dirfil = np.zeros((ncloudcols_dirfil,nfiles,ndirs))
+totuflux_all_dirfil=np.zeros((nlayers_dirfil+1,ncloudcols_dirfil,nfiles,ndirs))
+
 i_dir=0
 for directory in directories:
 
 	filenames = []
 	dir_label = directory.split('/')[-2]
+	print
 	print(dir_label)
+	print
 	a = sorted(listdir(directory))
 	filenames.append(a)
 	if('.DS_Store' in a):
@@ -585,7 +597,7 @@ for directory in directories:
 		col_budg[1]=fnet_master[nlayers,1]+Fah[1]-Evap[1]
 		for i_cld in range(ncloudcols):
 			# print 'i_cld: {:d} Q: {:4.0f} b: {:4.2f} Qv: {:4.0f} E: {:4.0f} tbound: {:4.0f} Fah1: {:4.0f} fnet at toa: {:4.0f} col budg 1 {:4.0f} col budg 2 {:4.0f} sum col budg {:4.0f} fdown {:4.0f} olr {:4.0f}'.format(i_cld,Q[i_cld],b,Qv[i_cld],Evap[i_cld],tbound_master[i_cld],Fah[0],fnet_master[nlayers,i_cld],col_budg[0],col_budg[1],np.sum(col_budg),totdflux_sw_master[nlayers,i_cld],totuflux_lw_master[nlayers,i_cld])
-			print 'fdown {:4.0f} olr {:4.0f} fah {:4.0f} evap {:4.0f}'.format(totdflux_master[nlayers,i_cld],totuflux_master[nlayers,i_cld],Fah[i_cld],Evap[i_cld])
+			print 'fdown {:4.0f} olr {:4.0f} fah {:4.0f} evap {:4.0f} tmean {:6.1f}'.format(totdflux_master[nlayers,i_cld],totuflux_master[nlayers,i_cld],Fah[i_cld],Evap[i_cld],np.mean(tbound_master))
 		# plt.figure(1)
 		# plt.subplot(121+i_dir)
 		# plt.plot(wkl_master[0,1,0],tbound_master[0],'o',c='r',label='Twarm')			
@@ -596,12 +608,39 @@ for directory in directories:
 		# plt.ylim(295,307)
 		if(i_file==0):
 			plt.legend()
-		plotrrtmoutput_masters()
+		# plotrrtmoutput_masters()
+		tbound_all_dirfil[:,i_file,i_dir]=tbound_master
+		totuflux_all_dirfil[:,:,i_file,i_dir]=totuflux_master
 		i_file+=1
 		
 	i_dir+=1	
 
+# wklfacs=np.logspace(-2,0,num=10,base=10.)
 
+plt.figure(1)
+plt.plot(tbound_all_dirfil[0,:,0]-tbound_all_dirfil[0,0,0],totuflux_all_dirfil[nlayers_dirfil,0,:,0]-totuflux_all_dirfil[nlayers_dirfil,0,0,0],'-o',label='Furnace (Fin H$_2$O factor = 0.1)')
+plt.plot(tbound_all_dirfil[1,:,0]-tbound_all_dirfil[1,0,0],totuflux_all_dirfil[nlayers_dirfil,1,:,0]-totuflux_all_dirfil[nlayers_dirfil,1,0,0],'-o',label='Fin (Fin H$_2$O factor = 0.1)')
+plt.plot(tbound_all_dirfil[0,:,1]-tbound_all_dirfil[0,0,1],totuflux_all_dirfil[nlayers_dirfil,0,:,1]-totuflux_all_dirfil[nlayers_dirfil,0,0,1],'-o',label='Furnace')
+plt.plot(tbound_all_dirfil[1,:,1]-tbound_all_dirfil[1,0,1],totuflux_all_dirfil[nlayers_dirfil,1,:,1]-totuflux_all_dirfil[nlayers_dirfil,1,0,1],'-o',label='Fin')
+plt.xlabel(r'$\Delta T_{g}$ (K)')
+plt.ylabel('$\Delta$OLR (Wm$^{-2}$)')
+plt.legend()
+
+# plt.figure(1)
+# plt.subplot(121)
+# plt.plot(tbound_master_dirfil[0,:,0],label='Tfurn')
+# plt.plot(tbound_master_dirfil[0,:,1],label='Tfurn 4xco2')
+# plt.plot(tbound_master_dirfil[1,:,0],label='Tfin')
+# plt.plot(tbound_master_dirfil[1,:,1],label='Tfin 4xco2')
+# plt.xlabel('Fin H2O / Furnace H2O')
+# plt.ylabel('T')
+# plt.legend()
+# plt.subplot(122)
+# plt.plot(wklfacs,np.mean(tbound_master_dirfil[:,:,1],axis=0)-np.mean(tbound_master_dirfil[:,:,0],axis=0),'-o')
+# plt.xlabel('Fin H2O / Furnace H2O')
+# plt.ylabel('Delta T from 4xCO2')
+# # plt.plot(np.mean(tbound_master_dirfil[:,:,1],axis=0)-np.mean(tbound_master_dirfil[:,0,1],axis=0),label='delta Tmean, high S')
+# plt.legend()
 
 
 # print(totuflux_lw_master[nlayers,:,1][:,0]-totuflux_lw_master[nlayers,:,1][:,0][0])
