@@ -19,9 +19,10 @@ project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python
 # 
 
 tbounds=np.arange(280.,321.,10)
+tbounds=np.array([295.,305.])
 for i_tbound in range(len(tbounds)):
 # wklfacs=np.logspace(-2,0,num=10,base=10.)
-	wklfacs=[0.1]
+	wklfacs=[0.1,1.]
 	for wklfac in wklfacs:
 
 		def init_plotting():
@@ -349,7 +350,7 @@ for i_tbound in range(len(tbounds)):
 					f.write(str(x[i]))
 					f.write('\n')
 		
-		nlayers=200
+		nlayers=590
 
 		ncloudcols=2
 		nmol=7
