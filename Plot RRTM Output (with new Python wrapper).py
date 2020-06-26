@@ -4,15 +4,43 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pylab import *
 from os import listdir
+import random
+from scipy import interpolate
 # import pandas as pd
 # from pandas import ExcelWriter
 # from pandas import ExcelFile
 
+print 'Started'
+
 directories = [
 # '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simplified dtbound vs dolr/wklfac=0.1/',
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simplified dtbound vs dolr/wklfac=1/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v2/tbound=280/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v2/tbound=290/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v2/tbound=300/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v2/tbound=310/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v2/tbound=320/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v2/tbound=330/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v2/tbound=340/',
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/rad fin model theory comparison/ts=3000/fsw=340/',
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/rad fin model theory comparison/ts=3000/fsw=350/',
 ]
+
+
+def colors(n):
+  ret = []
+  r = int(random.random() * 256)
+  g = int(random.random() * 256)
+  b = int(random.random() * 256)
+  step = 256 / n
+  for i in range(n):
+    r += step
+    g += step
+    b += step
+    r = int(r) % 256
+    g = int(g) % 256
+    b = int(b) % 256
+    ret.append((r/256.,g/256.,b/256.)) 
+  return ret
 
 def init_plotting():
 	plt.rcParams['figure.figsize'] = (10,10)
@@ -52,6 +80,8 @@ def init_plotting():
 	plt.gca().xaxis.set_ticks_position('bottom')
 	plt.gca().yaxis.set_ticks_position('left')
 init_plotting()
+colors = colors(10)
+print colors
 
 def logpplot(x,p,xlab,ylab):
 	plt.semilogy(x,p,'-')
@@ -149,7 +179,7 @@ def plotrrtmoutput_masters():
 		# plt.xlabel('wbrodl')
 		# plt.subplot(339)
 		# plt.plot(dfnet_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(fn)+str(i_cld))
-		plt.plot(np.mean(dfnet_master[:,:],axis=1),pavel_master[:,i_cld],'-o',label=str(fn)+str(i_cld))
+		plt.semilogy(np.mean(dfnet_master[:,:],axis=1),pavel_master[:,i_cld],'-o',label=str(fn)+str(i_cld))
 		plt.plot(conv_master[:,i_cld],pz_master[:,i_cld])
 		plt.axvline(-eqb_maxdfnet,linestyle='--')
 		plt.axvline(eqb_maxdfnet,linestyle='--')
@@ -170,7 +200,7 @@ if('.DS_Store' in a):
 	a.remove('.DS_Store')
 nfiles=len(a)
 
-nlayers=60
+nlayers=600
 nmol=7
 ncloudcols=2
 
@@ -319,10 +349,10 @@ vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemi
 
 # nlayers, ncloudcols, nfiles, ndirs
 
-nlayers_dirfil=200
+nlayers_dirfil=600
 ncloudcols_dirfil=2
-nfiles=5
-# ndirs=1
+# nfiles=7
+# ndirs=2
 
 tbound_all_dirfil = np.zeros((ncloudcols_dirfil,nfiles,ndirs))
 totuflux_all_dirfil=np.zeros((nlayers_dirfil+1,ncloudcols_dirfil,nfiles,ndirs))
@@ -595,9 +625,9 @@ for directory in directories:
 		Fah[1]=-1.*Fah[0]
 		col_budg[0]=fnet_master[nlayers,0]+Fah[0]+Evap[1]
 		col_budg[1]=fnet_master[nlayers,1]+Fah[1]-Evap[1]
-		for i_cld in range(ncloudcols):
-			# print 'i_cld: {:d} Q: {:4.0f} b: {:4.2f} Qv: {:4.0f} E: {:4.0f} tbound: {:4.0f} Fah1: {:4.0f} fnet at toa: {:4.0f} col budg 1 {:4.0f} col budg 2 {:4.0f} sum col budg {:4.0f} fdown {:4.0f} olr {:4.0f}'.format(i_cld,Q[i_cld],b,Qv[i_cld],Evap[i_cld],tbound_master[i_cld],Fah[0],fnet_master[nlayers,i_cld],col_budg[0],col_budg[1],np.sum(col_budg),totdflux_sw_master[nlayers,i_cld],totuflux_lw_master[nlayers,i_cld])
-			print 'fdown {:4.0f} olr {:4.0f} fah {:4.0f} evap {:4.0f} tmean {:6.1f}'.format(totdflux_master[nlayers,i_cld],totuflux_master[nlayers,i_cld],Fah[i_cld],Evap[i_cld],np.mean(tbound_master))
+		# for i_cld in range(ncloudcols):
+		# 	# print 'i_cld: {:d} Q: {:4.0f} b: {:4.2f} Qv: {:4.0f} E: {:4.0f} tbound: {:4.0f} Fah1: {:4.0f} fnet at toa: {:4.0f} col budg 1 {:4.0f} col budg 2 {:4.0f} sum col budg {:4.0f} fdown {:4.0f} olr {:4.0f}'.format(i_cld,Q[i_cld],b,Qv[i_cld],Evap[i_cld],tbound_master[i_cld],Fah[0],fnet_master[nlayers,i_cld],col_budg[0],col_budg[1],np.sum(col_budg),totdflux_sw_master[nlayers,i_cld],totuflux_lw_master[nlayers,i_cld])
+		# 	print 'fdown {:4.0f} olr {:4.0f} fah {:4.0f} evap {:4.0f} tmean {:6.1f}'.format(totdflux_master[nlayers,i_cld],totuflux_master[nlayers,i_cld],Fah[i_cld],Evap[i_cld],np.mean(tbound_master))
 		# plt.figure(1)
 		# plt.subplot(121+i_dir)
 		# plt.plot(wkl_master[0,1,0],tbound_master[0],'o',c='r',label='Twarm')			
@@ -615,16 +645,58 @@ for directory in directories:
 		
 	i_dir+=1	
 
-# wklfacs=np.logspace(-2,0,num=10,base=10.)
+wklfacs=np.logspace(-3,0,num=10,base=10.)
+print wklfacs
 
-plt.figure(1)
-plt.plot(tbound_all_dirfil[0,:,0]-tbound_all_dirfil[0,0,0],totuflux_all_dirfil[nlayers_dirfil,0,:,0]-totuflux_all_dirfil[nlayers_dirfil,0,0,0],'-o',label='Furnace (Fin H$_2$O factor = 0.1)')
-plt.plot(tbound_all_dirfil[1,:,0]-tbound_all_dirfil[1,0,0],totuflux_all_dirfil[nlayers_dirfil,1,:,0]-totuflux_all_dirfil[nlayers_dirfil,1,0,0],'-o',label='Fin (Fin H$_2$O factor = 0.1)')
-plt.plot(tbound_all_dirfil[0,:,1]-tbound_all_dirfil[0,0,1],totuflux_all_dirfil[nlayers_dirfil,0,:,1]-totuflux_all_dirfil[nlayers_dirfil,0,0,1],'-o',label='Furnace')
-plt.plot(tbound_all_dirfil[1,:,1]-tbound_all_dirfil[1,0,1],totuflux_all_dirfil[nlayers_dirfil,1,:,1]-totuflux_all_dirfil[nlayers_dirfil,1,0,1],'-o',label='Fin')
-plt.xlabel(r'$\Delta T_{g}$ (K)')
-plt.ylabel('$\Delta$OLR (Wm$^{-2}$)')
+# for i in range(1,ndirs):
+# 	plt.figure(1)
+# 	plt.plot(wklfacs,(totuflux_all_dirfil[nlayers,1,:,i]-totuflux_all_dirfil[nlayers,1,:,i-1])/10.,'-o',label='Fin')
+# 	plt.plot(wklfacs,(totuflux_all_dirfil[nlayers,0,:,i]-totuflux_all_dirfil[nlayers,0,:,i-1])/10.,'-o',label='Furnace')
+# 	plt.xlabel(r'Fin H$_2$O Factor')
+# 	plt.ylabel(r'$\beta = \frac{\Delta OLR}{ \Delta T}$ (Wm$^{-2}$K$^{-1}$)')
+# plt.legend()
+
+betas = np.zeros((ncloudcols,nfiles,ndirs))
+
+for i_cld in range(ncloudcols):
+	for i_file in range(nfiles):
+		for i_dir in range(1,ndirs):
+			plt.figure(1)
+			# plt.plot(tbound_all_dirfil[1,i_file,i_dir],(totuflux_all_dirfil[nlayers,1,i_file,i_dir]-totuflux_all_dirfil[nlayers,1,i_file,i_dir-1])/(tbound_all_dirfil[1,i_file,i_dir]-tbound_all_dirfil[1,i_file,i_dir-1]),'o',c=colors[i_file])
+			# plt.plot(tbound_all_dirfil[0,i_file,i_dir],(totuflux_all_dirfil[nlayers,0,i_file,i_dir]-totuflux_all_dirfil[nlayers,0,i_file,i_dir-1])/(tbound_all_dirfil[0,i_file,i_dir]-tbound_all_dirfil[0,i_file,i_dir-1]),'o',c='r')
+			betas[i_cld,i_file,i_dir] = (totuflux_all_dirfil[nlayers,i_cld,i_file,i_dir]-totuflux_all_dirfil[nlayers,i_cld,i_file,i_dir-1])/(tbound_all_dirfil[i_cld,i_file,i_dir]-tbound_all_dirfil[i_cld,i_file,i_dir-1])
+
+for i_dir in range(1,ndirs):
+	plt.semilogx(wklfacs,1./betas[1,:,i_dir],'-o',label='tbound_fin='+str(tbound_all_dirfil[0,0,i_dir]))
+	plt.semilogx(wklfacs,1./betas[0,:,i_dir],'-o',label='tbound_furn='+str(tbound_all_dirfil[0,0,i_dir]))
+	plt.xlabel('H2O Factor')
+	plt.ylabel(r'$\alpha_{fin}$')
 plt.legend()
+
+Z = betas[0,:,:].T
+X,Y = np.meshgrid(wklfacs,tbound_all_dirfil[0,0,:])
+
+
+
+f = interpolate.interp2d(X,Y,Z)
+
+tboundsnje = [324,324,324,325,326,327,328,329,331,334]
+
+# for i in range(nfiles):
+# 	print f(wklfacs[i],tboundsnje[i])[0], ','
+
+# plt.figure(1)
+# # plt.contour(X,Y,Z,20)
+# plt.imshow(Z)
+# plt.gca().set_xscale('log')
+# plt.colorbar()
+
+# print tbound_all_dirfil[0,:,0]
+
+# print (totuflux_all_dirfil[nlayers,1,:,1]-totuflux_all_dirfil[nlayers,1,:,0])/10.
+
+# print np.mean(tbound_all_dirfil[:,:,1] - tbound_all_dirfil[:,:,0],axis=0)
+
 
 # plt.figure(1)
 # plt.subplot(121)
