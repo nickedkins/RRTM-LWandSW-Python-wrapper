@@ -666,21 +666,40 @@ for i_cld in range(ncloudcols):
 			# plt.plot(tbound_all_dirfil[0,i_file,i_dir],(totuflux_all_dirfil[nlayers,0,i_file,i_dir]-totuflux_all_dirfil[nlayers,0,i_file,i_dir-1])/(tbound_all_dirfil[0,i_file,i_dir]-tbound_all_dirfil[0,i_file,i_dir-1]),'o',c='r')
 			betas[i_cld,i_file,i_dir] = (totuflux_all_dirfil[nlayers,i_cld,i_file,i_dir]-totuflux_all_dirfil[nlayers,i_cld,i_file,i_dir-1])/(tbound_all_dirfil[i_cld,i_file,i_dir]-tbound_all_dirfil[i_cld,i_file,i_dir-1])
 
-for i_dir in range(1,ndirs):
-	plt.semilogx(wklfacs,1./betas[1,:,i_dir],'-o',label='tbound_fin='+str(tbound_all_dirfil[0,0,i_dir]))
-	plt.semilogx(wklfacs,1./betas[0,:,i_dir],'-o',label='tbound_furn='+str(tbound_all_dirfil[0,0,i_dir]))
-	plt.xlabel('H2O Factor')
-	plt.ylabel(r'$\alpha_{fin}$')
-plt.legend()
+# for i_dir in range(1,ndirs):
+# 	plt.semilogx(wklfacs,1./betas[1,:,i_dir],'-o',label='tbound_fin='+str(tbound_all_dirfil[0,0,i_dir]))
+# 	plt.semilogx(wklfacs,1./betas[0,:,i_dir],'-o',label='tbound_furn='+str(tbound_all_dirfil[0,0,i_dir]))
+# 	plt.xlabel('H2O Factor')
+# 	plt.ylabel(r'$\alpha_{fin}$')
+# plt.legend()
 
-Z = betas[0,:,:].T
-X,Y = np.meshgrid(wklfacs,tbound_all_dirfil[0,0,:])
+Z = betas[1,:,:].T
+X,Y = np.meshgrid(wklfacs,tbound_all_dirfil[1,0,:])
 
 
 
 f = interpolate.interp2d(X,Y,Z)
 
-tboundsnje = [324,324,324,325,326,327,328,329,331,334]
+wklfacs_grid = np.logspace(-3,0,num=100,base=10.)
+tbound_grid=np.linspace(280,320,100)
+
+Z_int = np.zeros((len(wklfacs_grid),len(tbound_grid)))
+
+for i_w in range(len(wklfacs_grid)):
+	for i_t in range(len(tbound_grid)):
+		Z_int[i_w,i_t]=f(wklfacs_grid[i_w],tbound_grid[i_t])
+
+X,Y=np.meshgrid(wklfacs_grid,tbound_grid)
+
+plt.figure(1)
+plt.contourf(X,Y,Z_int)
+plt.gca().set_xscale('log')
+plt.xlabel('H$_2$O factor')
+plt.ylabel('Surface temperature (K)')
+plt.colorbar()
+
+
+# tboundsnje = [324,324,324,325,326,327,328,329,331,334]
 
 # for i in range(nfiles):
 # 	print f(wklfacs[i],tboundsnje[i])[0], ','
