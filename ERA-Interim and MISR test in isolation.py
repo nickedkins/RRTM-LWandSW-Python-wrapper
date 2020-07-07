@@ -87,15 +87,6 @@ for col in range(ncols):
         tempcloudfrac = tempcloudfrac + binned_cf[col,cloudcol] - tempcloudfrac * binned_cf[col,cloudcol]
     clearfrac[col] = (1.0 - tempcloudfrac) / 2.0
 
-
-#for col in range(ncols):
-#    binned_cf[col,-1] = clearfrac[col]
-
-
-#binned_cf[:,2] = binned_cf[:,2] * pert
-
-# print binned_cf
-
 # for col in range(ncols):
 #     filename = 'ccfracs col %2d' % (col)
 #     fileloc = outdir + filename
