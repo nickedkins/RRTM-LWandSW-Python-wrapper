@@ -14,7 +14,11 @@ print 'Started'
 
 directories = [
 # '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/tfurn-tfin vs c_zonal/0.1 to 10/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v3/tbound=280/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v3/tbound=290/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v3/tbound=300/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v3/tbound=310/',
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v3/tbound=320/',
 ]
 
 
@@ -637,16 +641,17 @@ for directory in directories:
 		
 	i_dir+=1	
 
-wklfacs=np.logspace(-3,0,num=10,base=10.)
-print wklfacs
+# wklfacs=np.logspace(-3,0,num=10,base=10.)
+wklfacs=np.logspace(-3,0,num=5,base=10.)
+# print wklfacs
 
-c_zonal_transps = np.linspace(1,30,num=10)
-c_zonal_transps = np.linspace(0.1,10,num=10)
+# c_zonal_transps = np.linspace(1,30,num=10)
+# c_zonal_transps = np.linspace(0.1,10,num=10)
 
-plt.figure(1)
-plt.plot(c_zonal_transps,tbound_all_dirfil[1,:,0]-tbound_all_dirfil[0,:,0],'-o')
-plt.xlabel(r'$c$: tropical zonal transport coefficient')
-plt.ylabel(r'$T_{furn}-T_{fin}$ (K)')
+# plt.figure(1)
+# plt.plot(c_zonal_transps,tbound_all_dirfil[1,:,0]-tbound_all_dirfil[0,:,0],'-o')
+# plt.xlabel(r'$c$: tropical zonal transport coefficient')
+# plt.ylabel(r'$T_{furn}-T_{fin}$ (K)')
 
 # for i in range(1,ndirs):
 # 	plt.figure(1)
@@ -656,15 +661,17 @@ plt.ylabel(r'$T_{furn}-T_{fin}$ (K)')
 # 	plt.ylabel(r'$\beta = \frac{\Delta OLR}{ \Delta T}$ (Wm$^{-2}$K$^{-1}$)')
 # plt.legend()
 
-# betas = np.zeros((ncloudcols,nfiles,ndirs))
+nfiles=5
 
-# for i_cld in range(ncloudcols):
-# 	for i_file in range(nfiles):
-# 		for i_dir in range(1,ndirs):
-# 			plt.figure(1)
-# 			# plt.plot(tbound_all_dirfil[1,i_file,i_dir],(totuflux_all_dirfil[nlayers,1,i_file,i_dir]-totuflux_all_dirfil[nlayers,1,i_file,i_dir-1])/(tbound_all_dirfil[1,i_file,i_dir]-tbound_all_dirfil[1,i_file,i_dir-1]),'o',c=colors[i_file])
-# 			# plt.plot(tbound_all_dirfil[0,i_file,i_dir],(totuflux_all_dirfil[nlayers,0,i_file,i_dir]-totuflux_all_dirfil[nlayers,0,i_file,i_dir-1])/(tbound_all_dirfil[0,i_file,i_dir]-tbound_all_dirfil[0,i_file,i_dir-1]),'o',c='r')
-# 			betas[i_cld,i_file,i_dir] = (totuflux_all_dirfil[nlayers,i_cld,i_file,i_dir]-totuflux_all_dirfil[nlayers,i_cld,i_file,i_dir-1])/(tbound_all_dirfil[i_cld,i_file,i_dir]-tbound_all_dirfil[i_cld,i_file,i_dir-1])
+betas = np.zeros((ncloudcols,nfiles,ndirs))
+
+for i_cld in range(ncloudcols):
+	for i_file in range(nfiles):
+		for i_dir in range(1,ndirs):
+			plt.figure(1)
+			# plt.plot(tbound_all_dirfil[1,i_file,i_dir],(totuflux_all_dirfil[nlayers,1,i_file,i_dir]-totuflux_all_dirfil[nlayers,1,i_file,i_dir-1])/(tbound_all_dirfil[1,i_file,i_dir]-tbound_all_dirfil[1,i_file,i_dir-1]),'o',c=colors[i_file])
+			# plt.plot(tbound_all_dirfil[0,i_file,i_dir],(totuflux_all_dirfil[nlayers,0,i_file,i_dir]-totuflux_all_dirfil[nlayers,0,i_file,i_dir-1])/(tbound_all_dirfil[0,i_file,i_dir]-tbound_all_dirfil[0,i_file,i_dir-1]),'o',c='r')
+			betas[i_cld,i_file,i_dir] = (totuflux_all_dirfil[nlayers,i_cld,i_file,i_dir]-totuflux_all_dirfil[nlayers,i_cld,i_file,i_dir-1])/(tbound_all_dirfil[i_cld,i_file,i_dir]-tbound_all_dirfil[i_cld,i_file,i_dir-1])
 
 # # for i_dir in range(1,ndirs):
 # # 	plt.semilogx(wklfacs,1./betas[1,:,i_dir],'-o',label='tbound_fin='+str(tbound_all_dirfil[0,0,i_dir]))
@@ -673,30 +680,34 @@ plt.ylabel(r'$T_{furn}-T_{fin}$ (K)')
 # # 	plt.ylabel(r'$\alpha_{fin}$')
 # # plt.legend()
 
-# Z = betas[1,:,:].T
-# X,Y = np.meshgrid(wklfacs,tbound_all_dirfil[1,0,:])
+Z = betas[1,:,:].T
 
+# print wklfacs.shape, tbound_all_dirfil[1,0,:].shape
 
+X,Y = np.meshgrid(wklfacs,tbound_all_dirfil[1,0,:])
 
-# f = interpolate.interp2d(X,Y,Z)
+print X.shape,Y.shape,Z.shape
 
-# wklfacs_grid = np.logspace(-3,0,num=100,base=10.)
-# tbound_grid=np.linspace(280,320,100)
+f = interpolate.interp2d(X,Y,Z)
 
-# Z_int = np.zeros((len(wklfacs_grid),len(tbound_grid)))
+wklfacs_grid = np.logspace(-3,0,num=100,base=10.)
+tbound_grid=np.linspace(280,320,100)
 
-# for i_w in range(len(wklfacs_grid)):
-# 	for i_t in range(len(tbound_grid)):
-# 		Z_int[i_w,i_t]=f(wklfacs_grid[i_w],tbound_grid[i_t])
+Z_int = np.zeros((len(wklfacs_grid),len(tbound_grid)))
 
-# X,Y=np.meshgrid(wklfacs_grid,tbound_grid)
+for i_w in range(len(wklfacs_grid)):
+	for i_t in range(len(tbound_grid)):
+		Z_int[i_w,i_t]=f(wklfacs_grid[i_w],tbound_grid[i_t])
 
-# plt.figure(1)
-# plt.contourf(X,Y,Z_int)
-# plt.gca().set_xscale('log')
-# plt.xlabel('H$_2$O factor')
-# plt.ylabel('Surface temperature (K)')
-# plt.colorbar()
+X,Y=np.meshgrid(wklfacs_grid,tbound_grid)
+
+plt.figure(1)
+plt.contourf(X,Y,Z_int)
+plt.gca().set_xscale('log')
+plt.xlabel('Fin H$_2$O factor')
+plt.ylabel('Fin surface temperature (K)')
+cb=plt.colorbar()
+cb.ax.set_xlabel(r'$\beta_{fin}$',)
 
 
 # tboundsnje = [324,324,324,325,326,327,328,329,331,334]
@@ -716,41 +727,5 @@ plt.ylabel(r'$T_{furn}-T_{fin}$ (K)')
 
 # print np.mean(tbound_all_dirfil[:,:,1] - tbound_all_dirfil[:,:,0],axis=0)
 
-
-# plt.figure(1)
-# plt.subplot(121)
-# plt.plot(tbound_master_dirfil[0,:,0],label='Tfurn')
-# plt.plot(tbound_master_dirfil[0,:,1],label='Tfurn 4xco2')
-# plt.plot(tbound_master_dirfil[1,:,0],label='Tfin')
-# plt.plot(tbound_master_dirfil[1,:,1],label='Tfin 4xco2')
-# plt.xlabel('Fin H2O / Furnace H2O')
-# plt.ylabel('T')
-# plt.legend()
-# plt.subplot(122)
-# plt.plot(wklfacs,np.mean(tbound_master_dirfil[:,:,1],axis=0)-np.mean(tbound_master_dirfil[:,:,0],axis=0),'-o')
-# plt.xlabel('Fin H2O / Furnace H2O')
-# plt.ylabel('Delta T from 4xCO2')
-# # plt.plot(np.mean(tbound_master_dirfil[:,:,1],axis=0)-np.mean(tbound_master_dirfil[:,0,1],axis=0),label='delta Tmean, high S')
-# plt.legend()
-
-
-# print(totuflux_lw_master[nlayers,:,1][:,0]-totuflux_lw_master[nlayers,:,1][:,0][0])
-
-# df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RE') #read RD's data to plot against mine
-# df = pd.read_excel('/Users/nickedkins/Dropbox/Spreadsheets (Research)/Nicks2 (Roger\'s result vs mine, made by RD).xlsx', sheet_name='RCE') #read RD's data to plot against mine
-# plt.figure(1)
-# plt.subplot(221)
-# plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
-# plt.semilogy(tz,pz)
-# plt.ylim(max(pz),min(pz))
-# plt.plot(df['Tz(K)'],df['Z(km)'])
-# plt.subplot(222)
-# plt.semilogy(df['Tlayer'],df['Player'],'--')
-# plt.ylim(max(pz),min(pz))
-# plt.subplot(223)
-# plt.semilogy(df['LWup'],df['Pz(mb)'],'--')
-# plt.semilogy(df['LWdn'],df['Pz(mb)'],'--')
-# plt.subplot(224)
-# plt.semilogy(df['Tz(K)'],df['Pz(mb)'],'--')
 
 show()

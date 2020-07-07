@@ -19,14 +19,15 @@ project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python
 # 
 
 # tbounds=np.arange(280.,321.,10)
-c_zonal_transps = np.linspace(0.1,10,num=10)
+# c_zonal_transps = np.linspace(0.1,10,num=10)
+c_zonal_transps = [1.]
 for c_zonal_transp in c_zonal_transps:
 	fixed_sws=np.array([340.])
 	for fixed_sw in fixed_sws:
-		tbounds=np.array([300.])
+		tbounds=np.array([280.,290.,300.,310.,320.])
 		for i_tbound in range(len(tbounds)):
-			# wklfacs=np.logspace(-3,0,num=10,base=10.)
-			wklfacs=[0.1]
+			wklfacs=np.logspace(-3,0,num=5,base=10.)
+			# wklfacs=[0.1]
 			for wklfac in wklfacs:
 
 				def init_plotting():
@@ -395,8 +396,8 @@ for c_zonal_transp in c_zonal_transps:
 				ur_max=3.0
 				eqb_maxhtr=1e-4
 				# eqb_maxdfnet=1e-4
-				eqb_maxdfnet=1e-2
-				eqb_col_budgs=1e-1
+				eqb_maxdfnet=5e-2
+				eqb_col_budgs=1e12
 				toa_fnet_eqb=1.0e12
 				timesteps=1000
 				cti=0
@@ -1798,7 +1799,7 @@ for c_zonal_transp in c_zonal_transps:
 
 						if(input_source==0):
 							# dtbound=toa_fnet*0.1*0.5*0.
-							dtbound=column_budgets[i_cld]*0.1*0.5*0.5*0.1
+							dtbound=column_budgets[i_cld]*0.1*0.5*0.5*0.1*0.
 							dtbound=np.clip(dtbound,-dmax,dmax)
 							tbound+=dtbound
 
@@ -1988,8 +1989,8 @@ for c_zonal_transp in c_zonal_transps:
 					if(input_source==0):
 						for i_cld in range(ncloudcols):
 							for i in range(nlayers):
-								cldweights=[0.5,0.5]
-								dT=np.mean(dfnet_master[i,:]/dpz_master[i,:]*cldweights)*-1./3.0
+								cldweights=[0.5,0.5] # this is where I will actually use cloud fractions from MISR—this is still the independent cloud columns system. frac for the formatted cloud file should = 1
+								dT=np.mean(dfnet_master[i,:]/dpz_master[i,:]*cldweights)*-1.
 								dT=np.clip(dT,-dmax,dmax)
 								# dT = htr[i]/3. #undrelax
 								# dT=np.clip(dT,-dmax,dmax)
