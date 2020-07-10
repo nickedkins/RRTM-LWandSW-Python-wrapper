@@ -174,7 +174,7 @@ def plotrrtmoutput_masters():
 		# plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
 		# plt.xlabel('wbrodl')
 		# plt.subplot(339)
-		# plt.plot(dfnet_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(fn)+str(i_cld))
+		plt.plot(dfnet_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(fn)+str(i_cld))
 		plt.semilogy(np.mean(dfnet_master[:,:],axis=1),pavel_master[:,i_cld],'-o',label=str(fn)+str(i_cld))
 		plt.plot(conv_master[:,i_cld],pz_master[:,i_cld])
 		plt.axvline(-eqb_maxdfnet,linestyle='--')

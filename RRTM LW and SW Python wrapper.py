@@ -290,7 +290,7 @@ for c_zonal_transp in c_zonal_transps:
                     for i in range(1,len(T)):
                         dT = (T[i]-T[i-1])
                         dz = (z[i]-z[i-1])/1000.
-                        if( (-1.0 * dT/dz > lapse or z[i]/1000. < -1.) and z[i]/1000. < 100. ):
+                        if( (-1.0 * dT/dz > lapse or z[i]/1000. < -1.) and z[i]/1000. < 20. ):
                             if(conv_log==1):
                                 conv[i]=1.
                             T[i] = T[i-1] - lapse * dz
@@ -562,10 +562,10 @@ for c_zonal_transp in c_zonal_transps:
                 ur_max=3.0
                 eqb_maxhtr=1e-4
                 # eqb_maxdfnet=1e-4
-                eqb_maxdfnet=1e-1
+                eqb_maxdfnet=1e-2   
                 eqb_col_budgs=1e12
                 toa_fnet_eqb=1.0e12
-                timesteps=100
+                timesteps=1000
                 cti=0
                 surf_rh=0.8
                 vol_mixh2o_min = 1e-6
@@ -656,7 +656,7 @@ for c_zonal_transp in c_zonal_transps:
                     lapse=6.7
                 elif(master_input==5):
                     lapse=6.2
-                tmin=150.
+                tmin=100.
                 if(master_input==5):
                     tmin=200.
                 tmax=400.
@@ -1873,7 +1873,6 @@ for c_zonal_transp in c_zonal_transps:
                     elif(master_input==6): #ERA-I
                         q,o3,fal = read_erai()
                         wbrodl = mperlayr_air * 1.0e-4
-                        print wbrodl
                         wkl[1,:]=q[:,0]
                         wkl[2,:]=400e-6
                         wkl[3,:]=o3[:,0]
@@ -2176,7 +2175,7 @@ for c_zonal_transp in c_zonal_transps:
                     # conv_master_min=np.min(conv_master,axis=1)
                     # re_dfnets=np.where(conv_master_min[:-1]==0,dfnet_master_mean,0.)
                     # maxdfnet=np.max(np.abs(np.mean(re_dfnets,axis=1)))
-                    maxdfnet=np.max(np.abs(re_dfnets))
+                    maxdfnet=np.max(np.abs(np.mean(re_dfnets,axis=1)))
 
                     # maxdfnet_ind=np.argmax(abs(re_dfnets))
                     # maxdfnet=dfnet[maxdfnet_ind]
