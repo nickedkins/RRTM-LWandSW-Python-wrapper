@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from pylab import *
 import datetime
 from random import randint
+from scipy import interpolate, stats
+from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 # import pandas as pd
 # from pandas import ExcelWriter
 # from pandas import ExcelFile
@@ -27,7 +29,7 @@ for c_zonal_transp in c_zonal_transps:
         tbounds=np.array([300.])
         for i_tbound in range(len(tbounds)):
             # wklfacs=np.logspace(-3,0,num=5,base=10.)
-            wklfacs=[0.1]
+            wklfacs=[1.0]
             for wklfac in wklfacs:
 
                 def init_plotting():
@@ -427,7 +429,98 @@ for c_zonal_transp in c_zonal_transps:
 
                     return binned_cf,altbins,cld_taus
 
+                def read_erai():
+
+                    def interpolate_createprrtminput_lev(shortname,latparray,ps,lats):
+                                        
+                        lats = lats
+                        pressures = ps
+
+                        xx,yy = np.meshgrid(lats[::-1],pressures)
+                        
+                        if(disttypelev[shortname] == 'lat'):
+                            
+                            z = latparray
+
+                            f = interpolate.RegularGridInterpolator((lats[::-1],pressures),z.T,bounds_error=False,fill_value=1000.0)
+
+                            xnew = latgrid
+                            ynew = pgrid
+                            xxnew, yynew = np.meshgrid(xnew,ynew)
+                            (xxnewr,yynewr) = (xxnew.ravel(),yynew.ravel())
+                            znew = f((xxnewr,yynewr),method='linear')
+                            znew=znew.reshape(nlayers,nlatcols)
+                            znew = znew[:,::-1]
+                            xnew = xnew[::-1]
+                            ynew = ynew[::-1]
+                            
+                        elif(disttypelev[shortname]=='avg'):
+                            z = latparray
+                            f = interpolate.RegularGridInterpolator((lats[::-1],pressures),z.T,bounds_error=False,fill_value=1000.0)
+                            xnew = latgrid
+                            ynew = pgrid
+                            xxnew, yynew = np.meshgrid(xnew,ynew)
+                            (xxnewr,yynewr) = (xxnew.ravel(),yynew.ravel())
+                            znew = f((xxnewr,yynewr),method='linear')
+                            znew=znew.reshape(nlayers,nlatcols)
+                            znew = znew[:,::-1]
+                            xnew = xnew[::-1]
+                            ynew = ynew[::-1]
+                            zavg = np.zeros(nlayers)
+                            
+                            for col in range(0,nlatcols):
+                                    zavg = zavg + znew[:,col] * latweights[col] 
+
+                            zavg = zavg / sum(latweights)
+
+                        return znew
+
+                    def interpolate_createprrtminput_sfc(shortname,latarray,lats):
+
+                        lats = lats
+
+                        z = latarray
+
+                        f = interp1d(lats,z)
+                        varss_int = f(latgrid)
+                        
+                        return varss_int
+
+                    interpdir = '/Users/nickedkins/Dropbox/Input Data for RCM Interpolation/'            
+
+                    q_ps = np.load(interpdir+'q_ps.npy')
+                    o3_ps = np.load(interpdir+'o3_ps.npy')
+                    q_lats = np.load(interpdir+'q_lats.npy')
+                    o3_lats = np.load(interpdir+'o3_lats.npy')
+                    fal_lats = np.load(interpdir+'fal_lats.npy')
+
+                    q_latp_max = np.load(interpdir+'q_latp.npy')
+                    o3_latp_max = np.load(interpdir+'o3_latp.npy')
+                    fal_lat_max = np.load(interpdir+'fal_lat.npy')
+                                
+                    latgrid = np.linspace(-90,90,nlatcols)
+                    pgrid = np.linspace(1000,1,nlayers)
+
+                    # shortnameslev = ['cc','clwc','o3','q','ciwc']
+                    shortnameslev = ['q', 'o3']
+                    longnameslev = {'cc':'Cloud fraction','clwc':'Cloud liquid water content (kg/kg)','o3':'Ozone mixing ratio','q':'Specific humidity (kg/kg)','ciwc':'Cloud ice water content (kg/kg)'}
+                    disttypelev = {'cc':'lat','clwc':'lat','o3':'lat','q':'lat','ciwc':'lat'}
+
+                    shortnamessfc = ['fal']
+                    longnamessfc = {'fal':'Surface albedo'}
+                    disttypesfc = {'fal':'lat'}
+
+                    loop = 1
+
+                    q=interpolate_createprrtminput_lev('q',q_latp_max,q_ps,q_lats)
+                    o3=interpolate_createprrtminput_lev('o3',o3_latp_max,o3_ps,o3_lats)
+                    fal=interpolate_createprrtminput_sfc('fal',fal_lat_max,fal_lats)
+
+                    print 'Finished'
+
+                    return q, o3, fal
                 
+
                 nlayers=60
                 ncloudcols=2
                 nlatcols=1
@@ -436,7 +529,7 @@ for c_zonal_transp in c_zonal_transps:
                 zonal_transps = [-0.,0.]
 
                 # master switches
-                master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins
+                master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim
                 if(master_input==1):
                     nlayers=51
                 conv_on=1 #0: no convection, 1: convective adjustment
@@ -563,7 +656,7 @@ for c_zonal_transp in c_zonal_transps:
                     lapse=6.7
                 elif(master_input==5):
                     lapse=6.2
-                tmin=100.
+                tmin=150.
                 if(master_input==5):
                     tmin=200.
                 tmax=400.
@@ -1631,7 +1724,7 @@ for c_zonal_transp in c_zonal_transps:
                         wbrodl=np.array(df['dry'][:-1])
                         wbrodl=wbrodl[::-1]
 
-                    if(master_input==0):
+                    if(master_input==0 or master_input==6):
                         pz=np.linspace(psurf,pmin,nlayers+1)
                         for i in range(len(pavel)):
                             pavel[i]=(pz[i]+pz[i+1])/2.
@@ -1777,6 +1870,16 @@ for c_zonal_transp in c_zonal_transps:
                             # wkl[3,i] = mperlayr[i] * 1.0e-4 * 456e-6
                             wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
                             wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
+                    elif(master_input==6): #ERA-I
+                        q,o3,fal = read_erai()
+                        wbrodl = mperlayr_air * 1.0e-4
+                        print wbrodl
+                        wkl[1,:]=q[:,0]
+                        wkl[2,:]=400e-6
+                        wkl[3,:]=o3[:,0]
+                        
+
+
 
                     color=[]
                     for i in range(nlayers+1):
@@ -1813,7 +1916,6 @@ for c_zonal_transp in c_zonal_transps:
 
                             # zonal_transps[0]=(tbound_master[1]-tbound_master[0])*5.
                             # zonal_transps[1]=zonal_transps[0]*-1.
-
 
                         cldweights,altbins,tauclds=read_misr()
 
