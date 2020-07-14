@@ -330,28 +330,32 @@ for c_zonal_transp in c_zonal_transps:
                     for x in vars_0d:
                         f.write(str(x))
                         f.write('\n')
-                    for x in vars_master_lay_cld:
-                        for j in range(ncloudcols):
-                            for i in range(nlayers):
-                                f.write(str(x[i,j]))
-                                f.write('\n')
-                    for x in vars_master_lev_cld:
-                        for j in range(ncloudcols):
-                            for i in range(nlayers+1):
-                                f.write(str(x[i,j]))
-                                f.write('\n')
+                    for x in vars_master_lay_cld_lat:
+                        for k in range(nlatcols):
+                            for j in range(ncloudcols):
+                                for i in range(nlayers):
+                                    f.write(str(x[i,j,k]))
+                                    f.write('\n')
+                    for x in vars_master_lev_cld_lat:
+                        for k in range(nlatcols):
+                            for j in range(ncloudcols):
+                                for i in range(nlayers+1):
+                                    f.write(str(x[i,j,k]))
+                                    f.write('\n')
                     i_lens=0
                     for x in vars_misc_1d:
                         for i in range(vars_misc_1d_lens[i_lens]):
                             f.write(str(x[i]))
                             f.write('\n')
                         i_lens+=1
-                    for x in vars_master_lay_cld_nmol:
-                        for k in range(nmol+1):
-                            for j in range(ncloudcols):
-                                for i in range(nlayers):
-                                    f.write(str(x[i,j,k]))
-                                    f.write('\n')
+                    for x in vars_master_lay_cld_nmol_lat:
+                        for l in range(nlatcols):
+                            for k in range(nmol+1):
+                                for j in range(ncloudcols):
+                                    for i in range(nlayers):
+                                        f.write(str(x[i,j,k,l]))
+                                        f.write('\n')
+                                        # print(i, j, k, l, x[i,j,k,l])
                     for x in vars_master_cld:
                         for i in range(ncloudcols):
                             f.write(str(x[i]))
@@ -383,13 +387,14 @@ for c_zonal_transp in c_zonal_transps:
                     extra_cld_latcol = 2
                     extra_cld_cldcol = 2
 
-                    for i in range(len(altbins)):
-                        if (altbins[i] < 3.0):
-                            cld_taus[i] = od_low
-                        elif(altbins[i] < 7.0):
-                            cld_taus[i] = od_mid
-                        else:
-                            cld_taus[i] = od_high
+                    for i_lat in range(nlatcols):
+                        for i in range(len(altbins)):
+                            if (altbins[i] < 3.0):
+                                cld_taus[i] = od_low
+                            elif(altbins[i] < 7.0):
+                                cld_taus[i] = od_mid
+                            else:
+                                cld_taus[i] = od_high
 
                     binned_cf_lat = np.zeros((nlatcols,len(misr_alts)))
                     cf_lat_bincounts = np.zeros((nlatcols,len(misr_alts)))
@@ -427,7 +432,7 @@ for c_zonal_transp in c_zonal_transps:
                             tempcloudfrac = tempcloudfrac + binned_cf[col,cloudcol] - tempcloudfrac * binned_cf[col,cloudcol]
                         clearfrac[col] = (1.0 - tempcloudfrac) / 2.0
 
-                    return binned_cf,altbins,cld_taus
+                    return binned_cf[i_lat,:],altbins,cld_taus
 
                 def read_erai():
 
@@ -516,17 +521,18 @@ for c_zonal_transp in c_zonal_transps:
                     o3=interpolate_createprrtminput_lev('o3',o3_latp_max,o3_ps,o3_lats)
                     fal=interpolate_createprrtminput_sfc('fal',fal_lat_max,fal_lats)
 
-                    print 'Finished'
+                    print('Finished')
 
                     return q, o3, fal
                 
 
                 nlayers=60
                 ncloudcols=2
-                nlatcols=1
+                nlatcols=5
                 nmol=7
 
                 zonal_transps = [-0.,0.]
+                zonal_transps=np.zeros((2,nlatcols))
 
                 # master switches
                 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim
@@ -563,9 +569,10 @@ for c_zonal_transp in c_zonal_transps:
                 eqb_maxhtr=1e-4
                 # eqb_maxdfnet=1e-4
                 eqb_maxdfnet=1e-2   
+                maxdfnet_tot=1.0
                 eqb_col_budgs=1e12
                 toa_fnet_eqb=1.0e12
-                timesteps=1000
+                timesteps=5
                 cti=0
                 surf_rh=0.8
                 vol_mixh2o_min = 1e-6
@@ -664,7 +671,7 @@ for c_zonal_transp in c_zonal_transps:
                 gravity=9.81
                 filewritten=0
                 sw_freq=100
-                plotted=0
+                plotted=1
 
                 pin2 = 0.79 * 1e5 #convert the input in bar to Pa
                 pico2 = 400e-6 * 1e5 #convert the input in bar to Pa
@@ -732,7 +739,7 @@ for c_zonal_transp in c_zonal_transps:
                 radice=90.
                 radliq=7.
 
-                maxdfnet=10.
+                maxdfnet_lat=np.zeros(nlatcols)
                 maxdfnet_ind=0
                 stepssinceswcalled=0
 
@@ -743,29 +750,29 @@ for c_zonal_transp in c_zonal_transps:
                 column_budgets=np.zeros(ncloudcols)
                 zonal_transps=np.zeros(ncloudcols)
 
-                tz_master=np.zeros((nlayers+1,ncloudcols))
-                tavel_master=np.zeros((nlayers,ncloudcols))
-                pz_master=np.zeros((nlayers+1,ncloudcols))
-                pavel_master=np.zeros((nlayers,ncloudcols))
-                altz_master=np.zeros((nlayers+1,ncloudcols))
-                altavel_master=np.zeros((nlayers,ncloudcols))
+                tz_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                tavel_master=np.zeros((nlayers,ncloudcols,nlatcols))
+                pz_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                pavel_master=np.zeros((nlayers,ncloudcols,nlatcols))
+                altz_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                altavel_master=np.zeros((nlayers,ncloudcols,nlatcols))
 
-                totuflux_master=np.zeros((nlayers+1,ncloudcols))
-                totuflux_lw_master=np.zeros((nlayers+1,ncloudcols))
-                totuflux_sw_master=np.zeros((nlayers+1,ncloudcols))
-                totdflux_master=np.zeros((nlayers+1,ncloudcols))
-                totdflux_lw_master=np.zeros((nlayers+1,ncloudcols))
-                totdflux_sw_master=np.zeros((nlayers+1,ncloudcols))
-                fnet_master=np.zeros((nlayers+1,ncloudcols))
-                fnet_lw_master=np.zeros((nlayers+1,ncloudcols))
-                fnet_sw_master=np.zeros((nlayers+1,ncloudcols))
-                htr_master=np.zeros((nlayers+1,ncloudcols))
-                htr_lw_master=np.zeros((nlayers+1,ncloudcols))
-                htr_sw_master=np.zeros((nlayers+1,ncloudcols))
-                wbrodl_master=np.zeros((nlayers,ncloudcols))
-                conv_master=np.zeros((nlayers+1,ncloudcols))
+                totuflux_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                totuflux_lw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                totuflux_sw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                totdflux_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                totdflux_lw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                totdflux_sw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                fnet_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                fnet_lw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                fnet_sw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                htr_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                htr_lw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                htr_sw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                wbrodl_master=np.zeros((nlayers,ncloudcols,nlatcols))
+                conv_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
 
-                wkl_master=np.zeros((nlayers,ncloudcols,nmol+1))
+                wkl_master=np.zeros((nlayers,ncloudcols,nmol+1,nlatcols))
 
                 totuflux=np.zeros(nlayers+1)
                 totdflux=np.zeros(nlayers+1)
@@ -805,6 +812,7 @@ for c_zonal_transp in c_zonal_transps:
                 # tauclds=np.array((3.0,0.0))
                 # tauclds=np.array((0.0,0.0))
                 # ssaclds=np.array((0.5,0.0))
+                tauclds=np.ones(ncloudcols)
                 ssaclds=np.ones(ncloudcols)*0.5
 
 
@@ -926,52 +934,56 @@ for c_zonal_transp in c_zonal_transps:
                     cld_lays=np.ones(ncloudcols)
                     cld_fracs=np.ones(ncloudcols)
                     tauclds=np.array((0.5,0.0))
+                    # tauclds=np.ones((ncloudcols,nlatcols))
                     ssaclds=np.array((0.25,0.0))
+                    # ssaclds=np.ones((ncloudcols,nlatcols))*0.5
 
-                    tbound_master=np.zeros(ncloudcols)
-                    toa_fnet_master=np.zeros(ncloudcols)
-                    tz_master=np.zeros((nlayers+1,ncloudcols))
-                    tavel_master=np.zeros((nlayers,ncloudcols))
-                    pz_master=np.zeros((nlayers+1,ncloudcols))
-                    pavel_master=np.zeros((nlayers,ncloudcols))
-                    altz_master=np.zeros((nlayers+1,ncloudcols))
-                    altavel_master=np.zeros((nlayers,ncloudcols))
+                    tbound_master=np.zeros((ncloudcols,nlatcols))
+                    toa_fnet_master=np.zeros((ncloudcols,nlatcols))
+                    tz_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    tavel_master=np.zeros((nlayers,ncloudcols,nlatcols))
+                    pz_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    pavel_master=np.zeros((nlayers,ncloudcols,nlatcols))
+                    altz_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    altavel_master=np.zeros((nlayers,ncloudcols,nlatcols))
 
-                    totuflux_master=np.zeros((nlayers+1,ncloudcols))
-                    totuflux_lw_master=np.zeros((nlayers+1,ncloudcols))
-                    totuflux_sw_master=np.zeros((nlayers+1,ncloudcols))
-                    totdflux_master=np.zeros((nlayers+1,ncloudcols))
-                    totdflux_lw_master=np.zeros((nlayers+1,ncloudcols))
-                    totdflux_sw_master=np.zeros((nlayers+1,ncloudcols))
-                    fnet_master=np.zeros((nlayers+1,ncloudcols))
-                    fnet_lw_master=np.zeros((nlayers+1,ncloudcols))
-                    fnet_sw_master=np.zeros((nlayers+1,ncloudcols))
-                    htr_master=np.zeros((nlayers+1,ncloudcols))
-                    htr_lw_master=np.zeros((nlayers+1,ncloudcols))
-                    htr_sw_master=np.zeros((nlayers+1,ncloudcols))
-                    wbrodl_master=np.zeros((nlayers,ncloudcols))
-                    conv_master=np.zeros((nlayers+1,ncloudcols))
+                    totuflux_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    totuflux_lw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    totuflux_sw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    totdflux_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    totdflux_lw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    totdflux_sw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    fnet_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    fnet_lw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    fnet_sw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    htr_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    htr_lw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    htr_sw_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
+                    wbrodl_master=np.zeros((nlayers,ncloudcols,nlatcols))
+                    conv_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
 
-                    wkl_master=np.zeros((nlayers,ncloudcols,nmol+1))
+                    wkl_master=np.zeros((nlayers,ncloudcols,nmol+1,nlatcols))
 
-                    vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,ncloudcols,master_input,conv_on,surf_lowlev_coupled,lay_intp,lw_on,sw_on,eqb_maxdfnet,toa_fnet_eqb]
-                    vars_master_lay_cld=[tavel_master,pavel_master,altavel_master,wbrodl_master]
-                    vars_master_lev_cld=[tz_master,pz_master,altz_master,totuflux_master,totuflux_lw_master,totuflux_sw_master,totdflux_master,totdflux_lw_master,totdflux_sw_master,fnet_master,fnet_lw_master,fnet_sw_master,htr_master,htr_lw_master,htr_sw_master,conv_master]
+                    vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,ncloudcols,master_input,conv_on,surf_lowlev_coupled,lay_intp,lw_on,sw_on,eqb_maxdfnet,toa_fnet_eqb,nlatcols]
+                    vars_master_lay_cld_lat=[tavel_master,pavel_master,altavel_master,wbrodl_master]
+                    vars_master_lev_cld_lat=[tz_master,pz_master,altz_master,totuflux_master,totuflux_lw_master,totuflux_sw_master,totdflux_master,totdflux_lw_master,totdflux_sw_master,fnet_master,fnet_lw_master,fnet_sw_master,htr_master,htr_lw_master,htr_sw_master,conv_master]
                     vars_misc_1d=[semis,semiss,solvar]
                     vars_misc_1d_lens=[16,29,29]
-                    vars_master_lay_cld_nmol=[wkl_master]
+                    vars_master_lay_cld_nmol_lat=[wkl_master]
                     vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master,zonal_transps]
 
 
-                    for x in vars_master_lay_cld:
-                        for j in range(ncloudcols):
-                            for i in range(nlayers):
-                                x[i,j] = f.readline()
+                    for x in vars_master_lay_cld_lat:
+                        for k in range(nlatcols):
+                            for j in range(ncloudcols):
+                                for i in range(nlayers):
+                                    x[i,j,k] = f.readline()
 
-                    for x in vars_master_lev_cld:
-                        for j in range(ncloudcols):
-                            for i in range(nlayers+1):
-                                x[i,j] = f.readline()
+                    for x in vars_master_lev_cld_lat:
+                        for k in range(nlatcols):
+                            for j in range(ncloudcols):
+                                for i in range(nlayers+1):
+                                    x[i,j,k] = f.readline()
 
                     i_lens=0
                     for x in vars_misc_1d:
@@ -980,11 +992,12 @@ for c_zonal_transp in c_zonal_transps:
                         i_lens+=1
 
 
-                    for x in vars_master_lay_cld_nmol:
-                        for k in range(nmol+1):
-                            for j in range(ncloudcols):
-                                for i in range(nlayers):
-                                    x[i,j,k] = f.readline()
+                    for x in vars_master_lay_cld_nmol_lat:
+                        for l in range(nlatcols):
+                            for k in range(nmol+1):
+                                for j in range(ncloudcols):
+                                    for i in range(nlayers):
+                                        x[i,j,k,l] = f.readline()
 
 
                     for x in vars_master_cld:
@@ -1870,12 +1883,6 @@ for c_zonal_transp in c_zonal_transps:
                             # wkl[3,i] = mperlayr[i] * 1.0e-4 * 456e-6
                             wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
                             wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
-                    elif(master_input==6): #ERA-I
-                        q,o3,fal = read_erai()
-                        wbrodl = mperlayr_air * 1.0e-4
-                        wkl[1,:]=q[:,0]
-                        wkl[2,:]=400e-6
-                        wkl[3,:]=o3[:,0]
                         
 
 
@@ -1885,307 +1892,343 @@ for c_zonal_transp in c_zonal_transps:
                         color.append('#%06X' % randint(0, 0xFFFFFF))
 
 
+                if(master_input==6): #ERA-I
+                    q,o3,fal = read_erai()
+
                 # main loop (timestepping)
                 for ts in range(timesteps):
 
-                    for i_cld in range(ncloudcols):
-
-                        if(ts>1 or input_source==1):
-
-                            tbound=tbound_master[i_cld]
-
-                            tz=tz_master[:,i_cld]
-                            tavel=tavel_master[:,i_cld]
-
-                            pz=pz_master[:,i_cld]
-                            pavel=pavel_master[:,i_cld]
-                            altz=altz_master[:,i_cld]
-                            altavel=altavel_master[:,i_cld]
-                            # fnet=fnet_master[:,i_cld]
-                            wkl[1,:]=wkl_master[:,i_cld,0]
-                            wkl[2,:]=wkl_master[:,i_cld,1]
-                            wkl[3,:]=wkl_master[:,i_cld,2]
-                            wkl[4,:]=wkl_master[:,i_cld,3]
-                            wkl[5,:]=wkl_master[:,i_cld,4]
-                            wkl[6,:]=wkl_master[:,i_cld,5]
-                            wkl[7,:]=wkl_master[:,i_cld,6]
-                            wbrodl=wbrodl_master[:,i_cld]
-
-                            toa_fnet=toa_fnet_master[i_cld]
-
-                            # zonal_transps[0]=(tbound_master[1]-tbound_master[0])*5.
-                            # zonal_transps[1]=zonal_transps[0]*-1.
-
-                        cldweights,altbins,tauclds=read_misr()
-
-                        inflag=inflags[i_cld].astype('int')
-                        iceflag=iceflags[i_cld].astype('int')
-                        liqflag=liqflags[i_cld].astype('int')
-                        # cld_lay=cld_lays[i_cld].astype('int')
-                        cld_lay=np.argmin(abs(altz/1000.-altbins[i_cld]))
-                        frac=cld_fracs[i_cld]
-                        taucld=tauclds[i_cld]
-                        ssacld=ssaclds[i_cld]
-
-                        vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,ncloudcols,master_input,conv_on,surf_lowlev_coupled,lay_intp,lw_on,sw_on,eqb_maxdfnet,toa_fnet_eqb]
-                        vars_master_lay_cld=[tavel_master,pavel_master,altavel_master,wbrodl_master]
-                        vars_master_lev_cld=[tz_master,pz_master,altz_master,totuflux_master,totuflux_lw_master,totuflux_sw_master,totdflux_master,totdflux_lw_master,totdflux_sw_master,fnet_master,fnet_lw_master,fnet_sw_master,htr_master,htr_lw_master,htr_sw_master,conv_master]
-                        vars_misc_1d=[semis,semiss,solvar]
-                        vars_misc_1d_lens=[16,29,29]
-                        vars_master_lay_cld_nmol=[wkl_master]
-                        vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master,zonal_transps]
+                    for i_lat in range(nlatcols):
 
 
-                        if(ts>0):
-                            for i in range(1,nlayers):
-                                ur[i] = ur_min
+                        wbrodl = mperlayr_air * 1.0e-4
+                        wkl[1,:]=q[:,i_lat]
+                        wkl[2,:]=400e-6
+                        wkl[3,:]=o3[:,i_lat]
+                        plt.figure(1)
+                        plt.semilogy(wkl[1,:],pavel,label=i_lat)
+
+                        for i_cld in range(ncloudcols):
+
                             
+
+                            if(ts>1 or input_source==1):
+
+                                tbound=tbound_master[i_cld]
+
+                                tz=tz_master[:,i_cld,i_lat]
+                                tavel=tavel_master[:,i_cld,i_lat]
+
+                                pz=pz_master[:,i_cld,i_lat]
+                                pavel=pavel_master[:,i_cld,i_lat]
+                                altz=altz_master[:,i_cld,i_lat]
+                                altavel=altavel_master[:,i_cld,i_lat]
+                                # fnet=fnet_master[:,i_cld]
+                                wkl[1,:]=wkl_master[:,i_cld,0,i_lat]
+                                wkl[2,:]=wkl_master[:,i_cld,1,i_lat]
+                                wkl[3,:]=wkl_master[:,i_cld,2,i_lat]
+                                wkl[4,:]=wkl_master[:,i_cld,3,i_lat]
+                                wkl[5,:]=wkl_master[:,i_cld,4,i_lat]
+                                wkl[6,:]=wkl_master[:,i_cld,5,i_lat]
+                                wkl[7,:]=wkl_master[:,i_cld,6,i_lat]
+                                wbrodl=wbrodl_master[:,i_cld,i_lat]
+
+                                toa_fnet=toa_fnet_master[i_cld]
+
+                                # zonal_transps[0]=(tbound_master[1]-tbound_master[0])*5.
+                                # zonal_transps[1]=zonal_transps[0]*-1.
+
+                            cldweights,altbins,tauclds=read_misr()
+
+                            inflag=inflags[i_cld].astype('int')
+                            iceflag=iceflags[i_cld].astype('int')
+                            liqflag=liqflags[i_cld].astype('int')
+                            # cld_lay=cld_lays[i_cld].astype('int')
+                            cld_lay=np.argmin(abs(altz/1000.-altbins[i_cld]))
+                            frac=cld_fracs[i_cld]
+                            taucld=tauclds[i_cld]
+                            ssacld=ssaclds[i_cld]
+
+                            vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,ncloudcols,master_input,conv_on,surf_lowlev_coupled,lay_intp,lw_on,sw_on,eqb_maxdfnet,toa_fnet_eqb,nlatcols]
+                            vars_master_lay_cld_lat=[tavel_master,pavel_master,altavel_master,wbrodl_master]
+                            vars_master_lev_cld_lat=[tz_master,pz_master,altz_master,totuflux_master,totuflux_lw_master,totuflux_sw_master,totdflux_master,totdflux_lw_master,totdflux_sw_master,fnet_master,fnet_lw_master,fnet_sw_master,htr_master,htr_lw_master,htr_sw_master,conv_master]
+                            vars_misc_1d=[semis,semiss,solvar]
+                            vars_misc_1d_lens=[16,29,29]
+                            vars_master_lay_cld_nmol_lat=[wkl_master]
+                            vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master,zonal_transps]
+
+
+                            if(ts>0):
+                                for i in range(1,nlayers):
+                                    ur[i] = ur_min
+                                
+                                if(input_source==0):
+                                    conv=np.zeros(nlayers+1) #reset to zero
+                                    conv[0]=1
+
+                                # if(master_input==0):
+                                if(master_input==0 or master_input==3):
+                                    surf_rh=0.8
+                                    for i in range(nlayers):
+                                        esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
+                                        rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
+                                        rel_hum=np.clip(rel_hum,0.0,0.8)
+                                        vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
+                                        if(i>1 and vol_mixh2o[i] > vol_mixh2o[i-1]):
+                                            vol_mixh2o[i]=vol_mixh2o[i-1]
+                                        vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
+                                        if(master_input==0):
+                                            wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
+                                        elif(master_input==3):
+                                            if(i_cld==0):
+                                                wkl[1,i] = vol_mixh2o[i]
+                                            elif(i_cld==1):
+                                                wkl[1,i] = vol_mixh2o[i]*wklfac
+
+
+
+
+                                # if(i_cld==1 and ts==1):
+                                #   wkl[1,:]=wkl_master[:,i_cld,0]*wklfac
+
+                            # if(input_source==0):
+                            #   dtbound=toa_fnet*0.1*0.5
+                            #   dtbound=np.clip(dtbound,-dmax,dmax)
+                            #   tbound+=dtbound
+
+
+
                             if(input_source==0):
+                                dtbound=toa_fnet*0.1*0.5*0.
+                                # dtbound=column_budgets[i_cld,i_lat]*0.1*0.5*0.5*0.1*0.
+                                dtbound=np.clip(dtbound,-dmax,dmax)
+                                tbound+=dtbound
+
+                            # if(input_source==0 and master_input==5)
+
+                            cti=0
+                            for i in range(len(conv_master[:,i_cld,i_lat])):
+                                if(conv_master[i,i_cld,i_lat]==1):
+                                    cti=i
+                                else:
+                                    continue
+
+                            if(input_source==1):
+                                dttrop=-0.00
+                                dptrop=gravity*pz[cti]*dttrop/(rsp*lapse*1e-3*tz[cti])
+                                print(dptrop, 'dptrop')
+                                print(pz[cti])
+                                tz[cti]+=dttrop
+                                pz[cti]+=dptrop
+
+                            writeformattedcloudfile()
+
+                            if(lw_on==1):
+                                writeformattedinputfile_lw()
+                                callrrtmlw()
+                                totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
+
+                            if((ts==1 or (abs(maxdfnet_tot) < eqb_maxdfnet*10. and stepssinceswcalled>500)) and sw_on==1):
+                            #   if(maxhtr<eqb_maxhtr):
+                                writeformattedinputfile_sw()
+                                callrrtmsw()
+                                print('RRTM SW Called')
+                                stepssinceswcalled=0
+                                totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
+                            stepssinceswcalled+=1
+
+
+                            prev_htr=htr
+
+                            if(ts>1 and master_input==2):
+                                totuflux_sw*=(238./fnet_sw[nlayers])
+                                totdflux_sw*=(238./fnet_sw[nlayers])
+                                htr_sw*=(238./fnet_sw[nlayers])
+                                fnet_sw*=(238./fnet_sw[nlayers])
+                            totuflux=totuflux_lw+totuflux_sw
+                            totdflux=totdflux_lw+totdflux_sw
+                            fnet=fnet_sw-fnet_lw
+                            htr=htr_lw+htr_sw
+
+                            # writeoutputfile_masters()
+
+                            toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
+                            # toa_fnet=totdflux[nlayers]-totuflux[nlayers]+zonal_transps[i_cld] #net total downward flux at TOA  NJE now accounting for zonal transport
+                            # toa_fnet=256.731-totuflux[nlayers]+0.0077 # NJE fix later
+
+                            prev_maxhtr=maxhtr*1.0
+                            re_htrs = np.where(conv==0,htr,0.)
+                            maxhtr=max(abs(re_htrs))
+                            maxhtr_ind=np.argmax(abs(re_htrs))
+                            # dfnet=np.zeros(nlayers)
+                            # dpz=np.zeros(nlayers)
+                            # for i in range(nlayers):
+                            #   dfnet[i]=fnet[i+1]-fnet[i]
+                            #   dpz[i]=pz[i+1]-pz[i]
+                            # maxdfnet=max(abs(dfnet))
+
+                            # for i in range(nlayers):
+                            #   dT=dfnet[i]/dpz[i]*-1.*3.
+                            #   # dT = htr[i]/3. #undrelax
+                            #   # dT=np.clip(dT,-dmax,dmax)
+                            #   tavel[i]+=dT
+
+                            if(input_source==0):
+                                for i in range(1,nlayers):
+                                    if(lay_intp==0):
+                                        tz[i] = (tavel[i-1] + tavel[i])/2.
+                                    else:
+                                        tz[i] = tavel[i-1]*1.0
+
+                                if(lay_intp==0):
+                                    tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
+                                else:
+                                    tz[nlayers]=tavel[nlayers-1]
+                                
+                                altz[0] = 0.0
+                                for i in range(1,nlayers):
+                                    altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+                                altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
+
                                 conv=np.zeros(nlayers+1) #reset to zero
                                 conv[0]=1
 
-                            # if(master_input==0):
-                            if(master_input==0 or master_input==3):
-                                surf_rh=0.8
-                                for i in range(nlayers):
-                                    esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
-                                    rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
-                                    rel_hum=np.clip(rel_hum,0.0,0.8)
-                                    vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
-                                    if(i>1 and vol_mixh2o[i] > vol_mixh2o[i-1]):
-                                        vol_mixh2o[i]=vol_mixh2o[i-1]
-                                    vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
-                                    if(master_input==0):
-                                        wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
-                                    elif(master_input==3):
-                                        if(i_cld==0):
-                                            wkl[1,i] = vol_mixh2o[i]
-                                        elif(i_cld==1):
-                                            wkl[1,i] = vol_mixh2o[i]*wklfac
+                                if(surf_lowlev_coupled==1):
+                                    tz[0]=tbound
 
+                                if(conv_on==1):
+                                    convection(tavel,altavel,1)
+                                    convection(tz,altz,1)
 
+                                tavel=np.clip(tavel,tmin,tmax)
+                                tz=np.clip(tz,tmin,tmax)
 
+                            # Q=np.zeros(ncloudcols)
+                            # Qv=np.zeros(ncloudcols)
+                            # esat_lowlay=np.zeros(ncloudcols)
+                            # esat_bound=np.zeros(ncloudcols)
+                            # qsat_lowlay=np.zeros(ncloudcols)
+                            # qsat_bound=np.zeros(ncloudcols)
+                            # qstar=np.zeros(ncloudcols)
+                            # Evap=np.zeros(ncloudcols)
+                            # Fah=np.zeros(ncloudcols)
+                            # col_budg=np.zeros(ncloudcols)
+                            # deltheta=85.
+                            # cp=1.003
+                            # L=2429.8
+                            # r=0.8
+                            # A1=1.
+                            # A2=1.
 
-                            # if(i_cld==1 and ts==1):
-                            #   wkl[1,:]=wkl_master[:,i_cld,0]*wklfac
+                            # for k in range(2):
+                            #     for i_cld2 in range(ncloudcols):
+                            #         Q[i_cld2]=(fnet_master[nlayers,i_cld2]-fnet_master[0,i_cld2])
+                            #         esat_lowlay[i_cld2] = 6.1094*exp(17.625*(tz_master[0,i_cld2]-273.15)/(tz_master[0,i_cld2]-273.15+243.04))
+                            #         esat_bound[i_cld2] = 6.1094*exp(17.625*(tbound_master[i_cld2]-273.15)/(tbound_master[i_cld2]-273.15+243.04))
+                            #         qsat_lowlay[i_cld2]=0.622*esat_lowlay[i_cld2]/(pz_master[0,i_cld2]-esat_lowlay[i_cld2])
+                            #         qsat_bound[i_cld2]=0.622*esat_bound[i_cld2]/(pz_master[0,i_cld2]-esat_bound[i_cld2])
+                            #         qstar[i_cld2]=qsat_bound[i_cld2]-r*qsat_lowlay[i_cld2]
+                            #         b=L*qstar[1]/(cp*deltheta)
+                            #         Qv[i_cld2]=(1-b)*Q[i_cld2]
+                            #         Evap[i_cld2]=-b*Q[i_cld2]
+                            # Fah[0]=A2/A1*Qv[1]
+                            # Fah[1]=-1.*Fah[0]
 
-                        # if(input_source==0):
-                        #   dtbound=toa_fnet*0.1*0.5
-                        #   dtbound=np.clip(dtbound,-dmax,dmax)
-                        #   tbound+=dtbound
+                            # zonal_transps=Fah
+                            # zonal_transps[0,i_lat]=(tbound_master[1,i_lat]-tbound_master[0,i_lat])*c_zonal_transp
+                            # zonal_transps[1,i_lat]=zonal_transps[0,i_lat]*-1.
+                            # zonal_transps=[0,0]
+                            # column_budgets[i_cld]=340.+fnet[nlayers]+zonal_transps[i_cld]
 
+                            # column_budgets[i_cld,i_lat]=fixed_sw+fnet[nlayers]+zonal_transps[i_cld,i_lat]
 
+                            # if(i_cld==0):
+                            #   column_budgets[i_cld]+=Evap[1]
+                            # else:
+                            #   column_budgets[i_cld]-=Evap[1]
 
-                        if(input_source==0):
-                            # dtbound=toa_fnet*0.1*0.5*0.
-                            dtbound=column_budgets[i_cld]*0.1*0.5*0.5*0.1*0.
-                            dtbound=np.clip(dtbound,-dmax,dmax)
-                            tbound+=dtbound
+                            tbound_master[i_cld]=tbound
+                            toa_fnet_master[i_cld]=toa_fnet
 
-                        # if(input_source==0 and master_input==5)
-
-                        cti=0
-                        for i in range(len(conv_master[:,i_cld])):
-                            if(conv_master[i,i_cld]==1):
-                                cti=i
-                            else:
-                                continue
-
-                        if(input_source==1):
-                            dttrop=-0.00
-                            dptrop=gravity*pz[cti]*dttrop/(rsp*lapse*1e-3*tz[cti])
-                            print dptrop, 'dptrop'
-                            print pz[cti]
-                            tz[cti]+=dttrop
-                            pz[cti]+=dptrop
-
-                        writeformattedcloudfile()
-
-                        if(lw_on==1):
-                            writeformattedinputfile_lw()
-                            callrrtmlw()
-                            totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
-
-                        if((ts==1 or (abs(maxdfnet) < eqb_maxdfnet*10. and stepssinceswcalled>500)) and sw_on==1):
-                        #   if(maxhtr<eqb_maxhtr):
-                            writeformattedinputfile_sw()
-                            callrrtmsw()
-                            print 'RRTM SW Called'
-                            stepssinceswcalled=0
-                            totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
-                        stepssinceswcalled+=1
-
-
-                        prev_htr=htr
-
-                        if(ts>1 and master_input==2):
-                            totuflux_sw*=(238./fnet_sw[nlayers])
-                            totdflux_sw*=(238./fnet_sw[nlayers])
-                            htr_sw*=(238./fnet_sw[nlayers])
-                            fnet_sw*=(238./fnet_sw[nlayers])
-                        totuflux=totuflux_lw+totuflux_sw
-                        totdflux=totdflux_lw+totdflux_sw
-                        fnet=fnet_sw-fnet_lw
-                        htr=htr_lw+htr_sw
-
-                        # writeoutputfile_masters()
-
-                        toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
-                        # toa_fnet=totdflux[nlayers]-totuflux[nlayers]+zonal_transps[i_cld] #net total downward flux at TOA  NJE now accounting for zonal transport
-                        # toa_fnet=256.731-totuflux[nlayers]+0.0077 # NJE fix later
-
-                        prev_maxhtr=maxhtr*1.0
-                        re_htrs = np.where(conv==0,htr,0.)
-                        maxhtr=max(abs(re_htrs))
-                        maxhtr_ind=np.argmax(abs(re_htrs))
-                        # dfnet=np.zeros(nlayers)
-                        # dpz=np.zeros(nlayers)
-                        # for i in range(nlayers):
-                        #   dfnet[i]=fnet[i+1]-fnet[i]
-                        #   dpz[i]=pz[i+1]-pz[i]
-                        # maxdfnet=max(abs(dfnet))
-
-                        # for i in range(nlayers):
-                        #   dT=dfnet[i]/dpz[i]*-1.*3.
-                        #   # dT = htr[i]/3. #undrelax
-                        #   # dT=np.clip(dT,-dmax,dmax)
-                        #   tavel[i]+=dT
-
-                        if(input_source==0):
-                            for i in range(1,nlayers):
-                                if(lay_intp==0):
-                                    tz[i] = (tavel[i-1] + tavel[i])/2.
-                                else:
-                                    tz[i] = tavel[i-1]*1.0
-
-                            if(lay_intp==0):
-                                tz[nlayers] = 2*tavel[nlayers-1]-tz[nlayers-1]
-                            else:
-                                tz[nlayers]=tavel[nlayers-1]
+                            tz_master[:,i_cld,i_lat]=tz
+                            tavel_master[:,i_cld,i_lat]=tavel
+                            pz_master[:,i_cld,i_lat]=pz
+                            pavel_master[:,i_cld,i_lat]=pavel
+                            altz_master[:,i_cld,i_lat]=altz
+                            altavel_master[:,i_cld,i_lat]=altavel
+                            totuflux_master[:,i_cld,i_lat]=totuflux
+                            totuflux_lw_master[:,i_cld,i_lat]=totuflux_lw
+                            totuflux_sw_master[:,i_cld,i_lat]=totuflux_sw
+                            totdflux_master[:,i_cld,i_lat]=totdflux
+                            totdflux_lw_master[:,i_cld,i_lat]=totdflux_lw
+                            totdflux_sw_master[:,i_cld,i_lat]=totdflux_sw
+                            fnet_master[:,i_cld,i_lat]=fnet
+                            fnet_lw_master[:,i_cld,i_lat]=fnet_lw
+                            fnet_sw_master[:,i_cld,i_lat]=fnet_sw
+                            htr_master[:,i_cld,i_lat]=htr
+                            htr_lw_master[:,i_cld,i_lat]=htr_lw
+                            htr_sw_master[:,i_cld,i_lat]=htr_sw
                             
-                            altz[0] = 0.0
-                            for i in range(1,nlayers):
-                                altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
-                            altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
+                            if(input_source==0):
+                                conv_master[:,i_cld,i_lat]=conv
+                            wbrodl_master[:,i_cld,i_lat]=wbrodl
 
-                            conv=np.zeros(nlayers+1) #reset to zero
-                            conv[0]=1
+                            # for i_mol in range(nmol+1):
+                            for i_mol in range(1,nmol):
+                                print(i_mol, wkl[i_mol,:])
+                                wkl_master[:,i_cld,i_mol-1,i_lat] = wkl[i_mol,:]
+                                # wkl_master[:,i_cld,i_mol,i_lat] = wkl[i_mol,:]
 
-                            if(surf_lowlev_coupled==1):
-                                tz[0]=tbound
 
-                            if(conv_on==1):
-                                convection(tavel,altavel,1)
-                                convection(tz,altz,1)
+                            #  end i_cld loop
 
-                            tavel=np.clip(tavel,tmin,tmax)
-                            tz=np.clip(tz,tmin,tmax)
+                        # end loop latcols
 
-                        # Q=np.zeros(ncloudcols)
-                        # Qv=np.zeros(ncloudcols)
-                        # esat_lowlay=np.zeros(ncloudcols)
-                        # esat_bound=np.zeros(ncloudcols)
-                        # qsat_lowlay=np.zeros(ncloudcols)
-                        # qsat_bound=np.zeros(ncloudcols)
-                        # qstar=np.zeros(ncloudcols)
-                        # Evap=np.zeros(ncloudcols)
-                        # Fah=np.zeros(ncloudcols)
-                        # col_budg=np.zeros(ncloudcols)
-                        # deltheta=85.
-                        # cp=1.003
-                        # L=2429.8
-                        # r=0.8
-                        # A1=1.
-                        # A2=1.
-
-                        # for k in range(2):
-                        #     for i_cld2 in range(ncloudcols):
-                        #         Q[i_cld2]=(fnet_master[nlayers,i_cld2]-fnet_master[0,i_cld2])
-                        #         esat_lowlay[i_cld2] = 6.1094*exp(17.625*(tz_master[0,i_cld2]-273.15)/(tz_master[0,i_cld2]-273.15+243.04))
-                        #         esat_bound[i_cld2] = 6.1094*exp(17.625*(tbound_master[i_cld2]-273.15)/(tbound_master[i_cld2]-273.15+243.04))
-                        #         qsat_lowlay[i_cld2]=0.622*esat_lowlay[i_cld2]/(pz_master[0,i_cld2]-esat_lowlay[i_cld2])
-                        #         qsat_bound[i_cld2]=0.622*esat_bound[i_cld2]/(pz_master[0,i_cld2]-esat_bound[i_cld2])
-                        #         qstar[i_cld2]=qsat_bound[i_cld2]-r*qsat_lowlay[i_cld2]
-                        #         b=L*qstar[1]/(cp*deltheta)
-                        #         Qv[i_cld2]=(1-b)*Q[i_cld2]
-                        #         Evap[i_cld2]=-b*Q[i_cld2]
-                        # Fah[0]=A2/A1*Qv[1]
-                        # Fah[1]=-1.*Fah[0]
-
-                        # zonal_transps=Fah
-                        zonal_transps[0]=(tbound_master[1]-tbound_master[0])*c_zonal_transp
-                        zonal_transps[1]=zonal_transps[0]*-1.
-                        # zonal_transps=[0,0]
-                        # column_budgets[i_cld]=340.+fnet[nlayers]+zonal_transps[i_cld]
-                        column_budgets[i_cld]=fixed_sw+fnet[nlayers]+zonal_transps[i_cld]
-                        # if(i_cld==0):
-                        #   column_budgets[i_cld]+=Evap[1]
-                        # else:
-                        #   column_budgets[i_cld]-=Evap[1]
-
-                        tbound_master[i_cld]=tbound
-                        tz_master[:,i_cld]=tz
-                        tavel_master[:,i_cld]=tavel
-                        pz_master[:,i_cld]=pz
-                        pavel_master[:,i_cld]=pavel
-                        altz_master[:,i_cld]=altz
-                        altavel_master[:,i_cld]=altavel
-                        totuflux_master[:,i_cld]=totuflux
-                        totuflux_lw_master[:,i_cld]=totuflux_lw
-                        totuflux_sw_master[:,i_cld]=totuflux_sw
-                        totdflux_master[:,i_cld]=totdflux
-                        totdflux_lw_master[:,i_cld]=totdflux_lw
-                        totdflux_sw_master[:,i_cld]=totdflux_sw
-                        fnet_master[:,i_cld]=fnet
-                        fnet_lw_master[:,i_cld]=fnet_lw
-                        fnet_sw_master[:,i_cld]=fnet_sw
-                        htr_master[:,i_cld]=htr
-                        htr_lw_master[:,i_cld]=htr_lw
-                        htr_sw_master[:,i_cld]=htr_sw
-                        toa_fnet_master[i_cld]=toa_fnet
-                        if(input_source==0):
-                            conv_master[:,i_cld]=conv
-                        wbrodl_master[:,i_cld]=wbrodl
-
-                        for i_mol in range(nmol+1):
-                            wkl_master[:,i_cld,i_mol-1] = wkl[i_mol,:]
-
-                        #  end i_cld loop
-
-                    dfnet_master=np.zeros((nlayers,ncloudcols))
-                    dpz_master=np.zeros((nlayers,ncloudcols))
-                    for i_cld in range(ncloudcols):
-                        for i in range(nlayers):
-                            dfnet_master[i,i_cld]=fnet_master[i+1,i_cld]-fnet_master[i,i_cld]
-                            dpz_master[i,i_cld]=pz_master[i+1,i_cld]-pz_master[i,i_cld]
-
-                    if(input_source==0):
+                    dfnet_master=np.zeros((nlayers,ncloudcols,nlatcols))
+                    dpz_master=np.zeros((nlayers,ncloudcols,nlatcols))
+                    for i_lat in range(nlatcols):
                         for i_cld in range(ncloudcols):
                             for i in range(nlayers):
-                                # cldweights=[0.5,0.5]
-                                dT=np.mean(dfnet_master[i,:]/dpz_master[i,:]*cldweights)*-1.*4.*4.
-                                dT=np.clip(dT,-dmax,dmax)
-                                # dT = htr[i]/3. #undrelax
-                                # dT=np.clip(dT,-dmax,dmax)
-                                tavel_master[i,i_cld]+=dT
-                        tavel_master=np.clip(tavel_master,tmin,tmax)
+                                dfnet_master[i,i_cld,i_lat]=fnet_master[i+1,i_cld,i_lat]-fnet_master[i,i_cld,i_lat]
+                                dpz_master[i,i_cld,i_lat]=pz_master[i+1,i_cld,i_lat]-pz_master[i,i_cld,i_lat]
+
+                    if(input_source==0):
+                        for i_lat in range(nlatcols):
+                            for i_cld in range(ncloudcols):
+                                for i in range(nlayers):
+                                    # cldweights=[0.5,0.5]
+                                    dT=np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights)*-1.*4.*4.
+                                    dT=np.clip(dT,-dmax,dmax)
+                                    # dT = htr[i]/3. #undrelax
+                                    # dT=np.clip(dT,-dmax,dmax)
+                                    tavel_master[i,i_cld,i_lat]+=dT
+                            tavel_master=np.clip(tavel_master,tmin,tmax)
 
                     re_dfnets=np.where(conv_master[:-1]==0,dfnet_master,0.)
                     # dfnet_master_mean=np.mean(dfnet_master,axis=1)
                     # conv_master_min=np.min(conv_master,axis=1)
                     # re_dfnets=np.where(conv_master_min[:-1]==0,dfnet_master_mean,0.)
                     # maxdfnet=np.max(np.abs(np.mean(re_dfnets,axis=1)))
-                    maxdfnet=np.max(np.abs(np.mean(re_dfnets,axis=1)))
+                    for i_lat in range(nlatcols):
+                        maxdfnet_lat[i_lat]=np.max(np.abs(np.mean(re_dfnets[:,:,i_lat],axis=1)))
+                    maxdfnet_tot=np.max(np.abs(maxdfnet_lat))
+                    # maxdfnet_tot=np.max(np.abs(np.mean(re_dfnets,axis=1)))
 
                     # maxdfnet_ind=np.argmax(abs(re_dfnets))
                     # maxdfnet=dfnet[maxdfnet_ind]
 
                     if(ts%10==0):
-                        print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f}'.format(ts,maxdfnet,maxdfnet_ind,toa_fnet_master[0],toa_fnet_master[1],cti,tbound_master[0],tbound_master[1],column_budgets[0],column_budgets[1],zonal_transps[0],zonal_transps[1]))
+                        # print('{:4d} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:3d} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f} | {:12.8f}'.format(ts,maxdfnet,maxdfnet_ind,toa_fnet_master[0],toa_fnet_master[1],cti,tbound_master[0],tbound_master[1],column_budgets[0],column_budgets[1],zonal_transps[0],zonal_transps[1]))
+                        for i_lat in range(nlatcols):
+                            if(i_lat<nlatcols-1):
+                                print(maxdfnet_lat[i_lat],'|',end='')
+                            else:
+                                print(maxdfnet_lat[i_lat])
+                        # print('{:4f}'.format(maxdfnet_tot))
                         # print re_dfnets
                         # print('{:4d} | {:12.8f} | {:3d}  '.format(ts,maxdfnet,maxdfnet_ind))
 
-                    if(abs(maxdfnet) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>100 and np.max(abs(column_budgets))<eqb_col_budgs):
+                    if(abs(maxdfnet_tot) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>100 and np.max(abs(column_budgets))<eqb_col_budgs):
                         if(plotted!=1):
                             plotrrtmoutput()
                             plotted=1
@@ -2206,7 +2249,6 @@ for c_zonal_transp in c_zonal_transps:
                     # end timesteps loop
 
                 writeoutputfile_masters()
-
 
                 if(plotted==0):
                     plotrrtmoutput()
