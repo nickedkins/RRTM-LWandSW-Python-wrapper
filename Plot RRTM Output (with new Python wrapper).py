@@ -14,11 +14,6 @@ print 'Started'
 
 directories = [
 '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v3/tbound=280/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v3/tbound=290/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v3/tbound=300/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v3/tbound=310/',
-# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/betas v3/tbound=320/',
 ]
 
 
@@ -136,53 +131,53 @@ def plotrrtmoutput_masters():
     plt.figure(1)
     for i_lat in range(nlatcols):
         for i_cld in range(ncloudcols):
-            # plt.subplot(331)
-            # plt.semilogy(tz_master[:,i_cld],pz_master[:,i_cld],'-o',label=str(i_cld))
-            # # plt.semilogy(tavel_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(i_cld))
-            # plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-            # plt.xlabel('T (K)')
+            plt.subplot(331)
+            plt.semilogy(tz_master[:,i_cld],pz_master[:,i_cld],'-o',label=str(i_cld))
+            # plt.semilogy(tavel_master[:,i_cld],pavel_master[:,i_cld],'-o',label=str(i_cld))
+            plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+            plt.xlabel('T (K)')
             # plt.legend()
-            # plt.ylabel('Pressure (hPa)')
+            plt.ylabel('Pressure (hPa)')
             # plt.legend()
-            # plt.grid(which='both')
-            # plt.subplot(332)
-            # plt.semilogy(totuflux_master[:,i_cld],pz_master[:,i_cld])
-            # plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-            # plt.xlabel('totuflux')
-            # plt.subplot(333)
-            # plt.semilogy(totdflux_master[:,i_cld],pz_master[:,i_cld])
-            # plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-            # plt.xlabel('totdflux')
-            # plt.subplot(334)
-            # plt.semilogy(fnet_master[:,i_cld],pz_master[:,i_cld])
-            # plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-            # plt.xlabel('fnet')
-            # plt.subplot(335)
+            plt.grid(which='both')
+            plt.subplot(332)
+            plt.semilogy(totuflux_master[:,i_cld],pz_master[:,i_cld])
+            plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+            plt.xlabel('totuflux')
+            plt.subplot(333)
+            plt.semilogy(totdflux_master[:,i_cld],pz_master[:,i_cld])
+            plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+            plt.xlabel('totdflux')
+            plt.subplot(334)
+            plt.semilogy(fnet_master[:,i_cld],pz_master[:,i_cld])
+            plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+            plt.xlabel('fnet')
+            plt.subplot(335)
             plt.semilogy(wkl_master[:,i_cld,0,i_lat],pavel_master[:,i_cld,i_lat])
             plt.ylim(np.max(pz_master[:,i_cld,i_lat]),np.min(pz_master[:,i_cld,i_lat]))
             plt.xlabel('wkl1')
-            # plt.subplot(336)
-            # plt.semilogy(wkl_master[:,i_cld,1],pavel_master[:,i_cld])
-            # plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-            # plt.xlabel('wkl2')
-            # plt.subplot(337)
-            # plt.semilogy(wkl_master[:,i_cld,2],pavel_master[:,i_cld])
-            # plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-            # plt.xlabel('wkl3')
-            # plt.subplot(338)
-            # plt.semilogy(wbrodl_master[:,i_cld],pz_master[:,i_cld])
-            # plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
-            # plt.xlabel('wbrodl')
-            # plt.subplot(339)
-            # plt.plot(dfnet_master[:,i_cld,i_lat],pavel_master[:,i_cld,i_lat],'-o',label=str(fn)+str(i_cld))
-            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_cld,i_lat],'-o',label=str(fn)+str(i_cld))
-            # plt.plot(conv_master[:,i_cld,i_lat],pz_master[:,i_cld,i_lat])
-            # plt.axvline(-eqb_maxdfnet,linestyle='--')
-            # plt.axvline(eqb_maxdfnet,linestyle='--')
-            # plt.ylim(np.max(pz_master[:,i_cld,i_lat]),np.min(pz_master[:,i_cld,i_lat]))
-            # plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
-            # plt.ylabel('Pressure (hPa)')
-            # plt.grid(which='both')
+            plt.subplot(336)
+            plt.semilogy(wkl_master[:,i_cld,1],pavel_master[:,i_cld])
+            plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+            plt.xlabel('wkl2')
+            plt.subplot(337)
+            plt.semilogy(wkl_master[:,i_cld,2],pavel_master[:,i_cld])
+            plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+            plt.xlabel('wkl3')
+            plt.subplot(338)
+            plt.semilogy(wbrodl_master[:,i_cld],pz_master[:,i_cld])
+            plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
+            plt.xlabel('wbrodl')
+            plt.subplot(339)
+            plt.plot(dfnet_master[:,i_cld,i_lat],pavel_master[:,i_cld,i_lat],'-o',label=str(fn)+str(i_cld))
+            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_cld,i_lat],'-o',label=str(fn)+str(i_cld))
+            plt.plot(conv_master[:,i_cld,i_lat],pz_master[:,i_cld,i_lat])
+            plt.axvline(-eqb_maxdfnet,linestyle='--')
+            plt.axvline(eqb_maxdfnet,linestyle='--')
+            plt.ylim(np.max(pz_master[:,i_cld,i_lat]),np.min(pz_master[:,i_cld,i_lat]))
+            plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
+            plt.ylabel('Pressure (hPa)')
+            plt.grid(which='both')
             # plt.legend()
 
 
@@ -199,7 +194,7 @@ nfiles=len(a)
 nlayers=60
 nmol=7
 ncloudcols=2
-nlatcols=5
+nlatcols=3
 
 # totuflux_lw_master=np.zeros((nlayers+1,nfiles,ndirs))
 # totuflux_sw_master=np.zeros((nlayers+1,nfiles,ndirs))
