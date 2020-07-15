@@ -745,11 +745,6 @@ for c_zonal_transp in c_zonal_transps:
 
                 # init arrays
 
-                tbound_master=np.zeros(ncloudcols)
-                toa_fnet_master=np.zeros(ncloudcols)
-                column_budgets=np.zeros(ncloudcols)
-                zonal_transps=np.zeros(ncloudcols)
-
                 tz_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
                 tavel_master=np.zeros((nlayers,ncloudcols,nlatcols))
                 pz_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
@@ -773,6 +768,18 @@ for c_zonal_transp in c_zonal_transps:
                 conv_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
 
                 wkl_master=np.zeros((nlayers,ncloudcols,nmol+1,nlatcols))
+
+                inflags_master=np.zeros((ncloudcols,nlatcols))
+                iceflags_master=np.zeros((ncloudcols,nlatcols))
+                liqflags_master=np.zeros((ncloudcols,nlatcols))
+                cld_lays_master=np.zeros((ncloudcols,nlatcols))
+                cld_fracs_master=np.zeros((ncloudcols,nlatcols))
+                tauclds_master=np.zeros((ncloudcols,nlatcols))
+                ssaclds_master=np.zeros((ncloudcols,nlatcols))
+                tbound_master=np.zeros((ncloudcols,nlatcols))
+                toa_fnet_master=np.zeros((ncloudcols,nlatcols))
+                column_budgets_master=np.zeros((ncloudcols,nlatcols))
+                zonal_transps_master=np.zeros((ncloudcols,nlatcols))
 
                 totuflux=np.zeros(nlayers+1)
                 totdflux=np.zeros(nlayers+1)
@@ -963,6 +970,18 @@ for c_zonal_transp in c_zonal_transps:
                     conv_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
 
                     wkl_master=np.zeros((nlayers,ncloudcols,nmol+1,nlatcols))
+
+                    inflags_master=np.zeros((ncloudcols,nlatcols))
+                    iceflags_master=np.zeros((ncloudcols,nlatcols))
+                    liqflags_master=np.zeros((ncloudcols,nlatcols))
+                    cld_lays_master=np.zeros((ncloudcols,nlatcols))
+                    cld_fracs_master=np.zeros((ncloudcols,nlatcols))
+                    tauclds_master=np.zeros((ncloudcols,nlatcols))
+                    ssaclds_master=np.zeros((ncloudcols,nlatcols))
+                    tbound_master=np.zeros((ncloudcols,nlatcols))
+                    toa_fnet_master=np.zeros((ncloudcols,nlatcols))
+                    column_budgets_master=np.zeros((ncloudcols,nlatcols))
+                    zonal_transps_master=np.zeros((ncloudcols,nlatcols))
 
                     vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,ncloudcols,master_input,conv_on,surf_lowlev_coupled,lay_intp,lw_on,sw_on,eqb_maxdfnet,toa_fnet_eqb,nlatcols]
                     vars_master_lay_cld_lat=[tavel_master,pavel_master,altavel_master,wbrodl_master]
@@ -1935,6 +1954,18 @@ for c_zonal_transp in c_zonal_transps:
 
                                 toa_fnet=toa_fnet_master[i_cld]
 
+                                inflags=inflags_master[:,i_lat]
+                                iceflags=iceflags_master[:,i_lat]
+                                liqflags=liqflags_master[:,i_lat]
+                                cld_lays=cld_lays_master[:,i_lat]
+                                cld_fracs=cld_fracs_master[:,i_lat]
+                                tauclds=tauclds_master[:,i_lat]
+                                ssaclds=ssaclds_master[:,i_lat]
+                                zonal_transps=zonal_transps_master[:,i_lat]
+                                column_budgets=column_budgets_master[:,i_lat]
+
+                                tbound=tbound_master[i_cld,i_lat]
+
                                 # zonal_transps[0]=(tbound_master[1]-tbound_master[0])*5.
                                 # zonal_transps[1]=zonal_transps[0]*-1.
 
@@ -1955,7 +1986,7 @@ for c_zonal_transp in c_zonal_transps:
                             vars_misc_1d=[semis,semiss,solvar]
                             vars_misc_1d_lens=[16,29,29]
                             vars_master_lay_cld_nmol_lat=[wkl_master]
-                            vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master,zonal_transps]
+                            vars_master_cld=[inflags_master,iceflags_master,liqflags_master,cld_lays_master,cld_fracs_master,tauclds_master,ssaclds_master,tbound_master,toa_fnet_master,zonal_transps_master]
 
 
                             if(ts>0):
@@ -2147,8 +2178,7 @@ for c_zonal_transp in c_zonal_transps:
                             # else:
                             #   column_budgets[i_cld]-=Evap[1]
 
-                            tbound_master[i_cld]=tbound
-                            toa_fnet_master[i_cld]=toa_fnet
+                            
 
                             tz_master[:,i_cld,i_lat]=tz
                             tavel_master[:,i_cld,i_lat]=tavel
@@ -2168,6 +2198,17 @@ for c_zonal_transp in c_zonal_transps:
                             htr_master[:,i_cld,i_lat]=htr
                             htr_lw_master[:,i_cld,i_lat]=htr_lw
                             htr_sw_master[:,i_cld,i_lat]=htr_sw
+
+                            tbound_master[i_cld,i_lat]=tbound
+                            toa_fnet_master[i_cld,i_lat]=toa_fnet
+
+                            inflags_master[i_cld,i_lat]=inflags
+                            iceflags_master[i_cld,i_lat]=iceflags
+                            liqflags_master[i_cld,i_lat]=liqflags
+                            cld_lays_master[i_cld,i_lat]=cld_lays
+                            _master[i_cld,i_lat]=
+                            _master[i_cld,i_lat]=
+                            _master[i_cld,i_lat]=                            
                             
                             if(input_source==0):
                                 conv_master[:,i_cld,i_lat]=conv
