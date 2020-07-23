@@ -13,7 +13,10 @@ from scipy import interpolate
 print 'Started'
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/basic sensitivity/',
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/basic sensitivity/nlatcols=11/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/basic sensitivity/nlatcols=11/tbound fixed/'
 ]
 
 
@@ -149,7 +152,8 @@ def plotrrtmoutput_masters():
             plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
             plt.xlabel('totdflux')
             plt.subplot(334)
-            plt.semilogy(fnet_master[:,i_cld],pz_master[:,i_cld])
+            # plt.semilogy(fnet_master[:,i_cld],pz_master[:,i_cld])
+            plt.semilogy(totdflux_master[:,i_cld]-totuflux_master[:,i_cld],pz_master[:,i_cld])
             plt.ylim(np.max(pz_master[:,i_cld]),np.min(pz_master[:,i_cld]))
             plt.xlabel('fnet')
             plt.subplot(335)
@@ -191,10 +195,12 @@ if('.DS_Store' in a):
     a.remove('.DS_Store')
 nfiles=len(a)
 
-nlayers=60
+nlayers=100
 nmol=7
 ncloudcols=2
-nlatcols=3
+nlatcols=11
+
+latgrid = np.linspace(-90,90,nlatcols)
 
 # totuflux_lw_master=np.zeros((nlayers+1,nfiles,ndirs))
 # totuflux_sw_master=np.zeros((nlayers+1,nfiles,ndirs))
@@ -346,7 +352,7 @@ ncloudcols_dirfil=ncloudcols
 # nfiles=7
 # ndirs=2
 
-tbound_all_dirfil = np.zeros((ncloudcols_dirfil,nfiles,ndirs))
+tbound_all_dirfil = np.zeros((ncloudcols_dirfil,nfiles,ndirs,nlatcols))
 totuflux_all_dirfil=np.zeros((nlayers_dirfil+1,ncloudcols_dirfil,nfiles,ndirs,nlatcols))
 
 i_dir=0
@@ -471,19 +477,19 @@ for directory in directories:
         vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
         solvar=np.zeros(29)
 
-        inflags=np.ones(ncloudcols)
-        iceflags=np.ones(ncloudcols)
-        liqflags=np.ones(ncloudcols)
-        cld_lays=np.ones(ncloudcols)
-        cld_fracs=np.ones(ncloudcols)
+        inflags=np.ones((ncloudcols,nlatcols))
+        iceflags=np.ones((ncloudcols,nlatcols))
+        liqflags=np.ones((ncloudcols,nlatcols))
+        cld_lays=np.ones((ncloudcols,nlatcols))
+        cld_fracs=np.ones((ncloudcols,nlatcols))
         # tauclds=np.array((3.0,0.0))
         # ssaclds=np.array((0.5,0.0))
-        tauclds=np.ones(ncloudcols)
-        ssaclds=np.ones(ncloudcols)
+        tauclds=np.ones((ncloudcols,nlatcols))
+        ssaclds=np.ones((ncloudcols,nlatcols))
 
-        tbound_master=np.ones(ncloudcols)
-        toa_fnet_master=np.ones(ncloudcols)
-        zonal_transps=np.zeros(ncloudcols)
+        tbound_master=np.ones((ncloudcols,nlatcols))
+        toa_fnet_master=np.ones((ncloudcols,nlatcols))
+        zonal_transps=np.zeros((ncloudcols,nlatcols))
 
         tz_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
         tavel_master=np.zeros((nlayers,ncloudcols,nlatcols))
@@ -521,7 +527,7 @@ for directory in directories:
         vars_misc_1d=[semis,semiss,solvar]
         vars_misc_1d_lens=[16,29,29]
         vars_master_lay_cld_nmol_lat=[wkl_master]
-        vars_master_cld=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master,zonal_transps]
+        vars_master_cld_lat=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master,zonal_transps]
 
 
 
@@ -576,11 +582,10 @@ for directory in directories:
                             x[i,j,k,l] = f.readline()
 
         i_count=0
-        for x in vars_master_cld:
-            for i in range(ncloudcols):
-                x[i]=f.readline()
-                print i_count, x[i]
-            i_count+=1
+        for x in vars_master_cld_lat:
+            for j in range(nlatcols):
+                for i in range(ncloudcols):
+                    x[i,j]=f.readline()
 
 
         dfnet_master=np.zeros((nlayers,ncloudcols,nlatcols))
@@ -647,8 +652,8 @@ for directory in directories:
 
         if(i_file==0):
             plt.legend()
-        plotrrtmoutput_masters()
-        tbound_all_dirfil[:,i_file,i_dir]=tbound_master
+        # plotrrtmoutput_masters()
+        tbound_all_dirfil[:,i_file,i_dir,:]=tbound_master
         totuflux_all_dirfil[:,:,i_file,i_dir,:]=totuflux_master
         i_file+=1
         
@@ -674,7 +679,15 @@ wklfacs=np.logspace(-3,0,num=5,base=10.)
 #   plt.ylabel(r'$\beta = \frac{\Delta OLR}{ \Delta T}$ (Wm$^{-2}$K$^{-1}$)')
 # plt.legend()
 
-nfiles=5
+nfiles=2
+
+plt.figure(1)
+# plt.plot(latgrid,totuflux_all_dirfil[nlayers,0,0,0,:],'-o')
+# plt.plot(latgrid,totuflux_all_dirfil[nlayers,0,1,0,:],'-o')
+plt.plot(latgrid,10./(totuflux_all_dirfil[nlayers,0,2,0,:]-totuflux_all_dirfil[nlayers,0,0,0,:]),'-o')
+plt.xlabel('Latitude')
+plt.ylabel('dT/dOLR')
+# plt.plot((tbound_all_dirfil[0,1,0,:]-tbound_all_dirfil[0,0,0,:])/10.,'-o')
 
 # betas = np.zeros((ncloudcols,nfiles,ndirs))
 

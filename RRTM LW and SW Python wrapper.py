@@ -290,7 +290,7 @@ for c_zonal_transp in c_zonal_transps:
                     for i in range(1,len(T)):
                         dT = (T[i]-T[i-1])
                         dz = (z[i]-z[i-1])/1000.
-                        if( (-1.0 * dT/dz > lapse or z[i]/1000. < -5.0) and z[i]/1000. < 20. ):
+                        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 7.) and z[i]/1000. < 20. ):
                             if(conv_log==1):
                                 conv[i]=1.
                             T[i] = T[i-1] - lapse * dz
@@ -527,10 +527,53 @@ for c_zonal_transp in c_zonal_transps:
                     return q, o3, fal
                 
 
-                nlayers=60
+                nlayers=100
                 ncloudcols=2
-                nlatcols=3
+                nlatcols=11
                 nmol=7
+
+                latgrid = np.linspace(-90,90,nlatcols)
+                zen=np.zeros((nlatcols,365,24))
+                insol=np.zeros((nlatcols,365,24))
+                zenlats=np.zeros(nlatcols)
+                insollats=np.zeros(nlatcols)
+                solar_constant=1368.
+
+                # for col = 1,ncols
+                for i_lat in range(nlatcols):
+                    # do day = 1,365
+                    for day in range(1,365):
+                        # do hour=1,24
+                        for hour in range(1,24):
+                            hourang = 15.0 * (np.float(hour)-12.0)
+                            # declin = -23.5 * cosd(360.0/365.0 + (np.float(day) + 10.0))
+                            declin = -23.5 * np.cos(np.deg2rad(360.0/365.0 + (np.float(day) + 10.0)))
+                            # Xrad = boxlats(col) * 2.0*3.14/360.0
+                            Xrad = latgrid[i_lat] * 2.0*3.14/360.0
+                            Yrad = declin * 2.0*3.14/360.0
+                            Hrad = hourang * 2.0*3.14/360.0
+                            if (np.sin(Xrad)*np.sin(Yrad) + np.cos(Xrad)*np.cos(Yrad)*np.cos(Hrad) > 0):
+                                # zen(col,day,hour) = acos(sin(Xrad)*sin(Yrad) + cos(Xrad)*cos(Yrad)*cos(Hrad))
+                                zen[i_lat,day,hour] = np.arccos(np.sin(Xrad)*np.sin(Yrad) + np.cos(Xrad)*np.cos(Yrad)*np.cos(Hrad))
+                                # insol(col,day,hour) = solar_constant * cos(zen(col,day,hour))
+                                insol[i_lat,day,hour] = solar_constant * np.cos(zen[i_lat,day,hour])
+                            else:
+                                insol[i_lat,day,hour]
+
+                # do col=1,ncols
+                #     x_lats(col) = sin(boxlats(col)*3.14/180.0)
+                # enddo
+
+                # do i=0,ncols
+                #     x_edge(i) = sin(latbounds(i)*3.14/180.0)
+                # enddo
+
+                # do col=1,ncols
+                for i_lat in range(nlatcols):
+                    insollats[i_lat] = np.sum(insol[i_lat,:,:]) / np.size(insol[i_lat,:,:])
+                    zenlats[i_lat] = np.sum(zen[i_lat,:,:]) / np.size(zen[i_lat,:,:])
+
+                szas = np.rad2deg(np.arccos(insollats/solar_constant))
 
                 zonal_transps = [-0.,0.]
                 zonal_transps=np.zeros((2,nlatcols))
@@ -569,11 +612,11 @@ for c_zonal_transp in c_zonal_transps:
                 ur_max=3.0
                 eqb_maxhtr=1e-4
                 # eqb_maxdfnet=1e-4
-                eqb_maxdfnet=1e-2   
+                eqb_maxdfnet=1e-1
                 maxdfnet_tot=1.0
                 eqb_col_budgs=1e12
                 toa_fnet_eqb=1.0e12
-                timesteps=500
+                timesteps=2000
                 cti=0
                 surf_rh=0.8
                 vol_mixh2o_min = 1e-6
@@ -583,7 +626,7 @@ for c_zonal_transp in c_zonal_transps:
                 maxhtr=0.
                 toa_fnet=0
 
-                tbound=280. #surface temperature (K)
+                tbound=280.+10. #surface temperature (K)
                 iemiss=2 #surface emissivity. Keep this fixed for now.
                 iemis=2
                 ireflect=0 #for Lambert reflection
@@ -594,7 +637,7 @@ for c_zonal_transp in c_zonal_transps:
                 idelm=1             # flag for outputting downwelling fluxes computed using the delta-M scaling approximation. 0=output "true" direct and diffuse downwelling fluxes, 1=output direct and diffuse downwelling fluxes computed with delta-M approximation
                 icos=0              #0:there is no need to account for instrumental cosine response, 1:to account for instrumental cosine response in the computation of the direct and diffuse fluxes, 2:2 to account for instrumental cosine response in the computation of the diffuse fluxes only
                 semis=np.ones(16)*1.0   #all spectral bands the same as iemissm (maybe this is the surface??)
-                semiss=np.ones(29)*0.57
+                semiss=np.ones(29)*1.
                 if(master_input==1):
                     semiss[15:29] = np.array([
                     0.881,
@@ -643,7 +686,8 @@ for c_zonal_transp in c_zonal_transps:
                 ipthak=3
                 ipthrk=3
                 juldat=0        #Julian day associated with calculation (1-365/366 starting January 1). Used to calculate Earth distance from sun. A value of 0 (default) indicates no scaling of solar source function using earth-sun distance.
-                sza=45.
+                sza=75.52
+                # sza=0.
                 if(master_input==1):
                     sza=65.             #Solar zenith angle in degrees (0 deg is overhead).
                 elif(master_input==2):
@@ -814,13 +858,13 @@ for c_zonal_transp in c_zonal_transps:
                 inflags=(np.ones(ncloudcols)*2).astype(int)
                 iceflags=(np.ones(ncloudcols)*2).astype(int)
                 liqflags=(np.ones(ncloudcols)*1).astype(int)
-                cld_lays=np.ones(ncloudcols)*nlayers/5.
+                cld_lays=np.ones(ncloudcols)*nlayers/10.
                 cld_fracs=np.ones(ncloudcols)*1.
                 ctest=' '
                 # tauclds=np.array((3.0,0.0))
                 # tauclds=np.array((0.0,0.0))
                 # ssaclds=np.array((0.5,0.0))
-                tauclds=np.ones(ncloudcols)*0.0
+                tauclds=np.ones(ncloudcols)*1.0
                 ssaclds=np.ones(ncloudcols)*0.5
 
 
@@ -941,9 +985,9 @@ for c_zonal_transp in c_zonal_transps:
                     liqflags=np.ones(ncloudcols)
                     cld_lays=np.ones(ncloudcols)
                     cld_fracs=np.ones(ncloudcols)
-                    tauclds=np.array((0.5,0.0))*0.0
+                    # tauclds=np.array((0.5,0.0))*0.0
                     # tauclds=np.ones((ncloudcols,nlatcols))
-                    ssaclds=np.array((0.25,0.0))
+                    # ssaclds=np.array((0.25,0.0))
                     # ssaclds=np.ones((ncloudcols,nlatcols))*0.5
 
                     tbound_master=np.zeros((ncloudcols,nlatcols))
@@ -1921,13 +1965,13 @@ for c_zonal_transp in c_zonal_transps:
 
                     for i_lat in range(nlatcols):
 
+                        sza=szas[i_lat]
+
 
                         wbrodl = mperlayr_air * 1.0e-4
                         wkl[1,:]=q[:,i_lat]
                         wkl[2,:]=400e-6
                         wkl[3,:]=o3[:,i_lat]
-                        plt.figure(1)
-                        plt.semilogy(wkl[1,:],pavel,label=i_lat)
 
                         for i_cld in range(ncloudcols):
 
@@ -1964,6 +2008,11 @@ for c_zonal_transp in c_zonal_transps:
                                 zonal_transps=zonal_transps_master[:,i_lat]
                                 column_budgets=column_budgets_master[:,i_lat]
 
+                                totuflux_lw=totuflux_lw_master[:,i_cld,i_lat]
+                                totdflux_lw=totdflux_lw_master[:,i_cld,i_lat]
+                                totuflux_sw=totuflux_sw_master[:,i_cld,i_lat]
+                                totdflux_sw=totdflux_sw_master[:,i_cld,i_lat]
+
 
                                 # zonal_transps[0]=(tbound_master[1]-tbound_master[0])*5.
                                 # zonal_transps[1]=zonal_transps[0]*-1.
@@ -1974,7 +2023,8 @@ for c_zonal_transp in c_zonal_transps:
                             iceflag=iceflags[i_cld].astype('int')
                             liqflag=liqflags[i_cld].astype('int')
                             # cld_lay=cld_lays[i_cld].astype('int')
-                            cld_lay=np.argmin(abs(altz/1000.-altbins[i_cld]))
+                            # cld_lay=np.argmin(abs(altz/1000.-altbins[i_cld]))
+                            cld_lay=np.argmin(abs(pz-700.))
                             frac=cld_fracs[i_cld]
                             taucld=tauclds[i_cld]
                             ssacld=ssaclds[i_cld]
@@ -2031,7 +2081,7 @@ for c_zonal_transp in c_zonal_transps:
 
 
                             if(input_source==0):
-                                dtbound=toa_fnet*0.1*0.5
+                                dtbound=toa_fnet*0.1*0.5*0.1*0.
                                 # dtbound=column_budgets[i_cld,i_lat]*0.1*0.5*0.5*0.1*0.
                                 dtbound=np.clip(dtbound,-dmax,dmax)
                                 tbound+=dtbound
@@ -2060,7 +2110,8 @@ for c_zonal_transp in c_zonal_transps:
                                 callrrtmlw()
                                 totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
 
-                            if((ts==1 or (abs(maxdfnet_tot) < eqb_maxdfnet*10. and stepssinceswcalled>500)) and sw_on==1):
+                            # if((ts==2 or (abs(maxdfnet_tot) < eqb_maxdfnet*10. and stepssinceswcalled>500)) and sw_on==1):
+                            if(sw_on==1 and ts%500==0):
                             #   if(maxhtr<eqb_maxhtr):
                                 writeformattedinputfile_sw()
                                 callrrtmsw()
@@ -2082,11 +2133,12 @@ for c_zonal_transp in c_zonal_transps:
                             fnet=fnet_sw-fnet_lw
                             htr=htr_lw+htr_sw
 
+                            # print 'sza= ',sza, 'totdflux_sw[nlayers]= ',totdflux_sw[nlayers]
+
                             # writeoutputfile_masters()
 
-                            # toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
-                            toa_fnet=240.-totuflux[nlayers]
-                            print (totdflux[nlayers],totuflux[nlayers],toa_fnet)
+                            toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
+                            # print (totdflux[nlayers],totuflux[nlayers],toa_fnet,totdflux_lw[nlayers],totdflux_sw[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers])
                             # toa_fnet=totdflux[nlayers]-totuflux[nlayers]+zonal_transps[i_cld] #net total downward flux at TOA  NJE now accounting for zonal transport
                             # toa_fnet=256.731-totuflux[nlayers]+0.0077 # NJE fix later
 
@@ -2241,7 +2293,7 @@ for c_zonal_transp in c_zonal_transps:
                             for i_cld in range(ncloudcols):
                                 for i in range(nlayers):
                                     # cldweights=[0.5,0.5]
-                                    dT=np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights)*-1.*4.*4.
+                                    dT=np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights)*-1.*4.*2.
                                     dT=np.clip(dT,-dmax,dmax)
                                     # dT = htr[i]/3. #undrelax
                                     # dT=np.clip(dT,-dmax,dmax)
@@ -2266,9 +2318,11 @@ for c_zonal_transp in c_zonal_transps:
                         for i_lat in range(nlatcols):
                             if(i_lat<nlatcols-1):
                                 # print(maxdfnet_lat[i_lat],'|',end='')
-                                print(maxdfnet_lat[i_lat],tbound_master[:,i_lat],'|'),
+                                # print(maxdfnet_lat[i_lat],tbound_master[:,i_lat],'|'),
+                                print(maxdfnet_lat[i_lat],np.mean(toa_fnet_master[:,i_lat],axis=0),'|'),
                             else:
-                                print(maxdfnet_lat[i_lat],tbound_master[:,i_lat])
+                                # print(maxdfnet_lat[i_lat],tbound_master[:,i_lat])
+                                print(maxdfnet_lat[i_lat],np.mean(toa_fnet_master[:,i_lat],axis=0))
                         # print('{:4f}'.format(maxdfnet_tot))
                         # print re_dfnets
                         # print('{:4d} | {:12.8f} | {:3d}  '.format(ts,maxdfnet,maxdfnet_ind))
