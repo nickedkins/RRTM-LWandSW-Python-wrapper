@@ -514,42 +514,13 @@ for directory in directories:
         conv_master=np.zeros((nlayers+1,ncloudcols,nlatcols))
 
         wkl_master=np.zeros((nlayers,ncloudcols,nmol+1,nlatcols))
-
-        # vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay]
-        # vars_lay=[pavel,tavel,esat_liq,rel_hum,vol_mixh2o,wbrodl,mperlayr,mperlayr_air,conv,altavel]
-        # vars_lev=[totuflux,totuflux_lw,totuflux_sw,totdflux,totdflux_lw,totdflux_sw,fnet,fnet_lw,fnet_sw,htr,htr_lw,htr_sw,pz,tz,altz]
-        # vars_misc_1d=[semis,semiss,solvar]
-        # vars_misc_1d_lens=[16,29,29]
-        # vars_lay_nmol=[wkl]
-
+        
         vars_master_lay_cld_lat=[tavel_master,pavel_master,altavel_master,wbrodl_master]
         vars_master_lev_cld_lat=[tz_master,pz_master,altz_master,totuflux_master,totuflux_lw_master,totuflux_sw_master,totdflux_master,totdflux_lw_master,totdflux_sw_master,fnet_master,fnet_lw_master,fnet_sw_master,htr_master,htr_lw_master,htr_sw_master,conv_master]
         vars_misc_1d=[semis,semiss,solvar]
         vars_misc_1d_lens=[16,29,29]
         vars_master_lay_cld_nmol_lat=[wkl_master]
         vars_master_cld_lat=[inflags,iceflags,liqflags,cld_lays,cld_fracs,tauclds,ssaclds,tbound_master,toa_fnet_master,zonal_transps]
-
-
-
-        # for x in vars_lay:
-        #   for i in range(nlayers):
-        #       x[i] = f.readline()
-
-        # for x in vars_lev:
-        #   for i in range(nlayers+1):
-        #       x[i] = f.readline()
-
-        # i_lens=0
-        # for x in vars_misc_1d:
-        #   for i in range(vars_misc_1d_lens[i_lens]):
-        #       x[i] = f.readline()
-        #   i_lens+=1
-
-
-        # for x in vars_lay_nmol:
-        #   for i in range(shape(x)[0]):
-        #       for j in range(shape(x)[1]):
-        #           x[i,j] = f.readline()
 
 
         
