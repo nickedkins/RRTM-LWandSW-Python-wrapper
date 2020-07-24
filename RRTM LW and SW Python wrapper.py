@@ -1847,6 +1847,8 @@ for fixed_sw in fixed_sws:
 
                     sza=szas[i_lat]
                     lapse=lapse_master[i_lat]
+                    if(master_input==6):
+                        semiss=np.ones(29)*(1.0-fal[i_lat])
 
 
                     wbrodl = mperlayr_air * 1.0e-4
