@@ -13,7 +13,8 @@ from scipy import interpolate
 print 'Started'
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/basic sensitivity/nlatcols=9/v2/'
 ]
 
 
@@ -168,7 +169,7 @@ def plotrrtmoutput_masters():
             plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             plt.xlabel('wbrodl')
             plt.subplot(339)
-            plt.plot(dfnet_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(fn)+str(i_zon))
+            # plt.plot(dfnet_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(fn)+str(i_zon))
             plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-o',label=str(fn)+str(i_zon))
             plt.plot(conv_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat])
             plt.axvline(-eqb_maxdfnet,linestyle='--')
@@ -177,7 +178,7 @@ def plotrrtmoutput_masters():
             plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
             plt.ylabel('Pressure (hPa)')
             plt.grid(which='both')
-            plt.legend()
+            # plt.legend()
 
 
 def readrrtmoutput(fn):
@@ -190,7 +191,7 @@ if('.DS_Store' in a):
     a.remove('.DS_Store')
 nfiles=len(a)
 
-nlayers=100
+nlayers=60
 nmol=7
 nclouds=10
 nlatcols=9
@@ -634,11 +635,21 @@ for directory in directories:
     i_dir+=1    
 
 plt.figure(1)
-# plt.plot(latgrid,tbound_all_dirfil[0,0,0,:])
-plt.plot(latgrid,tbound_all_dirfil[1,0,0,:]-tbound_all_dirfil[0,0,0,:],'-o')
+# plt.plot(latgrid,tbound_all_dirfil[0,1,0,:]-tbound_all_dirfil[0,0,0,:],'-o')
+# plt.plot(latgrid,tbound_all_dirfil[1,1,0,:]-tbound_all_dirfil[1,0,0,:],'-o')
+plt.plot(latgrid,tbound_all_dirfil[0,1,0,:]-tbound_all_dirfil[0,0,0,:]-(tbound_all_dirfil[1,1,0,:]-tbound_all_dirfil[1,0,0,:]),'-o')
+
+for i in range(nlatcols):
+    print (tbound_all_dirfil[0,1,0,i]-tbound_all_dirfil[0,0,0,i])/10.,','    
+print
+for i in range(nlatcols):
+    print (tbound_all_dirfil[1,1,0,i]-tbound_all_dirfil[1,0,0,i])/10.,','    
+
+# print (tbound_all_dirfil[0,1,0,:]-tbound_all_dirfil[0,0,0,:])/10.
+# print (tbound_all_dirfil[1,1,0,:]-tbound_all_dirfil[1,0,0,:])/10.
 
 # wklfacs=np.logspace(-3,0,num=10,base=10.)
-wklfacs=np.logspace(-3,0,num=5,base=10.)
+# wklfacs=np.logspace(-3,0,num=5,base=10.)
 # print wklfacs
 
 # c_zonal_transps = np.linspace(1,30,num=10)

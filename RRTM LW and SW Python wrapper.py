@@ -1,3 +1,4 @@
+
 # RRTM LW and SW Python wrapper
 
 import numpy as np
@@ -387,27 +388,31 @@ def read_erai():
 
 	interpdir = '/Users/nickedkins/Dropbox/Input Data for RCM Interpolation/'            
 	q_ps = np.load(interpdir+'q_ps.npy')
+	r_ps = np.load(interpdir+'r_ps.npy')
 	o3_ps = np.load(interpdir+'o3_ps.npy')
 	q_lats = np.load(interpdir+'q_lats.npy')
+	r_lats = np.load(interpdir+'r_lats.npy')
 	o3_lats = np.load(interpdir+'o3_lats.npy')
 	fal_lats = np.load(interpdir+'fal_lats.npy')
 	q_latp_max = np.load(interpdir+'q_latp.npy')
+	r_latp_max = np.load(interpdir+'r_latp.npy')
 	o3_latp_max = np.load(interpdir+'o3_latp.npy')
 	fal_lat_max = np.load(interpdir+'fal_lat.npy')
 	latgrid = np.linspace(-90,90,nlatcols)
 	pgrid = np.linspace(1000,1,nlayers)
 	# shortnameslev = ['cc','clwc','o3','q','ciwc']
-	shortnameslev = ['q', 'o3']
-	longnameslev = {'cc':'Cloud fraction','clwc':'Cloud liquid water content (kg/kg)','o3':'Ozone mixing ratio','q':'Specific humidity (kg/kg)','ciwc':'Cloud ice water content (kg/kg)'}
-	disttypelev = {'cc':'lat','clwc':'lat','o3':'lat','q':'lat','ciwc':'lat'}
+	shortnameslev = ['q', 'o3', 'r']
+	longnameslev = {'cc':'Cloud fraction','clwc':'Cloud liquid water content (kg/kg)','o3':'Ozone mixing ratio','q':'Specific humidity (kg/kg)','ciwc':'Cloud ice water content (kg/kg)', 'r':'Relative Humidity'}
+	disttypelev = {'cc':'lat','clwc':'lat','o3':'lat','q':'lat','ciwc':'lat', 'r':'lat'}
 	shortnamessfc = ['fal']
 	longnamessfc = {'fal':'Surface albedo'}
 	disttypesfc = {'fal':'lat'}
 	loop = 1
 	q=interpolate_createprrtminput_lev('q',q_latp_max,q_ps,q_lats)
+	r=interpolate_createprrtminput_lev('r',r_latp_max,r_ps,r_lats)
 	o3=interpolate_createprrtminput_lev('o3',o3_latp_max,o3_ps,o3_lats)
 	fal=interpolate_createprrtminput_sfc('fal',fal_lat_max,fal_lats)
-	return q, o3, fal
+	return q, o3, fal,r
 
 def createlatdistbn(filename):
 	fileloc = project_dir+'/Latitudinal Distributions/'+filename+'.txt'
@@ -433,7 +438,7 @@ def createlatdistbn(filename):
 	return varinterp
 
 # set overall dimensions for model
-nlayers=100
+nlayers=60
 nzoncols=2
 nlatcols=9
 nmol=7
@@ -526,7 +531,7 @@ for fixed_sw in fixed_sws:
 			maxdfnet_tot=1.0
 			eqb_col_budgs=1e0
 			toa_fnet_eqb=1.0e12
-			timesteps=1000
+			timesteps=200
 			cti=0
 			surf_rh=0.8
 			vol_mixh2o_min = 1e-6
@@ -536,6 +541,7 @@ for fixed_sw in fixed_sws:
 			maxhtr=0.
 			toa_fnet=0
 			tbound=290. #surface temperature (K)
+			tbound_inits=220. + np.cos(np.deg2rad(latgrid))*80.
 			iemiss=2 #surface emissivity. Keep this fixed for now.
 			iemis=2
 			ireflect=0 #for Lambert reflection
@@ -612,7 +618,7 @@ for fixed_sw in fixed_sws:
 				lapse=6.7
 			elif(master_input==5):
 				lapse=6.2
-			tmin=100.
+			tmin=150.
 			if(master_input==5):
 				tmin=200.
 			tmax=400.
@@ -741,7 +747,6 @@ for fixed_sw in fixed_sws:
 			pz=np.linspace(psurf,pmin,nlayers+1)
 			altz=np.zeros(nlayers+1)
 			tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
-			# tz=np.clip(tz,tmin,tmax)
 			tz=np.clip(tz,200,tmax)
 			tavel=np.zeros(nlayers)
 			esat_liq=np.zeros(nlayers)
@@ -1867,12 +1872,17 @@ for fixed_sw in fixed_sws:
 
 
 			if(master_input==6): #ERA-I
-				q,o3,fal = read_erai()
+				q,o3,fal,r = read_erai()
 
 			# main loop (timestepping)
 			for ts in range(timesteps):
 
 				for i_lat in range(nlatcols):
+
+					if(ts==1):
+						tbound = tbound_inits[i_lat]
+						tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
+						tz=np.clip(tz,200,tmax)
 
 					sza=szas[i_lat]
 					lapse=lapse_master[i_lat]
@@ -1884,6 +1894,7 @@ for fixed_sw in fixed_sws:
 					wkl[1,:]=q[:,i_lat]
 					wkl[2,:]=400e-6
 					wkl[3,:]=o3[:,i_lat]
+
 
 					for i_zon in range(nzoncols):
 
@@ -1984,8 +1995,15 @@ for fixed_sw in fixed_sws:
 										elif(i_zon==1):
 											wkl[1,i] = vol_mixh2o[i]*wklfac
 
-
-
+							if(master_input==6):
+								for i in range(nlayers):
+									rel_hum[i]=r[i,i_lat]/100.
+									vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
+									wkl[1,i] = vol_mixh2o[i]
+								if(i_zon==0):
+									wkl[1,:]=wkl[1,:]*2.
+								elif(i_zon==1):
+									wkl[1,:]=wkl[1,:]/2.
 
 							# if(i_zon==1 and ts==1):
 							#   wkl[1,:]=wkl_master[:,i_zon,0]*wklfac
@@ -2153,7 +2171,7 @@ for fixed_sw in fixed_sws:
 								merid_transps_master[i_zon,i_lat]=c_merid*(tz_master[0,i_zon,i_lat-1]-tz_master[0,i_zon,i_lat])
 
 
-						column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+10.
+						column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+10. #nje forcing
 
 						# if(i_zon==0):
 						#   column_budgets[i_zon]+=Evap[1]
@@ -2222,7 +2240,7 @@ for fixed_sw in fixed_sws:
 						for i_zon in range(nzoncols):
 							for i in range(nlayers):
 								cldweights=[0.5,0.5]
-								dT=np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights)*-1.*4.*2.*4.
+								dT=np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights)*-1.*4.*2.*2.
 								dT=np.clip(dT,-dmax,dmax)
 								# dT = htr[i]/3. #undrelax
 								# dT=np.clip(dT,-dmax,dmax)
