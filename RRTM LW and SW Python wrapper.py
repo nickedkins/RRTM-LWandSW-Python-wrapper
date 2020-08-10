@@ -398,7 +398,7 @@ def read_erai():
 	r_latp_max = np.load(interpdir+'r_latp.npy')
 	o3_latp_max = np.load(interpdir+'o3_latp.npy')
 	fal_lat_max = np.load(interpdir+'fal_lat.npy')
-	# latgrid = np.linspace(-90,90,nlatcols)
+	latgrid = np.linspace(-90,90,nlatcols)
 	pgrid = np.linspace(1000,1,nlayers)
 	# shortnameslev = ['cc','clwc','o3','q','ciwc']
 	shortnameslev = ['q', 'o3', 'r']
@@ -437,20 +437,10 @@ def createlatdistbn(filename):
 	varinterp = list(varinterp / cossums)
 	return varinterp
 
-#################functions###########################################################
-
 # set overall dimensions for model
 nlayers=100
 nzoncols=2
 nlatcols=27
-
-latgridbounds=np.linspace(-90,90,nlatcols+1)
-latgrid=np.zeros(nlatcols)
-for i in range(nlatcols):
-	latgrid[i]=(latgridbounds[i]+latgridbounds[i+1])/2.
-# latgridbounds=[-10,10.]
-# latgrid=[0.]
-
 nmol=7
 nclouds=10
 
@@ -459,7 +449,10 @@ master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run
 prev_output_file='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/2020_06_09 12_50_54'
 
-
+latgridbounds=np.linspace(-90,90,nlatcols+1)
+latgrid=np.zeros(nlatcols)
+for i in range(nlatcols):
+	latgrid[i]=(latgridbounds[i]+latgridbounds[i+1])/2.
 
 zen=np.zeros((nlatcols,365,24))
 insol=np.zeros((nlatcols,365,24))
@@ -476,7 +469,7 @@ c_zonal=4.0 #zonal transport coefficient
 c_merid=0.0 #meridional transport coefficient
 
 # loop over a parameter range: fixed_sw, tbound, wklfac
-extra_forcings=[-10.]
+extra_forcings=[0.,10.]
 for extra_forcing in extra_forcings:
 
 	fixed_sws=np.array([340.])
@@ -541,7 +534,7 @@ for extra_forcing in extra_forcings:
 				maxdfnet_tot=1.0
 				eqb_col_budgs=1e0
 				toa_fnet_eqb=1.0e12
-				timesteps=800
+				timesteps=400
 				cti=0
 				surf_rh=0.8
 				vol_mixh2o_min = 1e-6
@@ -551,9 +544,7 @@ for extra_forcing in extra_forcings:
 				maxhtr=0.
 				toa_fnet=0
 				tbound=290. #surface temperature (K)
-				# tbound_inits=220. + np.cos(np.deg2rad(latgrid))*80.
 				tbound_inits=220. + np.cos(np.deg2rad(latgrid))*80.
-				undrelax_lats= 2.0 - np.cos(np.deg2rad(latgrid))
 				iemiss=2 #surface emissivity. Keep this fixed for now.
 				iemis=2
 				ireflect=0 #for Lambert reflection
@@ -633,7 +624,7 @@ for extra_forcing in extra_forcings:
 				tmin=150.
 				if(master_input==5):
 					tmin=200.
-				tmax=330.
+				tmax=400.
 				rsp=287.04 # RCEMIP value
 				gravity=9.81
 				filewritten=0
@@ -2009,7 +2000,6 @@ for extra_forcing in extra_forcings:
 
 								if(master_input==6):
 									for i in range(nlayers):
-										esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
 										rel_hum[i]=r[i,i_lat]/100.
 										vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
 										wkl[1,i] = vol_mixh2o[i]
@@ -2017,7 +2007,6 @@ for extra_forcing in extra_forcings:
 										wkl[1,:]=wkl[1,:]*2.
 									elif(i_zon==1):
 										wkl[1,:]=wkl[1,:]/2.
-									wkl[1,:]=np.clip(wkl[1,:],0,0.2)
 
 								# if(i_zon==1 and ts==1):
 								#   wkl[1,:]=wkl_master[:,i_zon,0]*wklfac
@@ -2031,10 +2020,9 @@ for extra_forcing in extra_forcings:
 
 							if(input_source==0 and ts>50):
 								# dtbound=toa_fnet*0.1*0.5*0.1
-								dtbound=column_budgets_master[i_zon,i_lat]*0.2*0.2*0.1
-								dtbound=np.clip(dtbound,-dmax,dmax)
+								dtbound=column_budgets_master[i_zon,i_lat]*0.2
+								dtbound=np.clip(dtbound,-dmax*10.,dmax*10.)
 								tbound+=dtbound
-							tbound=np.clip(tbound,tmin,tmax)
 
 							# if(input_source==0 and master_input==5)
 
@@ -2255,7 +2243,7 @@ for extra_forcing in extra_forcings:
 							for i_zon in range(nzoncols):
 								for i in range(nlayers):
 									cldweights=[0.5,0.5]
-									dT=np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights)*-1.*2.*undrelax_lats[i_lat]
+									dT=np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights)*-1.*4.*2.*2.
 									dT=np.clip(dT,-dmax,dmax)
 									# dT = htr[i]/3. #undrelax
 									# dT=np.clip(dT,-dmax,dmax)
@@ -2276,13 +2264,12 @@ for extra_forcing in extra_forcings:
 					# maxdfnet=dfnet[maxdfnet_ind]
 
 					if(ts%10==0):
-						print( '{:4d}|'.format(ts))
+						print( '{:4d}|'.format(ts)),
 						for i_lat in range(nlatcols):
 							if(i_lat<nlatcols-1):
-								print( '{:4.2f} {:4.2f} {:4.2f} {:4.2f} {:4.2f} {:4.2f}|'.format(maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(totuflux_master[nlayers,:,i_lat],axis=0),np.mean(totdflux_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0) ))
+								print( '{:4.2f} {:4.2f} {:4.2f} {:4.2f} {:4.2f} {:4.2f}|'.format(maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(totuflux_master[nlayers,:,i_lat],axis=0),np.mean(totdflux_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0) )),
 							else:
 								print( '{:4.2f} {:4.2f} {:4.2f} {:4.2f} {:4.2f} {:4.2f}|'.format(maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(totuflux_master[nlayers,:,i_lat],axis=0),np.mean(totdflux_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0) ))
-					print '-------------------------------------------------------------------'
 
 
 					if(abs(maxdfnet_tot) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>100 and np.max(abs(column_budgets_master))<eqb_col_budgs):
