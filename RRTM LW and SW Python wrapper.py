@@ -440,9 +440,9 @@ def createlatdistbn(filename):
 #################functions###########################################################
 
 # set overall dimensions for model
-nlayers=590
+nlayers=30
 nzoncols=2
-nlatcols=27
+nlatcols=1
 
 latgridbounds=np.linspace(-90,90,nlatcols+1)
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
@@ -522,7 +522,7 @@ perts=[1.0]
 
 i_loops=0
 totloops=np.float(len(pertzons)*len(pertlats)*len(pertmols)*len(pertlays)*len(perts)*len(c_merids)*len(c_zonals))
-print totloops, 'totloops'
+print(totloops, 'totloops')
 # loop over a parameter range: fixed_sw, tbound, wklfac
 
 
@@ -532,7 +532,7 @@ for c_zonal in c_zonals:
 			for fixed_sw in fixed_sws:
 				for i_tbound in range(len(tbounds)):		
 					for wklfac in wklfacs:
-						print 'percent done: ', i_loops,i_loops/totloops
+						print('percent done: ', i_loops,i_loops/totloops)
 						i_loops+=1
 						for pertzon in pertzons:
 							for pertlat in pertlats:
@@ -1006,7 +1006,6 @@ for c_zonal in c_zonals:
 
 												i_var=0
 												for x in vars_master_zon_lat:
-													print i_var, 'i_var'
 													i_var+=1
 													for j in range(nlatcols):
 														for i in range(nzoncols):
@@ -2309,7 +2308,7 @@ for c_zonal in c_zonals:
 															print( '{:4.2f} {:4.2f} {:4.2f} {:4.2f} {:4.2f} {:4.2f}|'.format(maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(totuflux_master[nlayers,:,i_lat],axis=0),np.mean(totdflux_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0) ))
 														else:
 															print( '{:4.2f} {:4.2f} {:4.2f} {:4.2f} {:4.2f} {:4.2f}|'.format(maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(totuflux_master[nlayers,:,i_lat],axis=0),np.mean(totdflux_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0) ))
-															print '-------------------------------------------------------------------'
+															print('-------------------------------------------------------------------')
 
 
 												# if(abs(maxdfnet_tot) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>100 and np.max(abs(column_budgets_master))<eqb_col_budgs):

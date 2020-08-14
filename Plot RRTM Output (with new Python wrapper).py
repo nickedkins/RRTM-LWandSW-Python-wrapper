@@ -15,7 +15,8 @@ print 'Started'
 directories = [
 # '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
 # '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dummy c_zon and c_merid/'
-'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/energy flows/nl=590 (poss)/'
+# '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/energy flows/nl=590 (poss)/'
+'/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/sensitivity nlatcols=27/'
 ]
 
 
@@ -200,10 +201,11 @@ nfiles=len(a)
 nlayers=590
 nmol=7
 nclouds=10
-nlatcols=5
+nlatcols=27
 nzoncols=2
 
 latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90]
+latgridbounds=np.linspace(-90,90,nlatcols+1)
 latgrid=np.zeros(nlatcols)
 for i in range(nlatcols):
     latgrid[i]=(latgridbounds[i]+latgridbounds[i+1])/2.
@@ -658,7 +660,51 @@ for directory in directories:
         
     i_dir+=1    
 
-# print totuflux_all_dirfil[nlayers,0,:,:,:]
+tbound_all_dirfil[:,:,:,9:17]=np.NaN
+
+alpha_furns=(tbound_all_dirfil[0,0,0,:]-tbound_all_dirfil[0,1,0,:])/10
+alpha_fins=(tbound_all_dirfil[1,0,0,:]-tbound_all_dirfil[1,1,0,:])/10.
+
+c_zon=4.
+
+rad_eff=( 1.+ ( 4.*c_zon*alpha_furns*alpha_fins )/( alpha_furns+alpha_fins ) ) / ( 1. + c_zon * ( alpha_furns + alpha_fins ) )
+
+
+
+plt.figure()
+plt.grid(which='both')
+plt.plot(latgrid,tbound_all_dirfil[0,0,0,:],'-o',label='cloudy')
+plt.plot(latgrid,tbound_all_dirfil[1,0,0,:],'--o',label='clear')
+plt.xlabel('Latitude')
+plt.ylabel('Surface temperature (K)')
+plt.legend()
+plt.figure()
+plt.grid(which='both')
+plt.plot(latgrid,tbound_all_dirfil[0,0,0,:]-tbound_all_dirfil[0,1,0,:],'-o',label='cloudy')
+plt.plot(latgrid,tbound_all_dirfil[1,0,0,:]-tbound_all_dirfil[1,1,0,:],'--o',label='clear')
+plt.xlabel('Latitude')
+plt.ylabel(r'$\Delta$ surface temperature (K)')
+plt.legend()
+plt.figure()
+plt.grid(which='both')
+plt.plot(latgrid,(tbound_all_dirfil[0,0,0,:]-tbound_all_dirfil[0,1,0,:])/10.,'-o',label='cloudy')
+plt.plot(latgrid,(tbound_all_dirfil[1,0,0,:]-tbound_all_dirfil[1,1,0,:])/10.,'--o',label='clear')
+plt.xlabel('Latitude')
+plt.ylabel(r'$\alpha = \frac{dT}{dOLR}$')
+plt.legend()
+plt.figure()
+plt.grid(which='both')
+plt.plot(latgrid,(tbound_all_dirfil[0,0,0,:]-tbound_all_dirfil[0,1,0,:])/10.-(tbound_all_dirfil[1,0,0,:]-tbound_all_dirfil[1,1,0,:])/10.,'-o')
+plt.axhline(0,linestyle='--')
+plt.xlabel('Latitude')
+plt.ylabel(r'$\alpha_{cloud}-\alpha_{clear}$')
+plt.legend()
+plt.figure()
+plt.grid(which='both')
+plt.plot(latgrid,(1.0-rad_eff)*100.,'-o')
+plt.xlabel('Latitude')
+plt.ylabel('Radiator fin effectiveness')
+plt.legend()
 
 c_merids=[1,2,4]
 c_zonals=[1,2,4]
@@ -698,102 +744,102 @@ c_zonals=[1,2,4]
 
 
 
-# energy flows individual subplots fig
-i_loops=0
-for i_z in range(len(c_zonals)):
-    for i_m in range(len(c_merids)):
+# # energy flows individual subplots fig
+# i_loops=0
+# for i_z in range(len(c_zonals)):
+#     for i_m in range(len(c_merids)):
 
-        print i_loops*2, i_loops*2+1
+#         print i_loops*2, i_loops*2+1
 
-        fig=plt.figure(1)
-        # plt.suptitle(r'$\Delta$ TOA Fnet (cloudy)')
-        # plt.suptitle(r'$\Delta$ zonal_transp (cloudy)')
-        # plt.suptitle(r'$\Delta$ meridional transp (cloudy)')
-        # plt.suptitle(r'$\Delta$ total (cloudy)')
-        # plt.suptitle(r'$\Delta$ T (cloudy)')
-        # plt.suptitle(r'$\alpha$ = dT/d(box budget) (cloudy)')
+#         fig=plt.figure(1)
+#         # plt.suptitle(r'$\Delta$ TOA Fnet (cloudy)')
+#         # plt.suptitle(r'$\Delta$ zonal_transp (cloudy)')
+#         # plt.suptitle(r'$\Delta$ meridional transp (cloudy)')
+#         # plt.suptitle(r'$\Delta$ total (cloudy)')
+#         # plt.suptitle(r'$\Delta$ T (cloudy)')
+#         # plt.suptitle(r'$\alpha$ = dT/d(box budget) (cloudy)')
 
-        # plt.suptitle(r'$\Delta$ TOA Fnet (clear)')
-        # plt.suptitle(r'$\Delta$ zonal_transp (clear)')
-        # plt.suptitle(r'$\Delta$ meridional transp (clear)')
-        # plt.suptitle(r'$\Delta$ total (clear)')
-        # plt.suptitle(r'$\Delta$ T (clear)')
-        # plt.suptitle(r'$\alpha$ = dT/d(box budget) (clear)')
+#         # plt.suptitle(r'$\Delta$ TOA Fnet (clear)')
+#         # plt.suptitle(r'$\Delta$ zonal_transp (clear)')
+#         # plt.suptitle(r'$\Delta$ meridional transp (clear)')
+#         # plt.suptitle(r'$\Delta$ total (clear)')
+#         # plt.suptitle(r'$\Delta$ T (clear)')
+#         # plt.suptitle(r'$\alpha$ = dT/d(box budget) (clear)')
 
-        # plt.suptitle(r'$\Delta$ TOA Fnet (avg)')
-        # plt.suptitle(r'$\Delta$ zonal_transp (avg)') #pointless!
-        # plt.suptitle(r'$\Delta$ meridional transp (avg)'))
-        # plt.suptitle(r'$\Delta$ total (avg)')
-        # plt.suptitle(r'$\Delta$ T (avg)')
-        plt.suptitle(r'$\alpha$ = dT/d(box budget) (avg)')
+#         # plt.suptitle(r'$\Delta$ TOA Fnet (avg)')
+#         # plt.suptitle(r'$\Delta$ zonal_transp (avg)') #pointless!
+#         # plt.suptitle(r'$\Delta$ meridional transp (avg)'))
+#         # plt.suptitle(r'$\Delta$ total (avg)')
+#         # plt.suptitle(r'$\Delta$ T (avg)')
+#         plt.suptitle(r'$\alpha$ = dT/d(box budget) (avg)')
 
-        plt.subplot(131+i_m)
-        plt.gca().set_title('c_merid={}'.format(c_merids[i_m]))
-        # plt.plot(latgrid,(fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:])*-1.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(7,11)
-        # plt.plot(latgrid,zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:],'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(-4,0)
-        # plt.plot(latgrid,merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:],'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(-1.1,1)
-        # plt.plot(latgrid,(merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:]),'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.plot(latgrid,(tbound_all_dirfil[0,i_loops*2,0,:]-tbound_all_dirfil[0,i_loops*2+1,0,:]),'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(5,8)
+#         plt.subplot(131+i_m)
+#         plt.gca().set_title('c_merid={}'.format(c_merids[i_m]))
+#         # plt.plot(latgrid,(fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:])*-1.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(7,11)
+#         # plt.plot(latgrid,zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:],'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(-4,0)
+#         # plt.plot(latgrid,merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:],'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(-1.1,1)
+#         # plt.plot(latgrid,(merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:]),'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.plot(latgrid,(tbound_all_dirfil[0,i_loops*2,0,:]-tbound_all_dirfil[0,i_loops*2+1,0,:]),'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(5,8)
 
-        #clear
-        # plt.plot(latgrid,(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:])*-1.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(9,14)
-        # plt.plot(latgrid,zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:],'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(0,4)
-        # plt.plot(latgrid,merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:],'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(-2,2)
-        # plt.plot(latgrid,(merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:]),'--o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(10,17)
-        # plt.plot(latgrid,(tbound_all_dirfil[1,i_loops*2,0,:]-tbound_all_dirfil[1,i_loops*2+1,0,:]),'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(5,8)
+#         #clear
+#         # plt.plot(latgrid,(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:])*-1.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(9,14)
+#         # plt.plot(latgrid,zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:],'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(0,4)
+#         # plt.plot(latgrid,merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:],'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(-2,2)
+#         # plt.plot(latgrid,(merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:]),'--o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(10,17)
+#         # plt.plot(latgrid,(tbound_all_dirfil[1,i_loops*2,0,:]-tbound_all_dirfil[1,i_loops*2+1,0,:]),'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(5,8)
 
-        # average (clear + cloudy)/2
-        # plt.plot(latgrid,((fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:])*-1.+(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:])*-1.)/2.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(8,12)
-        # plt.plot(latgrid,(zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:]+zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])/2.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(-1,1)
-        # plt.plot(latgrid,(merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:]+merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])/2.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(-1.5,1)
-        # plt.plot(latgrid,((merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:])+(merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:]))/2.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(9,11)
-        # plt.plot(latgrid,((tbound_all_dirfil[0,i_loops*2,0,:]-tbound_all_dirfil[0,i_loops*2+1,0,:])+(tbound_all_dirfil[1,i_loops*2,0,:]-tbound_all_dirfil[1,i_loops*2+1,0,:]))/2.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
-        # plt.ylim(5,7.5)
+#         # average (clear + cloudy)/2
+#         # plt.plot(latgrid,((fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:])*-1.+(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:])*-1.)/2.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(8,12)
+#         # plt.plot(latgrid,(zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:]+zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])/2.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(-1,1)
+#         # plt.plot(latgrid,(merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:]+merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])/2.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(-1.5,1)
+#         # plt.plot(latgrid,((merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:])+(merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:]))/2.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(9,11)
+#         # plt.plot(latgrid,((tbound_all_dirfil[0,i_loops*2,0,:]-tbound_all_dirfil[0,i_loops*2+1,0,:])+(tbound_all_dirfil[1,i_loops*2,0,:]-tbound_all_dirfil[1,i_loops*2+1,0,:]))/2.,'-o',label='c_zonal={}'.format(c_zonals[i_z]))
+#         # plt.ylim(5,7.5)
 
-        # sensitivity alpha
-        # plt.plot( latgrid, (tbound_all_dirfil[0,i_loops*2,0,:]-tbound_all_dirfil[0,i_loops*2+1,0,:]) / ( (merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:]) ),'-o',label='c_zonal={}'.format(c_zonals[i_z]) )
-        # plt.ylim(0.6,1.3)
-        # plt.plot( latgrid, (tbound_all_dirfil[1,i_loops*2,0,:]-tbound_all_dirfil[1,i_loops*2+1,0,:]) / ( (merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:]) ),'-o',label='c_zonal={}'.format(c_zonals[i_z]) )
-        # plt.ylim(0.35,0.65)
-        plt.plot( latgrid, ((tbound_all_dirfil[0,i_loops*2,0,:]-tbound_all_dirfil[0,i_loops*2+1,0,:]) / ( (merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:]) ) + (tbound_all_dirfil[1,i_loops*2,0,:]-tbound_all_dirfil[1,i_loops*2+1,0,:]) / ( (merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:]) )) /2. ,'-o',label='c_zonal={}'.format(c_zonals[i_z]) )
-        plt.ylim(0.55,0.8)
-
-
-        # plt.axhline(0,linestyle='--')
-        # plt.axhline(10,linestyle='--')
-        plt.xlabel('Latitude')
-        # plt.ylabel(r'$\Delta$ budg (Wm$^{-2}$)')
+#         # sensitivity alpha
+#         # plt.plot( latgrid, (tbound_all_dirfil[0,i_loops*2,0,:]-tbound_all_dirfil[0,i_loops*2+1,0,:]) / ( (merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:]) ),'-o',label='c_zonal={}'.format(c_zonals[i_z]) )
+#         # plt.ylim(0.6,1.3)
+#         # plt.plot( latgrid, (tbound_all_dirfil[1,i_loops*2,0,:]-tbound_all_dirfil[1,i_loops*2+1,0,:]) / ( (merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:]) ),'-o',label='c_zonal={}'.format(c_zonals[i_z]) )
+#         # plt.ylim(0.35,0.65)
+#         plt.plot( latgrid, ((tbound_all_dirfil[0,i_loops*2,0,:]-tbound_all_dirfil[0,i_loops*2+1,0,:]) / ( (merid_transps_all_dirfil[0,i_loops*2,0,:]-merid_transps_all_dirfil[0,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[0,i_loops*2,0,:]-zonal_transps_all_dirfil[0,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,0,i_loops*2,0,:]-fnet_all_dirfil[nlayers,0,i_loops*2+1,0,:]) ) + (tbound_all_dirfil[1,i_loops*2,0,:]-tbound_all_dirfil[1,i_loops*2+1,0,:]) / ( (merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])-(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:]) )) /2. ,'-o',label='c_zonal={}'.format(c_zonals[i_z]) )
+#         plt.ylim(0.55,0.8)
 
 
+#         # plt.axhline(0,linestyle='--')
+#         # plt.axhline(10,linestyle='--')
+#         plt.xlabel('Latitude')
+#         # plt.ylabel(r'$\Delta$ budg (Wm$^{-2}$)')
 
-        # plt.gca().set_title('c_zonal={}, c_merid={}'.format(c_zonals[i_z],c_merids[i_m]))
-        # plt.plot(latgrid,fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:],'--o',label=r'$\Delta$ TOA Fnet (clear)')
-        # plt.plot(latgrid,zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:],'--o',label=r'$\Delta$ zonal_transp (clear)')
-        # plt.plot(latgrid,merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:],'--o',label=r'$\Delta$ merid_transp (clear)')
-        # plt.plot(latgrid,(merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])+(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:]),'--o',label='Total (clear)')
-        # plt.xlabel('Latitude')
-        # plt.ylabel(r'$\Delta$ budg (Wm$^{-2}$)')
-        # plt.axhline(0,linestyle='--')
-        # plt.axhline(10,linestyle='--')
 
-        i_loops+=1
 
-        if(i_loops==8):
-            handles, labels = plt.gca().get_legend_handles_labels()
-            fig.legend(handles, labels, loc='center right')
+#         # plt.gca().set_title('c_zonal={}, c_merid={}'.format(c_zonals[i_z],c_merids[i_m]))
+#         # plt.plot(latgrid,fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:],'--o',label=r'$\Delta$ TOA Fnet (clear)')
+#         # plt.plot(latgrid,zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:],'--o',label=r'$\Delta$ zonal_transp (clear)')
+#         # plt.plot(latgrid,merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:],'--o',label=r'$\Delta$ merid_transp (clear)')
+#         # plt.plot(latgrid,(merid_transps_all_dirfil[1,i_loops*2,0,:]-merid_transps_all_dirfil[1,i_loops*2+1,0,:])+(zonal_transps_all_dirfil[1,i_loops*2,0,:]-zonal_transps_all_dirfil[1,i_loops*2+1,0,:])+(fnet_all_dirfil[nlayers,1,i_loops*2,0,:]-fnet_all_dirfil[nlayers,1,i_loops*2+1,0,:]),'--o',label='Total (clear)')
+#         # plt.xlabel('Latitude')
+#         # plt.ylabel(r'$\Delta$ budg (Wm$^{-2}$)')
+#         # plt.axhline(0,linestyle='--')
+#         # plt.axhline(10,linestyle='--')
+
+#         i_loops+=1
+
+#         if(i_loops==8):
+#             handles, labels = plt.gca().get_legend_handles_labels()
+#             fig.legend(handles, labels, loc='center right')
 
 # plt.figure(1)
 # plt.plot(zonal_transps_all_dirfil[0,::3,:,0])
