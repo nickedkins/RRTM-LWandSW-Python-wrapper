@@ -14,7 +14,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Dropbox/github_repositories/RRTM-LWandSW-Python-wrapper/'
 
 def init_plotting():
 	plt.rcParams['figure.figsize'] = (10,10)
@@ -76,7 +76,7 @@ def writeparamsarr(params,f):
 
 # write an input file to be read by rrtm.f (matching the format of the example input files)
 def writeformattedinputfile_sw():
-	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/Input RRTM SW NJE Formatted','w+')
+	f=open('/Users/nickedkins/Dropbox/github_repositories/RRTM-LWandSW-Python-wrapper/SW/Input RRTM SW NJE Formatted','w+')
 	f.write('INPUT_RRTM_SW NJE created\n')
 	f.write('0        1         2         3         4         5         6         7         8         9\n')
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
@@ -107,7 +107,7 @@ def writeformattedinputfile_sw():
 	f.close()
 
 def writeformattedinputfile_lw():
-	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/Input RRTM LW NJE Formatted','w+')
+	f=open('/Users/nickedkins/Dropbox/github_repositories/RRTM-LWandSW-Python-wrapper/LW/Input RRTM LW NJE Formatted','w+')
 	f.write('INPUT_RRTM_SW NJE created\n')
 	f.write('0        1         2         3         4         5         6         7         8         9\n')
 	f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
@@ -128,7 +128,7 @@ def writeformattedinputfile_lw():
 
 # write formatted cloud fie for rrtm input
 def writeformattedcloudfile():
-	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/IN_CLD_RRTM NJE','w+')
+	f=open('/Users/nickedkins/Dropbox/github_repositories/RRTM-LWandSW-Python-wrapper/IN_CLD_RRTM NJE','w+')
 	f.write('   {:2d}    {:1d}    {:1d}\n'.format(inflags_master[i_zon,i_lat].astype(int),iceflags_master[i_zon,i_lat].astype(int),liqflags_master[i_zon,i_lat].astype(int)))
 	for i_cld in range(nclouds):
 		f.write('{} {:3d}{:10.5f}{:10.5f}{:10.5f}{:10.5f}{:10.5f}\n'.format(ctest,int(cld_lays_master[i_zon,i_lat,i_cld]),cld_fracs_master[i_zon,i_lat,i_cld],tauclds_master[i_zon,i_lat,i_cld],ssaclds_master[i_zon,i_lat,i_cld],radice,radliq))
@@ -139,20 +139,20 @@ def writeformattedcloudfile():
 
 # call the compiled rrtmlw executable
 def callrrtmlw():
-	loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw'
+	loc = '/Users/nickedkins/Dropbox/github_repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw'
 	os.chdir(project_dir+'/LW')
 	p = subprocess.Popen([loc])
 	stdoutdata, stderrdata = p.communicate()
 
 def callrrtmsw():
-	loc = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/rrtmsw'
+	loc = '/Users/nickedkins/Dropbox/github_repositories/RRTM-LWandSW-Python-wrapper/SW/rrtmsw'
 	os.chdir(project_dir+'/SW')
 	p = subprocess.Popen([loc])
 	stdoutdata, stderrdata = p.communicate()
 
 # read output produced by rrtmlw executable for use in next timestep within this python wrapper
 def readrrtmoutput_lw():
-	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/My Live Output RRTM')
+	f=open('/Users/nickedkins/Dropbox/github_repositories/RRTM-LWandSW-Python-wrapper/LW/My Live Output RRTM')
 	for i in range(0,nlayers+1):
 		totuflux_lw[i] =  f.readline()
 	for i in range(0,nlayers+1):
@@ -164,7 +164,7 @@ def readrrtmoutput_lw():
 	return totuflux_lw,totdflux_lw,fnet_lw,htr_lw
 
 def readrrtmoutput_sw():
-	f=open('/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/SW/My Live Output RRTM')
+	f=open('/Users/nickedkins/Dropbox/github_repositories/RRTM-LWandSW-Python-wrapper/SW/My Live Output RRTM')
 	for i in range(0,nlayers+1):
 		totuflux_sw[i] =  f.readline()
 	for i in range(0,nlayers+1):
@@ -377,6 +377,28 @@ def read_misr_2():
 
 	return zz[1:,:].T, altz, cld_taus
 
+def read_misr_3():
+	interpdir='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/MISR Data/'
+	misr_cf_latalt_max=np.load(interpdir+'fracs_latalt.npy')
+	cfs=misr_cf_latalt_max
+	misr_cod_latalt_max=np.load(interpdir+'od_wghtd_latalt.npy')
+	cods=misr_cod_latalt_max
+	misr_alts=np.load(interpdir+'alts.npy')
+	misr_lats=np.load(interpdir+'lats.npy')
+	x=misr_lats
+	y=misr_alts
+	
+	z1=cfs.T
+	f1 = interpolate.interp2d(x, y, z1, kind='linear')
+	xx,yy=np.meshgrid(latgrid,altz/1000.)
+	zz1=f1(latgrid,altz/1000.)
+
+	z2=cods.T
+	f2 = interpolate.interp2d(x, y, z2, kind='linear')
+	xx,yy=np.meshgrid(latgrid,altz/1000.)
+	zz2=f2(latgrid,altz/1000.)
+
+	return zz1[1:,:].T, altz, zz2[1:,:].T
 
 
 #  use array of previously collated ERA-Interim data to interpolate from to get h2o and o3 mixing ratios and surface albedos
@@ -479,7 +501,7 @@ def createlatdistbn(filename):
 # set overall dimensions for model
 nlayers=60
 nzoncols=2
-nlatcols=5
+nlatcols=1
 
 # latgridbounds=np.linspace(-90,90,nlatcols+1)
 xgridbounds=np.linspace(-1.,1.,nlatcols+1)
@@ -519,12 +541,12 @@ eqb_maxdfnet=0.01
 maxdfnet_tot=1.0
 eqb_col_budgs=0.01
 toa_fnet_eqb=1.0e12
-timesteps=800
+timesteps=2
 
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim
 input_source=2 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RAE expts/nb and advloc loops/nlatcols=5/baseline no adv v3'
+prev_output_file='/Users/nickedkins/Dropbox/github_repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RAE expts/nb and advloc loops/nlatcols=5/baseline no adv v3'
 
 adv_locs=[1] # 0: heating everywhere, 1: heating only in tropopause
 nbs=[1,2,4]
@@ -2045,7 +2067,8 @@ for adv_loc in adv_locs:
 																	# cldweights,altbins,tauclds=read_misr()
 																	# read_misr_2()
 																	# cld_fracs_master[i_zon,i_lat,:],altbins,tauclds_master[0,i_lat,:]=read_misr()
-																	cld_fracs_master[i_zon,:,:],altbins,tauclds_master[0,:,:]=read_misr_2()
+																	# cld_fracs_master[i_zon,:,:],altbins,tauclds_master[0,:,:]=read_misr_2()
+																	cld_fracs_master[i_zon,:,:],altbins,tauclds_master[0,:,:]=read_misr_3()
 																	for i_cld in range(nclouds):
 																		# cld_lays_master[i_zon,i_lat,i_cld]=np.argmin(abs(altz/1000.-altbins[i_cld]))
 																		# cld_lays_master[i_zon,i_lat,i_cld]=np.argmin(abs(altz/1000.-altbins[i_cld]))
