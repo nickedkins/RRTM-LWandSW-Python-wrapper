@@ -2,15 +2,15 @@
 <!DOCTYPE Fx3>
 <Fx3 version="1.2.1">
     <ProgramList>
-        <Name>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw</Name>
+        <Name>/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw</Name>
         <Arguments></Arguments>
-        <WorkingDirectory>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW</WorkingDirectory>
+        <WorkingDirectory>/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW</WorkingDirectory>
         <EnvironmentList></EnvironmentList>
         <Script></Script>
         <Type>append</Type>
     </ProgramList>
     <AddPaths>
-        <Path>&quot;/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src&quot;</Path>
+        <Path>&quot;/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/src&quot;</Path>
     </AddPaths>
     <WatchVariables>
         <Variable>SEMIS</Variable>
@@ -20,7 +20,7 @@
         <Breakpoint>
             <id>1</id>
             <line>77</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/k_g.f</filename>
+            <filename>/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/src/k_g.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
@@ -34,7 +34,7 @@
         <Breakpoint>
             <id>2</id>
             <line>72</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/k_g.f</filename>
+            <filename>/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/src/k_g.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
@@ -48,7 +48,7 @@
         <Breakpoint>
             <id>3</id>
             <line>67</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/k_g.f</filename>
+            <filename>/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/src/k_g.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
@@ -62,7 +62,7 @@
         <Breakpoint>
             <id>4</id>
             <line>92</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/k_g.f</filename>
+            <filename>/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/src/k_g.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
@@ -76,7 +76,7 @@
         <Breakpoint>
             <id>5</id>
             <line>695</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtatm.f</filename>
+            <filename>/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtatm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>
@@ -90,7 +90,7 @@
         <Breakpoint>
             <id>6</id>
             <line>683</line>
-            <filename>/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
+            <filename>/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/src/rrtm.f</filename>
             <type>breakpoint</type>
             <disposition></disposition>
             <enabled>y</enabled>

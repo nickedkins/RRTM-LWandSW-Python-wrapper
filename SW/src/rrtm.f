@@ -379,11 +379,11 @@ C       DO 1200 ILAY = 1,MXLAY
 
       IXMAX = MAXINPX
       IRD = 9
-      OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM
+      OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM
      &-LWandSW-Python-wrapper/SW/Input RRTM SW NJE Formatted',FORM='FORM
      &ATTED')
       
-C        OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RRT
+C        OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RRT
 C      &M-LWandSW-Python-wrapper/SW/example_runs/input_rrtm_sw_mls',FORM='
 C      &FORMATTED')
 
@@ -628,10 +628,10 @@ C               cloud properties.
       IRDCLD = 11
 
       OPEN(IRDCLD,FILE='IN_CLD_RRTM',FORM='FORMATTED')
-C       OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RR
+C       OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RR
 C      &TM-LWandSW-Python-wrapper/LW/run_examples/in_cld_rrtm_MLS-cld1',FO
 C      &RM='FORMATTED')
-      OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RR
+      OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RR
      &TM-LWandSW-Python-wrapper/IN_CLD_RRTM NJE',FORM='FORMATTED')
       
 

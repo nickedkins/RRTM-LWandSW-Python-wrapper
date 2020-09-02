@@ -201,10 +201,10 @@ C     is multiplied by W m-2 mb-1.
 !    Open the INPUT set of atmospheres
       IRD = 9
 C       OPEN (IRD,FILE='INPUT_RRTM',FORM='FORMATTED')
-C       OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM
+C       OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM
 C      &-LWandSW-Python-wrapper/LW/run_examples/input_rrtm_MLS',FORM='FORM
 C      &ATTED')
-      open(ird,file='/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-
+      open(ird,file='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-
      &LWandSW-Python-wrapper/LW/Input RRTM LW NJE Formatted',form='forma
      &tted')
       
@@ -669,10 +669,10 @@ C Open OUT_CLD_RRTM to output the cloud optical properties
 
 C Open Cloud Input File
 C       OPEN(IRDCLD,FILE='IN_CLD_RRTM',FORM='FORMATTED')
-C       OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RR
+C       OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RR
 C      &TM-LWandSW-Python-wrapper/LW/run_examples/in_cld_rrtm_MLS-cld1',FO
 C      &RM='FORMATTED')
-      OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub Repositories/RR
+      OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RR
      &TM-LWandSW-Python-wrapper/IN_CLD_RRTM NJE',FORM='FORMATTED')
 
       

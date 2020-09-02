@@ -1,4 +1,4 @@
-project_dir = '/Users/nickedkins/Dropbox/GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/'
 
 nlayers=590
 ncloudcols=1
