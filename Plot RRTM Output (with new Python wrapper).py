@@ -138,16 +138,19 @@ def plotrrtmoutput_masters():
         # for i_zon in range(nzoncols):
         for i_zon in [0]:
             plt.subplot(121)
-            plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
+            # plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
+            plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat])
             # plt.semilogy(tavel_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(i_zon))
             cti=np.int(cti_master[i_zon,i_lat])
-            plt.plot(tz_master[cti,i_zon,i_lat], pz_master[ cti, i_zon, i_lat ],'o' )
-            plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
-            plt.ylim(1000,10)
+            # plt.plot(tz_master[cti,i_zon,i_lat], pz_master[ cti, i_zon, i_lat ],'o' )
+            plt.plot(tz_master[cti,i_zon,i_lat], altz_master[ cti, i_zon, i_lat ],'o' )
+            # plt.ylim(4000,12000)
+            # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
+            # plt.ylim(1000,10)
             plt.xlabel('T (K)')
             plt.ylabel('Pressure (hPa)')
             plt.grid(True,which='both')
-            plt.legend()
+            # plt.legend()
             # plt.subplot(132)
             # plt.semilogy(totuflux_lw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],label=fn)
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
@@ -221,7 +224,7 @@ if('.DS_Store' in a):
 nfiles=len(a)
 
 nlayers=60
-nlatcols=3
+nlatcols=5
 
 nmol=7
 nclouds=nlayers
@@ -332,7 +335,7 @@ vol_mixh2o_max = 1e6
 ur_min=0.5
 ur_max=1.0
 eqb_maxhtr = 0.001
-timesteps=10000
+timesteps=800
 cti=0
 maxhtr=0.
 cld_lay=0.
