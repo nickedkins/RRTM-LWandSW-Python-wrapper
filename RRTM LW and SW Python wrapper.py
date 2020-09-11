@@ -556,7 +556,7 @@ toa_fnet_eqb=1.0e12
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/baselines/nl=60,ncol=5,v5'
-lapse_source=2 # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param
+lapse_source=1 # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param
 
 adv_locs=[0] # 0: heating everywhere, 1: heating only in tropopause
 nbs=[2]
@@ -571,11 +571,15 @@ zenlats=np.zeros(nlatcols)
 insollats=np.zeros(nlatcols)
 solar_constant=1368.
 
-lapse_master=np.zeros((nzoncols,nlatcols)))
-for i_zon in range(nzoncols):
-    lapse_master[i_zon,:]=np.array(createlatdistbn('Doug Mason Lapse Rate vs Latitude'))
-# lapse_master=np.array([-6.5])
-lapse_master*=-1.
+lapse_master=np.zeros((nzoncols,nlatcols))
+if(lapse_source==0):
+    lapse_master=np.ones((nzoncols,nlatcols)) * 5.7
+elif(lapse_source==1):
+    for i_zon in range(nzoncols):
+        lapse_master[i_zon,:]=np.array(createlatdistbn('Doug Mason Lapse Rate vs Latitude'))
+    lapse_master*=-1.
+
+
 
 # lapseloops=np.arange(4,11)
 lapseloops=[6]
@@ -2124,56 +2128,58 @@ for lapseloop in lapseloops:
                                                                         phi=np.deg2rad(latgrid)
                                                                         phi_edges=np.deg2rad(latgridbounds)
                                                                         
-                                                                        if(abs(latgrid[i_lat])<60):
-                                                                            
-                                                                            conv_on_lats[i_lat]=1
+                                                                        if(lapse_source==2):
                                                                         
-                                                                            if(nlatcols>1):
-                                                                                f=interp1d(latgrid,tbound_master[0,:],bounds_error=False,fill_value="extrapolate")
-                                                                                tbound_edges=f(latgridbounds)                                                                    
-                                                                                dmid[i_lat]=H * np.log( 1. - ( np.tan( phi[i_lat] ) * (tbound_edges[i_lat+1]-tbound_edges[i_lat]) ) / ( (phi_edges[i_lat+1] - phi_edges[i_lat]) * H * (9.8-lapse)) )
-        
-                                                                            dtrop[i_lat]=0.8*2.26e6*(6.1094*exp(17.625*(np.mean(tbound_master[:,i_lat])-273.15)/(np.mean(tbound_master[:,i_lat])-273.15+243.04)))/pz[0]*0.622/(1e3*(9.8-lapse) )
-                                                                            # ztrop_h82[i_lat]=dtrop[i_lat]
-                                                                            ztrop_h82[i_lat]=np.max([dmid[i_lat],dtrop[i_lat]])
-                                                                            ztrop_h82_ind[i_lat]=np.argmin(np.abs(altz/1000.-ztrop_h82[i_lat]))
-                                                                            
-                                                                            lapse=lapse_master[0,i_lat]
-                                                                            
-                                                                            lapse_eqb[i_lat]=0
-                                                                            
-                                                                            if(rad_eqb[i_lat]==1):
-                                                                            # if(ts%10==0):
+                                                                            if(abs(latgrid[i_lat])<60):
                                                                                 
-                                                                                ztrop[i_lat]=np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000.
-                                                                                
-                                                                                if( abs(ztrop[i_lat]-ztrop_h82[i_lat]) < 1.0):
-                                                                                    lapse_eqb[i_lat]=1
-                                                                                    lapse_master[0,i_lat]=lapse
-                                                                                else:
-                                                                                    # lapse_master[i_lat]+=( dmid[ i_lat ] - np.mean(altz_master[ np.int( np.mean( cti_master[:,i_lat], axis=0 ) ),:,i_lat],axis=0) / 1000. )*-0.05
-                                                                                    dztrop[i_lat] = ztrop_h82[i_lat] - ztrop[i_lat]
-                                                                                    lapse_add[i_lat]=np.clip(dztrop[i_lat] * -0.01,-0.1,0.1)
-                                                                                    lapse+=lapse_add[i_lat]
-                                                                                    if(np.isnan(lapse)):
-                                                                                        lapse=6.5
-                                                                                    lapse=np.clip(lapse,2.,12.)
-                                                                                    lapse_master[0,i_lat]=lapse
-                                                                                    convection(tavel,altavel,conv_log=1)
-                                                                                    convection(tz,altz,conv_log=1)
-        
-                                                                                if(ts%10==0):
-                                                                                    for i_lat2 in range(nlatcols):                                                                        
-                                                                                        print('ts: {} lat: {: 6.0f} ztrop:  {: 6.2f} ztrop_h82: {: 6.2f} dztrop:  {: 6.2f} new lapse  {: 6.2f} lapse_add {: 6.2f} rad_eqb: {: 4.0f} lapse_eqb: {: 4.0f} '.format(ts, latgrid[i_lat2], ztrop[i_lat2],ztrop_h82[i_lat2], dztrop[i_lat2], lapse_master[0,i_lat2],lapse_add[i_lat2], rad_eqb[i_lat2], lapse_eqb[i_lat2] ) )
-                                                                                    print('------------------')
-        
-                                                                            lapse_master[0,i_lat]=lapse
+                                                                                conv_on_lats[i_lat]=1
                                                                             
-                                                                        else:
-                                                                            conv_on_lats[i_lat]=0
-                                                                            adv_on[i_lat]=1
-                                                                            lapse_eqb[i_lat]=1
-                                                                            lapse_master[0,i_lat]=lapse
+                                                                                if(nlatcols>1):
+                                                                                    f=interp1d(latgrid,tbound_master[0,:],bounds_error=False,fill_value="extrapolate")
+                                                                                    tbound_edges=f(latgridbounds)                                                                    
+                                                                                    dmid[i_lat]=H * np.log( 1. - ( np.tan( phi[i_lat] ) * (tbound_edges[i_lat+1]-tbound_edges[i_lat]) ) / ( (phi_edges[i_lat+1] - phi_edges[i_lat]) * H * (9.8-lapse)) )
+            
+                                                                                dtrop[i_lat]=0.8*2.26e6*(6.1094*exp(17.625*(np.mean(tbound_master[:,i_lat])-273.15)/(np.mean(tbound_master[:,i_lat])-273.15+243.04)))/pz[0]*0.622/(1e3*(9.8-lapse) )
+                                                                                # ztrop_h82[i_lat]=dtrop[i_lat]
+                                                                                ztrop_h82[i_lat]=np.max([dmid[i_lat],dtrop[i_lat]])
+                                                                                ztrop_h82_ind[i_lat]=np.argmin(np.abs(altz/1000.-ztrop_h82[i_lat]))
+                                                                                
+                                                                                lapse=lapse_master[0,i_lat]
+                                                                                
+                                                                                lapse_eqb[i_lat]=0
+                                                                                
+                                                                                if(rad_eqb[i_lat]==1):
+                                                                                # if(ts%10==0):
+                                                                                    
+                                                                                    ztrop[i_lat]=np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000.
+                                                                                    
+                                                                                    if( abs(ztrop[i_lat]-ztrop_h82[i_lat]) < 1.0):
+                                                                                        lapse_eqb[i_lat]=1
+                                                                                        lapse_master[0,i_lat]=lapse
+                                                                                    else:
+                                                                                        # lapse_master[i_lat]+=( dmid[ i_lat ] - np.mean(altz_master[ np.int( np.mean( cti_master[:,i_lat], axis=0 ) ),:,i_lat],axis=0) / 1000. )*-0.05
+                                                                                        dztrop[i_lat] = ztrop_h82[i_lat] - ztrop[i_lat]
+                                                                                        lapse_add[i_lat]=np.clip(dztrop[i_lat] * -0.01,-0.1,0.1)
+                                                                                        lapse+=lapse_add[i_lat]
+                                                                                        if(np.isnan(lapse)):
+                                                                                            lapse=6.5
+                                                                                        lapse=np.clip(lapse,2.,12.)
+                                                                                        lapse_master[0,i_lat]=lapse
+                                                                                        convection(tavel,altavel,conv_log=1)
+                                                                                        convection(tz,altz,conv_log=1)
+            
+                                                                                    if(ts%10==0):
+                                                                                        for i_lat2 in range(nlatcols):                                                                        
+                                                                                            print('ts: {} lat: {: 6.0f} ztrop:  {: 6.2f} ztrop_h82: {: 6.2f} dztrop:  {: 6.2f} new lapse  {: 6.2f} lapse_add {: 6.2f} rad_eqb: {: 4.0f} lapse_eqb: {: 4.0f} '.format(ts, latgrid[i_lat2], ztrop[i_lat2],ztrop_h82[i_lat2], dztrop[i_lat2], lapse_master[0,i_lat2],lapse_add[i_lat2], rad_eqb[i_lat2], lapse_eqb[i_lat2] ) )
+                                                                                        print('------------------')
+            
+                                                                                lapse_master[0,i_lat]=lapse
+                                                                                
+                                                                            else:
+                                                                                conv_on_lats[i_lat]=0
+                                                                                adv_on[i_lat]=1
+                                                                                lapse_eqb[i_lat]=1
+                                                                                lapse_master[0,i_lat]=lapse
     
                                                                         # cldweights,altbins,tauclds=read_misr()
                                                                         # read_misr_2()
