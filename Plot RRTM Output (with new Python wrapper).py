@@ -137,19 +137,19 @@ def plotrrtmoutput_masters():
     # for i_lat in [2]:
         # for i_zon in range(nzoncols):
         for i_zon in [0]:
-            plt.subplot(121)
+            # plt.subplot(121)
             # plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
-            plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat])
-            # plt.semilogy(tavel_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(i_zon))
-            cti=np.int(cti_master[i_zon,i_lat])
+            # # plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat])
+            # # plt.semilogy(tavel_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(i_zon))
+            # cti=np.int(cti_master[i_zon,i_lat])
             # plt.plot(tz_master[cti,i_zon,i_lat], pz_master[ cti, i_zon, i_lat ],'o' )
-            plt.plot(tz_master[cti,i_zon,i_lat], altz_master[ cti, i_zon, i_lat ],'o' )
-            # plt.ylim(4000,12000)
-            # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
+            # # plt.plot(tz_master[cti,i_zon,i_lat], altz_master[ cti, i_zon, i_lat ],'o' )
+            # # plt.ylim(4000,12000)
+            # # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.ylim(1000,10)
-            plt.xlabel('T (K)')
-            plt.ylabel('Pressure (hPa)')
-            plt.grid(True,which='both')
+            # plt.xlabel('T (K)')
+            # plt.ylabel('Pressure (hPa)')
+            # plt.grid(True,which='both')
             # plt.legend()
             # plt.subplot(132)
             # plt.semilogy(totuflux_lw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],label=fn)
@@ -171,7 +171,7 @@ def plotrrtmoutput_masters():
             # plt.ylim(np.max(pz_master[:,i_zon,i_lat]),np.min(pz_master[:,i_zon,i_lat]))
             # plt.xlabel('wkl1')
             # plt.subplot(336)
-            # plt.semilogy(wkl_master[:,i_zon,1,i_lat],pavel_master[:,i_zon,i_lat],label=str(i_file))
+            plt.semilogy(wkl_master[:,i_zon,1,i_lat],pavel_master[:,i_zon,i_lat],label=str(i_file))
             # # plt.legend()
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wkl2')
@@ -183,21 +183,17 @@ def plotrrtmoutput_masters():
             # plt.semilogy(wbrodl_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat])
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wbrodl')
-            plt.subplot(122)
-            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-',label='tot {}'.format(fn))
-            plt.semilogy(np.mean(dfnet_master[cti,:,i_lat],axis=0),pavel_master[cti,i_zon,i_lat],'o',label='tot {}'.format(fn))
-            # plt.semilogy(np.mean(dfnet_master_adv[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='adv {}'.format(fn))
-            # plt.semilogy(np.mean(dfnet_master_rad[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-.',label='rad {}'.format(fn))
-            plt.axvline(-eqb_maxdfnet,linestyle='--')
-            plt.axvline(eqb_maxdfnet,linestyle='--')
-            # plt.xlim(-0.1,0.1)
-            # plt.ylim(np.max(pz_master[:,i_zon,i_lat]),np.min(pz_master[:,i_zon,i_lat]))
-            plt.ylim(1000,10)
-            # plt.ylim(1000,700)
-            # plt.xlim(-2,2)
-            plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
-            plt.ylabel('Pressure (hPa)')
-            plt.grid(True,which='both')
+            # plt.subplot(122)
+            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-',label='tot {}'.format(fn))
+            # plt.semilogy(np.mean(dfnet_master[cti,:,i_lat],axis=0),pavel_master[cti,i_zon,i_lat],'o',label='tot {}'.format(fn))
+            # # plt.semilogy(np.mean(dfnet_master_adv[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='adv {}'.format(fn))
+            # # plt.semilogy(np.mean(dfnet_master_rad[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-.',label='rad {}'.format(fn))
+            # plt.axvline(-eqb_maxdfnet,linestyle='--')
+            # plt.axvline(eqb_maxdfnet,linestyle='--')
+            # plt.ylim(1000,10)
+            # plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
+            # plt.ylabel('Pressure (hPa)')
+            # plt.grid(True,which='both')
             # plt.legend()
             # plt.subplot(133)
             # lapsedum=np.zeros(nlayers)
@@ -223,16 +219,24 @@ if('.DS_Store' in a):
     a.remove('.DS_Store')
 nfiles=len(a)
 
-nlayers=60
-nlatcols=5
+nlayers=120
+nlatcols=9
 
 nmol=7
 nclouds=nlayers
 
 nzoncols=2
 
-# latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90]
-latgridbounds=np.linspace(-90,90,nlatcols+1)
+# # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90]
+# latgridbounds=np.linspace(-90,90,nlatcols+1)
+# latgrid=np.zeros(nlatcols)
+# for i in range(nlatcols):
+#     latgrid[i]=(latgridbounds[i]+latgridbounds[i+1])/2.
+
+# latgridbounds=np.linspace(0.,60.,nlatcols+1)
+xgridbounds=np.linspace(-1,1,nlatcols+1)
+latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
+# latgridbounds=[-90,-66.5,-23.5,23s.5,66.5,90] # 5 box poles, subtropics, tropics
 latgrid=np.zeros(nlatcols)
 for i in range(nlatcols):
     latgrid[i]=(latgridbounds[i]+latgridbounds[i+1])/2.
@@ -576,6 +580,7 @@ for directory in directories:
         wkl_master=np.zeros((nlayers,nzoncols,nmol+1,nlatcols))
         
         cti_master=np.zeros((nzoncols,nlatcols))
+        lapse_master=np.zeros((nzoncols,nlatcols))
 
         vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,nzoncols,master_input,conv_on,surf_lowlev_coupled,lay_intp,lw_on,sw_on,eqb_maxdfnet,toa_fnet_eqb,nlatcols]
         vars_master_lay_zon_lat=[tavel_master,pavel_master,altavel_master,wbrodl_master,dfnet_master,dfnet_master_rad,dfnet_master_adv,dpz_master]
@@ -583,7 +588,7 @@ for directory in directories:
         vars_misc_1d=[semis,semiss,solvar]
         vars_misc_1d_lens=[16,29,29]
         vars_master_lay_zon_nmol_lat=[wkl_master]
-        vars_master_zon_lat=[inflags_master,iceflags_master,liqflags_master,tbound_master,toa_fnet_master,zonal_transps_master,merid_transps_master,cti_master]
+        vars_master_zon_lat=[inflags_master,iceflags_master,liqflags_master,tbound_master,toa_fnet_master,zonal_transps_master,merid_transps_master,cti_master,lapse_master]
         vars_master_zon_lat_cld=[cld_lays_master,cld_fracs_master,tauclds_master,ssaclds_master]
 
 
@@ -700,24 +705,30 @@ for directory in directories:
         if(i_file==len(a)):
             plt.legend()
         plotrrtmoutput_masters()
+        # plt.plot(latgrid,lapse_master[0,:],'-o')
+        # data=np.genfromtxt('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/Latitudinal Distributions/Doug Mason Lapse Rate vs Latitude.txt',delimiter=',')
+        # plt.plot(data[:,0],data[:,1]*-1.)
+        
         # plt.figure(1)
-        # cti=np.int(cti_master[0,0])
-        # print(cti)
-        # plt.plot(lapse,altz_master[cti,0,0]/1000.,'o')
-        # plt.plot(lapse,tbound_master[0],'o')
-        # tbound_all_dirfil[:,i_file,i_dir,:]=tbound_master
-        # tz_all_dirfil[:,:,i_file,i_dir]=tz_master
-        # zonal_transps_all_dirfil[:,i_file,i_dir,:]=zonal_transps_master
-        # merid_transps_all_dirfil[:,i_file,i_dir,:]=merid_transps_master*-1.
-        # totuflux_all_dirfil[:,:,i_file,i_dir,:]=totuflux_master
-        # totuflux_all_dirfil_lw[:,:,i_file,i_dir,:]=totuflux_lw_master
-        # fnet_all_dirfil[:,:,i_file,i_dir,:]=fnet_master
+        # for i_lat in range(nlatcols):
+        #     cti=cti_master[0,i_lat]
+        #     ztrop=altz_master[np.int(cti),0,i_lat]/1000.
+        #     ptrop=pz_master[np.int(cti),0,i_lat]
+        #     plt.plot(latgrid[i_lat],ptrop,'o')
+            
+        
+        tbound_all_dirfil[:,i_file,i_dir,:]=tbound_master
+        tz_all_dirfil[:,:,i_file,i_dir]=tz_master
+        zonal_transps_all_dirfil[:,i_file,i_dir,:]=zonal_transps_master
+        merid_transps_all_dirfil[:,i_file,i_dir,:]=merid_transps_master*-1.
+        totuflux_all_dirfil[:,:,i_file,i_dir,:]=totuflux_master
+        totuflux_all_dirfil_lw[:,:,i_file,i_dir,:]=totuflux_lw_master
+        fnet_all_dirfil[:,:,i_file,i_dir,:]=fnet_master
         i_file+=1
         
     i_dir+=1    
 
 ###########################################################################################################################################################################################
-
 
 
 
