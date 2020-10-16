@@ -228,6 +228,16 @@ def convection(T,z,conv_log):
             if(conv_log==1):
                 conv[i]=1.
             T[i] = T[i-1] - lapse * dz
+            
+def convection_moist(T,z,conv_log):
+    T[0]=tbound
+    for i in range(1,len(T)):
+        dT = (T[i]-T[i-1])
+        dz = (z[i]-z[i-1])/1000.
+        if( (-1.0 * dT/dz > gamma_m[i] or z[i]/1000. < 0.) and z[i]/1000. < 1000. ):
+            if(conv_log==1):
+                conv[i]=1.
+            T[i] = T[i-1] - gamma_m[i] * dz
 
 # write output file containing all atmospheric variables, with timestamped title, for later analysis
 def writeoutputfile_masters():
@@ -280,6 +290,11 @@ def writeoutputfile_masters():
                 for i in range(nzoncols):
                     f.write(str(x[i,j,k]))
                     f.write('\n')
+                    
+    for x in vars_master_lat:
+        for i in range(nlatcols):
+            f.write(str(x[i]))
+            f.write('\n')
 
 # use array of previously collated MISR data to interpolate from to get cloud fractions for a given height
 # also assign cld_tau based on if statements within this function (NOT from MISR data)
@@ -391,19 +406,46 @@ def read_misr_3():
 
     f1 = interpolate.interp2d(x, y, z1, kind='linear')
     xx,yy=np.meshgrid(latgrid,altz/1000.)
-    zz1=f1(latgrid,altz/1000.)/nlayers
+    zz1=f1(latgrid,altz/1000.)
+
+    z2=cods
+    f2 = interpolate.interp2d(x, y, z2, kind='linear')
+    xx,yy=np.meshgrid(latgrid,altz/1000.)
+    zz2=f2(latgrid,altz/1000.)
+
+    return zz1[1:,:].T, altz, zz2[1:,:].T
+
+def read_misr_4():
+    interpdir='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/MISR Data/'
+    misr_cf_latalt_max=np.load(interpdir+'fracs_latalt.npy')
+    cfs=misr_cf_latalt_max
+    misr_cod_latalt_max=np.load(interpdir+'od_wghtd_latalt.npy')
+    cods=misr_cod_latalt_max
+    misr_alts=np.load(interpdir+'alts.npy')
+    misr_lats=np.load(interpdir+'lats.npy')
+    x=misr_lats[1:,0]
+    y=misr_alts[:,0]
+    
+    z1=cfs
+
+    f1 = interpolate.interp2d(x, y, z1, kind='linear')
+    xx,yy=np.meshgrid(latgrid,altz/1000.)
+    zz1=f1(latgrid,altz/1000.)
 
     z2=cods
     f2 = interpolate.interp2d(x, y, z2, kind='linear')
     xx,yy=np.meshgrid(latgrid,altz/1000.)
     zz2=f2(latgrid,altz/1000.)
     
-#   for i_y in range(len(y)):
-#       if(y[i_y] > 15):
-#           zz2[i_y,:]=1e-3
-
-    return zz1[1:,:].T, altz, zz2[1:,:].T
-
+    for i_lat in range(nlatcols):    
+        h_eff=np.sum(zz1[:,i_lat]*altz)
+        cld_lay_v2[i_lat] = np.argmin(np.abs(altz-h_eff))
+        cf_mro[i_lat] = 0.
+        for i in range(nlayers):
+            cf_mro[i_lat] = cf_mro[i_lat] + zz1[i,i_lat] - (cf_mro[i_lat] * zz1[i,i_lat])
+        od_eff[i_lat]=np.sum(zz1[:,i_lat]*zz2[:,i_lat])
+    
+    return cld_lay_v2[i_lat], cf_mro[i_lat], od_eff[i_lat]
 
 #  use array of previously collated ERA-Interim data to interpolate from to get h2o and o3 mixing ratios and surface albedos
 def read_erai():
@@ -421,7 +463,7 @@ def read_erai():
             (xxnewr,yynewr) = (xxnew.ravel(),yynew.ravel())
             znew = f((xxnewr,yynewr),method='linear')
             znew=znew.reshape(nlayers,nlatcols)
-            znew = znew[:,::-1]
+            # znew = znew[:,::-1]
             xnew = xnew[::-1]
             ynew = ynew[::-1]
         elif(disttypelev[shortname]=='avg'):
@@ -473,7 +515,7 @@ def read_erai():
     loop = 1
     q=interpolate_createprrtminput_lev('q',q_latp_max,q_ps,q_lats)
     r=interpolate_createprrtminput_lev('r',r_latp_max,r_ps,r_lats)
-    o3=interpolate_createprrtminput_lev('o3',o3_latp_max,o3_ps,o3_lats)
+    o3=interpolate_createprrtminput_lev('o3',o3_latp_max,o3_ps,o3_lats)*28.964/48.
     fal=interpolate_createprrtminput_sfc('fal',fal_lat_max,fal_lats)
     return q, o3, fal,r
 
@@ -489,7 +531,7 @@ def createlatdistbn(filename):
     # lat = data[:,0]
     # var = data[:,1]    
     f = interpolate.interp1d(lat,var)
-    templats = np.linspace(-90,90,30)
+    templats = np.linspace(-90,90,60)
     varinterp = np.zeros(len(latgrid))
     cossums=np.zeros(len(latgrid))
     for j in range(len(latgridbounds)-1):
@@ -503,20 +545,33 @@ def createlatdistbn(filename):
 #################functions###########################################################
 
 # set overall dimensions for model
-nlayers=120
+nlayers=60
 nzoncols=2
-nlatcols=9
+nlatcols=1
 
-# latgridbounds=np.linspace(0.,90.,nlatcols+1)
-xgridbounds=np.linspace(-1.,1.,nlatcols+1)
-latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
-# latgridbounds=[-90,-66.5,-23.5,23s.5,66.5,90] # 5 box poles, subtropics, tropics
+# latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
+
+latgridbounds=np.linspace(60,90.,nlatcols+1)
+xgridbounds=np.sin(np.deg2rad(latgridbounds))
+
+# xgridbounds=np.linspace(-0.,1.,nlatcols+1)
+# latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
+
 latgrid=np.zeros(nlatcols)
 for i in range(nlatcols):
     latgrid[i]=(latgridbounds[i]+latgridbounds[i+1])/2.
 
+
+latweights_area=np.zeros(nlatcols)
+# latweights=np.cos(np.deg2rad(latgrid))
+
+for i_xg in range(len(xgridbounds)-1):
+    latweights_area[i_xg]=xgridbounds[i_xg+1]-xgridbounds[i_xg]
+
+latweights_area/=np.mean(latweights_area)
+
 if(nlatcols==1):
-    latgrid=np.array([65.])
+    latgrid=np.array([80.])
     latgridbounds=[latgrid[0]-5.,latgrid[0]+5.]
 
 nmol=7
@@ -543,9 +598,9 @@ ur_max=3.0
 eqb_maxhtr=1e-4
 # eqb_maxdfnet=1e-4
 
-eqb_maxdfnet=0.1
-eqb_col_budgs=1.0
-timesteps=1000
+eqb_maxdfnet=0.1*(60./nlayers)
+eqb_col_budgs=1.0e12
+timesteps=2000
 
 maxdfnet_tot=1.0
 
@@ -555,8 +610,8 @@ toa_fnet_eqb=1.0e12
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/baselines/nl=60,ncol=5,v5'
-lapse_source=1 # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param
+prev_output_file='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/baselines/nl=590,ncol=5 [NH only]'
+lapse_sources=[4] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 
 adv_locs=[0] # 0: heating everywhere, 1: heating only in tropopause
 nbs=[2]
@@ -571,34 +626,30 @@ zenlats=np.zeros(nlatcols)
 insollats=np.zeros(nlatcols)
 solar_constant=1368.
 
-lapse_master=np.zeros((nzoncols,nlatcols))
-if(lapse_source==0):
-    lapse_master=np.ones((nzoncols,nlatcols)) * 5.7
-elif(lapse_source==1):
-    for i_zon in range(nzoncols):
-        lapse_master[i_zon,:]=np.array(createlatdistbn('Doug Mason Lapse Rate vs Latitude'))
-    lapse_master*=-1.
+
 
 
 
 # lapseloops=np.arange(4,11)
 lapseloops=[6]
 
-c_zonals=[4.] #zonal transport coefficient
-c_merids=[1.] #meridional transport coefficient
+c_zonals=[0.] #zonal transport coefficient
+c_merids=[0.] #meridional transport coefficient
 
 
 extra_forcings=[0.]
 fixed_sws=np.array([340.])
 tbounds=np.array([300.])
 wklfacs=[1.0]
-wklfac_co2s=[4.]
+wklfac_co2s=[1.]
 
 pertzons=[0]
 pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
 perts=[1.0]
+
+tbound_adds=[0.]
 
 # pertzons=[0]
 # pertlats=[0,1,2,3,4]
@@ -610,19 +661,19 @@ perts=[1.0]
 ######################################################################################################################################################
 
 i_loops=0
-totloops=np.float(len(pertzons)*len(pertlats)*len(pertmols)*len(pertlays)*len(perts)*len(c_merids)*len(c_zonals)*len(adv_locs)*len(nbs)*len(lapseloops))
+totloops=np.float(len(pertzons)*len(pertlats)*len(pertmols)*len(pertlays)*len(perts)*len(c_merids)*len(c_zonals)*len(adv_locs)*len(nbs)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources) )
 print(totloops, 'totloops')
 # loop over a parameter range: fixed_sw, tbound, wklfac
 
-for lapseloop in lapseloops:
-    for adv_loc in adv_locs:
-        for nb in nbs:
-            for wklfac_co2 in wklfac_co2s:
-                for c_zonal in c_zonals:
-                    for c_merid in c_merids:
-                        for extra_forcing in extra_forcings:
-                            for fixed_sw in fixed_sws:
-                                for i_tbound in range(len(tbounds)):        
+for tbound_add in tbound_adds:
+    for lapse_source in lapse_sources:
+        for adv_loc in adv_locs:
+            for nb in nbs:
+                for wklfac_co2 in wklfac_co2s:
+                    for c_zonal in c_zonals:
+                        for c_merid in c_merids:
+                            for extra_forcing in extra_forcings:
+                                for fixed_sw in fixed_sws:
                                     for wklfac in wklfacs:
                                         for pert in perts:
                                             for pertmol in pertmols:
@@ -634,6 +685,16 @@ for lapseloop in lapseloops:
     
     
                 #########################################################################################################################################################
+              
+                                                                
+               
+                                                            lapse_master=np.ones((nzoncols,nlatcols))*5.7
+                                                            if(lapse_source==0):
+                                                                lapse_master=np.ones((nzoncols,nlatcols)) * 6.5
+                                                            elif(lapse_source==1):
+                                                                for i_zon in range(nzoncols):
+                                                                    lapse_master[i_zon,:]=np.array(createlatdistbn('Doug Mason Lapse Rate vs Latitude'))
+                                                                lapse_master*=-1.
                
                 
                                                             # calculate insolation at a given latitude, day, and hour
@@ -681,7 +742,15 @@ for lapseloop in lapseloops:
                                                             # tbound_inits=220. + np.cos(np.deg2rad(latgrid))*80.
                                                             tbound_inits=220. + np.cos(np.deg2rad(latgrid))*80.
                                                             # undrelax_lats= (2.0 - np.cos(np.deg2rad(latgrid)))*2.
-                                                            undrelax_lats=np.ones(nlatcols)*4.
+                                                            # data=np.genfromtxt('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/Latitudinal Distributions/Doug Mason Temperature vs Latitude NH.txt',delimiter=',')
+                                                            # data=np.genfromtxt('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/Latitudinal Distributions/Doug Mason Temperature vs Latitude.txt',delimiter=',')
+                                                            data=np.genfromtxt('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/Latitudinal Distributions/HV19 inferred tbound.txt',delimiter=',')
+                                                            lat_obs=data[:,0]
+                                                            tg_obs=data[:,1]
+                                                            f=interp1d(lat_obs,tg_obs)
+                                                            tbound_inits=f(latgrid)
+                                                            undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*4. #for nl=60
+                                                            # undrelax_lats=np.ones(nlatcols)*0.5 #for nl=590
                                                             iemiss=2 #surface emissivity. Keep this fixed for now.
                                                             iemis=2
                                                             ireflect=0 #for Lambert reflection
@@ -842,7 +911,10 @@ for lapseloop in lapseloops:
                                                             
                                                             rad_eqb=np.zeros(nlatcols)
                                                             colbudg_eqb=np.zeros(nlatcols)
-                                                            lapse_eqb=np.zeros(nlatcols)
+                                                            if(input_source != 2):
+                                                                lapse_eqb=np.ones(nlatcols)
+                                                            else:
+                                                                lapse_eqb=np.zeros(nlatcols)
     
                                                             # initialise arrays
                                                             tz_master=np.zeros((nlayers+1,nzoncols,nlatcols))
@@ -932,6 +1004,10 @@ for lapseloop in lapseloops:
                                                             maxdT=np.ones(nlatcols)
                                                             
                                                             dztrop=np.zeros(nlatcols)
+                                                            
+                                                            cld_lay_v2=np.zeros(nlatcols)
+                                                            cf_mro=np.zeros(nlatcols)
+                                                            od_eff=np.zeros(nlatcols)
     
                                                             ctest=' '
                                                             
@@ -1010,7 +1086,8 @@ for lapseloop in lapseloops:
                                                                 surf_lowlev_coupled=float   (   f.readline().rstrip('\n')   )
                                                                 lay_intp=float  (   f.readline().rstrip('\n')   )
                                                                 lw_on=int   (   f.readline().rstrip('\n')   )
-                                                                sw_on=int   (   f.readline().rstrip('\n')   )
+                                                                # sw_on=int   (   f.readline().rstrip('\n')   )
+                                                                f.readline()
                                                                 eqb_maxdfnet=float  (   f.readline().rstrip('\n')   )
                                                                 toa_fnet_eqb=float  (   f.readline().rstrip('\n')   )
                                                                 nlatcols=int    (   f.readline().rstrip('\n')   )
@@ -1095,6 +1172,7 @@ for lapseloop in lapseloops:
                                                                 vars_master_lay_zon_nmol_lat=[wkl_master]
                                                                 vars_master_zon_lat=[inflags_master,iceflags_master,liqflags_master,tbound_master,toa_fnet_master,zonal_transps_master,merid_transps_master,cti_master,lapse_master]
                                                                 vars_master_zon_lat_cld=[cld_lays_master,cld_fracs_master,tauclds_master,ssaclds_master]
+                                                                vars_master_lat=[latgrid]
                                                                 
                                                                 dztrop=np.zeros(nlatcols)
     
@@ -1136,6 +1214,12 @@ for lapseloop in lapseloops:
                                                                         for j in range(nlatcols):
                                                                             for i in range(nzoncols):
                                                                                 x[i,j,k]=f.readline()
+                                                                                
+                                                                for x in vars_master_lat:
+                                                                    for i in range(nlatcols):
+                                                                        x[i]=f.readline()
+                                                                        
+                                                                tbound_master+=tbound_add
     
                                                             elif(input_source==0):
     
@@ -1890,7 +1974,7 @@ for lapseloop in lapseloops:
                                                                 elif(master_input==3): # RCEMIP hydrostatics
                                                                     # tbound=295.
                                                                     # tbound=280.
-                                                                    tbound=tbounds[i_tbound]
+                                                                    # tbound=tbounds[i_tbound]
                                                                     g1=3.6478
                                                                     g2=0.83209
                                                                     g3=11.3515
@@ -2059,6 +2143,7 @@ for lapseloop in lapseloops:
                                                                         tz=np.clip(tz,200,tmax)
     
                                                                     if(input_source==0):
+                                                                        
                                                                         wbrodl = mperlayr_air * 1.0e-4
                                                                         wkl[1,:]=q[:,i_lat]
                                                                         wkl[2,:]=400e-6*wklfac_co2
@@ -2074,9 +2159,10 @@ for lapseloop in lapseloops:
                                                                         sza=szas[i_lat]
                                                                         semiss=np.ones(29)*(1.0-fal[i_lat])
                                                                         lapse=lapse_master[0,i_lat]
+                                                                        # lapse=6.5
                                                                         # lapse=lapseloop
-                                                                        
-                                                                    # lapse_master[i_lat]=lapse
+                                                                    lapse_master[0,i_lat]=lapse
+                                                                    lapse_master[1,i_lat]=lapse
     
     
                                                                     for i_zon in range(nzoncols):
@@ -2092,7 +2178,7 @@ for lapseloop in lapseloops:
                                                                             pavel=pavel_master[:,i_zon,i_lat]
                                                                             altz=altz_master[:,i_zon,i_lat]
                                                                             altavel=altavel_master[:,i_zon,i_lat]
-                                                                            # fnet=fnet_master[:,i_zon]
+                                                                            fnet=fnet_master[:,i_zon]
                                                                             wkl[1,:]=wkl_master[:,i_zon,0,i_lat]
                                                                             wkl[2,:]=wkl_master[:,i_zon,1,i_lat]
                                                                             wkl[3,:]=wkl_master[:,i_zon,2,i_lat]
@@ -2119,6 +2205,9 @@ for lapseloop in lapseloops:
                                                                             totdflux_lw=totdflux_lw_master[:,i_zon,i_lat]
                                                                             totuflux_sw=totuflux_sw_master[:,i_zon,i_lat]
                                                                             totdflux_sw=totdflux_sw_master[:,i_zon,i_lat]
+                                                                            fnet_lw=fnet_lw_master[:,i_zon,i_lat]
+                                                                            fnet_sw=fnet_sw_master[:,i_zon,i_lat]
+                                                                            
     
     
                                                                             # zonal_transps[0]=(tbound_master[1]-tbound_master[0])*5.
@@ -2128,30 +2217,38 @@ for lapseloop in lapseloops:
                                                                         phi=np.deg2rad(latgrid)
                                                                         phi_edges=np.deg2rad(latgridbounds)
                                                                         
+                                                                        if(lapse_source==1):
+                                                                            lapse_eqb[i_lat]=1
+                                                                        
                                                                         if(lapse_source==2):
                                                                         
-                                                                            if(abs(latgrid[i_lat])<60):
+                                                                            if(abs(latgrid[i_lat])<90):
                                                                                 
                                                                                 conv_on_lats[i_lat]=1
                                                                             
                                                                                 if(nlatcols>1):
                                                                                     f=interp1d(latgrid,tbound_master[0,:],bounds_error=False,fill_value="extrapolate")
                                                                                     tbound_edges=f(latgridbounds)                                                                    
-                                                                                    dmid[i_lat]=H * np.log( 1. - ( np.tan( phi[i_lat] ) * (tbound_edges[i_lat+1]-tbound_edges[i_lat]) ) / ( (phi_edges[i_lat+1] - phi_edges[i_lat]) * H * (9.8-lapse)) )
+                                                                                    dmid[i_lat]=H * np.log( 1. - ( np.tan( phi[i_lat] ) * (tbound_edges[i_lat+1]-tbound_edges[i_lat]) ) / ( (phi_edges[i_lat+1] - phi_edges[i_lat]) * H * (9.8-lapse)) ) * 1.5
             
-                                                                                dtrop[i_lat]=0.8*2.26e6*(6.1094*exp(17.625*(np.mean(tbound_master[:,i_lat])-273.15)/(np.mean(tbound_master[:,i_lat])-273.15+243.04)))/pz[0]*0.622/(1e3*(9.8-lapse) )
+                                                                                dtrop[i_lat]=0.8*2.26e6*(6.1094*exp(17.625*(np.mean(tbound_master[:,i_lat])-273.15)/(np.mean(tbound_master[:,i_lat])-273.15+243.04)))/pz[0]*0.622/(1e3*(9.8-lapse) ) * 1.5
                                                                                 # ztrop_h82[i_lat]=dtrop[i_lat]
                                                                                 ztrop_h82[i_lat]=np.max([dmid[i_lat],dtrop[i_lat]])
                                                                                 ztrop_h82_ind[i_lat]=np.argmin(np.abs(altz/1000.-ztrop_h82[i_lat]))
                                                                                 
                                                                                 lapse=lapse_master[0,i_lat]
+                                                                                lapse=np.clip(lapse,0.,12.)
                                                                                 
                                                                                 lapse_eqb[i_lat]=0
                                                                                 
                                                                                 if(rad_eqb[i_lat]==1):
+                                                                                # if(rad_eqb[i_lat]!=2):
                                                                                 # if(ts%10==0):
                                                                                     
-                                                                                    ztrop[i_lat]=np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000.
+                                                                                    if(abs(latgrid[i_lat])<60):
+                                                                                        ztrop[i_lat]=np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000.
+                                                                                    else:
+                                                                                        ztrop[i_lat]=np.mean(altz_master[np.int(np.mean(np.argmin(tz_master[:,0,i_lat]))),:,i_lat])/1000.
                                                                                     
                                                                                     if( abs(ztrop[i_lat]-ztrop_h82[i_lat]) < 1.0):
                                                                                         lapse_eqb[i_lat]=1
@@ -2163,7 +2260,7 @@ for lapseloop in lapseloops:
                                                                                         lapse+=lapse_add[i_lat]
                                                                                         if(np.isnan(lapse)):
                                                                                             lapse=6.5
-                                                                                        lapse=np.clip(lapse,2.,12.)
+                                                                                        lapse=np.clip(lapse,0.,12.)
                                                                                         lapse_master[0,i_lat]=lapse
                                                                                         convection(tavel,altavel,conv_log=1)
                                                                                         convection(tz,altz,conv_log=1)
@@ -2175,18 +2272,92 @@ for lapseloop in lapseloops:
             
                                                                                 lapse_master[0,i_lat]=lapse
                                                                                 
+                                                                        elif(lapse_source==3):
+                                                                            lapse=lapse_master[0,i_lat]
+                                                                            midtrop_ind = np.max([np.int( np.mean( cti_master[:,i_lat] )/2 ),nlayers/10.*6.]).astype('int')
+                                                                            f=interp1d(latgrid,tbound_master[0,:],bounds_error=False,fill_value="extrapolate")
+                                                                            tbound_edges=f(latgridbounds)
+                                                                            # gamma_c = 9.8 + np.tan( np.deg2rad( latgrid[i_lat] ) ) / (altz[midtrop_ind]/1000.) * ( tbound_edges[i_lat+1]-tbound_edges[i_lat] ) / ( np.deg2rad(latgridbounds[i_lat+1] - latgridbounds[i_lat]) )
+                                                                            if(i_lat<nlatcols-1):
+                                                                                gamma_c = 9.8 + np.tan( np.deg2rad( latgrid[i_lat] ) ) / (altz[midtrop_ind]/1000.) * ( tz_master[midtrop_ind,0,i_lat+1] - tz_master[midtrop_ind,0,i_lat] ) / ( np.deg2rad(latgridbounds[i_lat+1] - latgridbounds[i_lat]) )
                                                                             else:
-                                                                                conv_on_lats[i_lat]=0
-                                                                                adv_on[i_lat]=1
+                                                                                gamma_c = 9.8 + np.tan( np.deg2rad( latgrid[i_lat] ) ) / (altz[midtrop_ind]/1000.) * ( tz_master[midtrop_ind,0,i_lat] - tz_master[midtrop_ind,0,i_lat-1] ) / ( np.deg2rad(latgridbounds[i_lat] - latgridbounds[i_lat-1]) )
+                                                                            es=np.zeros(nlayers)
+                                                                            gamma_m=np.zeros(nlayers+1)
+                                                                            L_h2o=np.zeros(nlayers)
+                                                                            for i in range(nlayers-1):
+                                                                                L_h2o[i]=2510. - 2.38 * (tz[i] - 273.)
+                                                                                es[i] = 6.11 * np.exp( ( 0.622 * L_h2o[i] / 0.287 ) * ( 1. / 273. - 1./tz[i] ) )
+                                                                                gamma_m[i]=9.8 * ( 1. + 0.622 * L_h2o[i] * es[i] / ( pz[i] * 0.287 * tz[i] ) ) / ( 1. + ( (0.622 * L_h2o[i]  ) / ( 1.005 * pz[i] ) ) * ( (0.622 * L_h2o[i] * es[i]  ) / ( 0.287 * tz[i]**2 ) ) )
+                                                                                
+                                                                            trop_mean_gamma_m = np.mean(gamma_m[:np.int(nlayers/2)])
+                                                                                
+                                                                            if(ts%20==0):
+                                                                                lapse+=(gamma_c-lapse)*0.005
+                                                                            lapse=np.clip(lapse,1,12)
+                                                                            lapse_master[0,i_lat]=lapse
+                                                                            if( abs(lapse-gamma_c) < 0.1 ):
                                                                                 lapse_eqb[i_lat]=1
-                                                                                lapse_master[0,i_lat]=lapse
+                                                                            else:
+                                                                                lapse_eqb[i_lat]=0
+                                                                            # lapse_eqb[i_lat]=1
+                                                                            if(ts%50==0):
+                                                                                print('{: 6.2f} {: 6.2f} {: 6.2f} {: 6.2f} {: 6.2f}'.format(i_lat,lapse, midtrop_ind,gamma_c, trop_mean_gamma_m))
+                                                                                
+                                                                            if(ts>10):
+                                                                                if(gamma_c < trop_mean_gamma_m):
+                                                                                    convection(tavel,altavel,conv_log=1)
+                                                                                    convection(tz,altz,conv_log=1)
+                                                                                else:
+                                                                                    lapse=np.clip(trop_mean_gamma_m,1,12)
+                                                                                    convection_moist(tavel,altavel,conv_log=1)
+                                                                                    convection_moist(tz,altz,conv_log=1)
+                                                                                    lapse_master[0,i_lat]=lapse
+                                                                                    lapse_eqb[i_lat]=1
+                                                                                    
+                                                                        elif(lapse_source==4):
+                                                                            adv_on=np.ones(nlatcols)
+                                                                            lapse_eqb=np.ones(nlatcols)
+                                                                            conv_on_lats=np.zeros(nlatcols)
+                                                                            lapse=9.8
+                                                                            convection(tavel,altavel,conv_log=1)
+                                                                            convection(tz,altz,conv_log=1)
+                                                                            lapse_master[0,i_lat]=lapse
+                                                                            
+                                                                            
+                                                                                
+                                                                            # else:
+                                                                            #     conv_on_lats[i_lat]=0
+                                                                            #     adv_on[i_lat]=1
+                                                                            #     lapse_eqb[i_lat]=1
+                                                                            #     lapse_master[0,i_lat]=lapse
     
                                                                         # cldweights,altbins,tauclds=read_misr()
                                                                         # read_misr_2()
                                                                         # cld_fracs_master[i_zon,i_lat,:],altbins,tauclds_master[0,i_lat,:]=read_misr()
     #                                                                   cld_fracs_master[i_zon,:,:],altbins,tauclds_master[0,:,:]=read_misr_2()
     #                                                                   if(ts==1):
-                                                                        cld_fracs_master[i_zon,:,:],altbins,tauclds_master[0,:,:]=read_misr_3()
+                                                                        # cld_fracs_master[i_zon,:,:],altbins,tauclds_master[0,:,:]=read_misr_3()
+                                                                        # cld_lay_v2=0
+                                                                        # cf_mro=0
+                                                                        # od_eff=0
+                                                                        cld_lay_v2[i_lat], cf_mro[i_lat], od_eff[i_lat] = read_misr_4()
+                                                                        
+                                                                        cld_fracs_master[i_zon,:,np.int(cld_lay_v2[i_lat]-1)]=cf_mro[i_lat]
+                                                                        tauclds_master[i_zon,:,np.int(cld_lay_v2[i_lat]-1)]=od_eff[i_lat]
+                                                                        ssaclds_master=np.zeros((nzoncols,nlatcols,nclouds))
+                                                                        ssaclds_master[i_zon,:,np.int(cld_lay_v2[i_lat]-1)]=0.5
+                                                                        
+                                                                        # cld_fracs_master[i_zon,:,np.int(nlayers/1.5)]=0.68
+                                                                        # tauclds_master[i_zon,:,np.int(nlayers/1.5)]=6.0
+                                                                        # ssaclds_master=np.zeros((nzoncols,nlatcols,nclouds))
+                                                                        # ssaclds_master[i_zon,:,np.int(nlayers/1.5)]=0.5
+                                                                        
+                                                                        # for i in range(nlayers):
+                                                                        #     if(i%10!=0):
+                                                                        #         cld_fracs_master[i_zon,:,i]=0.
+                                                                        #         tauclds_master[0,:,i]=0.
+                                                                                
                                                                         if(i_lat==pertlat):
                                                                             for i_lay in range(pertlay,pertlay+6):
                                                                                 tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert
@@ -2217,6 +2388,7 @@ for lapseloop in lapseloops:
                                                                         vars_master_lay_zon_nmol_lat=[wkl_master]
                                                                         vars_master_zon_lat=[inflags_master,iceflags_master,liqflags_master,tbound_master,toa_fnet_master,zonal_transps_master,merid_transps_master,cti_master,lapse_master]
                                                                         vars_master_zon_lat_cld=[cld_lays_master,cld_fracs_master,tauclds_master,ssaclds_master]
+                                                                        vars_master_lat=[latgrid]
     
     
                                                                         if(ts>0):
@@ -2251,7 +2423,8 @@ for lapseloop in lapseloops:
                                                                                         # if(input_source==0):
                                                                                         rel_hum[i]=r[i,i_lat]/100.
                                                                                         vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
-                                                                                        wkl[1,i] = vol_mixh2o[i]
+                                                                                        # wkl[1,i] = vol_mixh2o[i]
+                                                                                        wkl[1,i]=q[i,i_lat]
                                                                                     if(i_zon==0):
                                                                                         # wkl[1,:]=wkl[1,:]*2.
                                                                                         wkl[1,:]=wkl[1,:]*1.
@@ -2272,11 +2445,11 @@ for lapseloop in lapseloops:
     
                                                                         if((input_source==0 and ts>150) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
-                                                                            dtbound=column_budgets_master[i_zon,i_lat]*0.04/2.
+                                                                            dtbound=column_budgets_master[i_zon,i_lat]*0.01
                                                                             if(input_source==2):
                                                                                 dtbound*=2.
                                                                             dtbound=np.clip(dtbound,-dmax,dmax)
-                                                                            tbound+=dtbound
+                                                                            tbound+=dtbound*0.
                                                                         tbound=np.clip(tbound,tmin,tmax)
     
                                                                         # if(input_source==0 and master_input==5)
@@ -2304,7 +2477,7 @@ for lapseloop in lapseloops:
     
                                                                         # if((ts==2 or (abs(maxdfnet_tot) < eqb_maxdfnet*10. and stepssinceswcalled>500)) and sw_on==1):
                                                                         # if((sw_on==1 and ts%300==1 and input_source==0) or ((input_source==1 or input_source==2) and (ts==3 and sw_on==1))):
-                                                                        if(rad_eqb[i_lat]==1 and sw_called<nlatcols*2  and sw_on==1 or (sw_on==1 and ts==5)):
+                                                                        if(rad_eqb[i_lat]==1 and sw_called<nlatcols*2  and sw_on==1 or (sw_on==1 and (ts==5 or ts==300) )):
                                                                             sw_called+=1
                                                                         #   if(maxhtr<eqb_maxhtr):
                                                                             writeformattedinputfile_sw()
@@ -2336,7 +2509,8 @@ for lapseloop in lapseloops:
     
                                                                         # writeoutputfile_masters()
     
-                                                                        toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
+                                                                        # toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
+                                                                        toa_fnet=fnet_sw[nlayers]-fnet_lw[nlayers]
                                                                         # print i_zon, i_lat, toa_fnet, totdflux[nlayers], totuflux[nlayers], sza, semiss
                                                                         # print (totdflux[nlayers],totuflux[nlayers],toa_fnet,totdflux_lw[nlayers],totdflux_sw[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers])
                                                                         # toa_fnet=totdflux[nlayers]-totuflux[nlayers]+zonal_transps[i_zon] #net total downward flux at TOA  NJE now accounting for zonal transport
@@ -2381,7 +2555,7 @@ for lapseloop in lapseloops:
     
                                                                             
     
-                                                                            if(conv_on_lats[i_lat]==1 and abs(latgrid[i_lat])<60. ):
+                                                                            if(conv_on_lats[i_lat]==1 and (abs(latgrid[i_lat])<60. or lapse_source!=2) ):
                                                                                 convection(tavel,altavel,1)
                                                                                 convection(tz,altz,1)
     
@@ -2437,14 +2611,19 @@ for lapseloop in lapseloops:
                                                                         # column_budgets[i_zon]=340.+fnet[nlayers]+zonal_transps[i_zon]
     
                                                                         if(nlatcols>1):
+                                                                            # mti=np.int(nlayers/2) # merid transp index
+                                                                            mti=1
                                                                             if(i_lat>0 and i_lat<nlatcols-1):
-                                                                                merid_transps_master[i_zon,i_lat]=c_merid*(tz_master[0,i_zon,i_lat+1]-tz_master[0,i_zon,i_lat]) + c_merid*(tz_master[0,i_zon,i_lat-1]-tz_master[0,i_zon,i_lat])
+                                                                                # merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[0,i_zon,i_lat+1]-tz_master[0,i_zon,i_lat]) + c_merid*(tz_master[0,i_zon,i_lat-1]-tz_master[0,i_zon,i_lat]))*latweights_area[i_lat]
+                                                                                merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat+1]-tz_master[mti,i_zon,i_lat]) + c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
                                                                             elif(i_lat==0):
-                                                                                merid_transps_master[i_zon,i_lat]=c_merid*(tz_master[0,i_zon,i_lat+1]-tz_master[0,i_zon,i_lat])
+                                                                                # merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[0,i_zon,i_lat+1]-tz_master[0,i_zon,i_lat]))*latweights_area[i_lat]
+                                                                                merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat+1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
                                                                             elif(i_lat==nlatcols-1):
-                                                                                merid_transps_master[i_zon,i_lat]=c_merid*(tz_master[0,i_zon,i_lat-1]-tz_master[0,i_zon,i_lat])
+                                                                                # merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[0,i_zon,i_lat-1]-tz_master[0,i_zon,i_lat]))*latweights_area[i_lat]
+                                                                                merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
     
-    
+                                                                        
                                                                         column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+zonal_transps_master[i_zon,i_lat]+extra_forcing  #nje forcing
     
                                                                         # if(i_zon==0):
@@ -2509,7 +2688,8 @@ for lapseloop in lapseloops:
                                                                             dpz_master[i,i_zon,i_lat]=pz_master[i+1,i_zon,i_lat]-pz_master[i,i_zon,i_lat]
     
     
-                                                                mtransp_dummy_tot=-50.
+                                                                # mtransp_dummy_tot=extra_forcing
+                                                                
     
                                                                 Q_adv=np.zeros((nlayers,nzoncols,nlatcols))
     
@@ -2518,7 +2698,8 @@ for lapseloop in lapseloops:
     
                                                                 for i_lat in range(nlatcols):
                                                                     for i_zon in range(nzoncols):
-                                                                        mtransp_dummy_tot=merid_transps_master[i_zon,i_lat]
+                                                                        mtransp_dummy_tot=toa_fnet_master[i_zon,i_lat]*-1.*0.65
+                                                                        # mtransp_dummy_tot=merid_transps_master[i_zon,i_lat]
                                                                         if(adv_loc==0):
                                                                             for i in range(nlayers):
                                                                                 Q_adv[i,i_zon,i_lat] = (nb * mtransp_dummy_tot * ((pz[i]/pz[0]) **(nb-1.) ))/nlayers
@@ -2526,16 +2707,19 @@ for lapseloop in lapseloops:
                                                                             for i in range(0,np.int(cti_master[i_zon,i_lat])):
                                                                                 Q_adv[i,i_zon,i_lat] = (nb * mtransp_dummy_tot * ((pz[i]/(pz[0]-pz[np.int(cti_master[i_zon,i_lat]) ] ) ) **(nb-1.) ))/nlayers
     
-                                                                        if(ts>1 and np.sum(Q_adv) != 0):
-                                                                            Q_adv = Q_adv * ( mtransp_dummy_tot / np.sum(Q_adv) )
+                                                                        # if(ts>1 and np.sum(Q_adv) != 0):
+                                                                        #     Q_adv = Q_adv * ( mtransp_dummy_tot / np.sum(Q_adv) )
     
-                                                                        if(adv_on[i_lat]==1):
-                                                                            for i in range(nlayers):
-                                                                                dfnet_master_adv[i,i_zon,i_lat]=Q_adv[i,i_zon,i_lat]
+                                                                        # if(adv_on[i_lat]==1):
+                                                                        #     for i in range(nlayers):
+                                                                        #         dfnet_master_adv[i,i_zon,i_lat]=Q_adv[i,i_zon,i_lat]
+                                                                                
+                                                                dfnet_master_adv=Q_adv                                                                            
     
                                                                 # dfnet_master_adv[i,i_zon,i_lat]=n_adv * b_adv * mtransp_dummy_tot*(pz[i]-pz[i+1])/(pz[0])
     
                                                                 dfnet_master=dfnet_master_adv+dfnet_master_rad
+
                                                                 # print('rad', i_zon, i_lat, dfnet_master_rad[:,i_zon,i_lat])
                                                                 # print( 'adv', i_zon, i_lat, dfnet_master_adv[:,i_zon,i_lat])
                                                                 # print('rad + adv',i_zon, i_lat,  dfnet_master_rad[:,i_zon,i_lat] + dfnet_master_adv[:,i_zon,i_lat] )
@@ -2544,7 +2728,7 @@ for lapseloop in lapseloops:
                                                                     for i_lat in range(nlatcols):
                                                                         for i_zon in range(nzoncols):
                                                                             for i in range(nlayers):
-                                                                                cldweights=[0.5,0.5]
+                                                                                cldweights=[1.,0.]
     #                                                                           dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*2.*undrelax_lats[i_lat]*(60./nlayers)
                                                                                 dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]
                                                                                 dT=np.clip(dT,-maxdT[i_lat],maxdT[i_lat])
@@ -2562,9 +2746,15 @@ for lapseloop in lapseloops:
                                                                 maxdfnet_ind=0
                                                                 for i_lat in range(nlatcols):
                                                                     for i_zon in range(nzoncols):
-                                                                        for i in range(np.int(cti_master[i_zon,i_lat])+1,nlayers-1):
+                                                                        # for i in range(np.int(cti_master[i_zon,i_lat])+1,nlayers-1):
+                                                                        # radbott1=np.int(cti_master[i_zon,i_lat])+1
+                                                                        radbott1=nlayers-10
+                                                                        rad_bottom=np.min([radbott1,nlayers-1]) 
+                                                                        for i in range(rad_bottom,nlayers):
                                                                             if(abs(np.mean(dfnet_master[i,:,i_lat])) > abs(maxdfnet_lat[i_lat])):
-                                                                                maxdfnet_lat[i_lat]=abs(np.mean(dfnet_master[i,:,i_lat]))
+                                                                                # maxdfnet_lat[i_lat]=abs(np.mean(dfnet_master[i,:,i_lat]))
+                                                                                maxdfnet_lat[i_lat]=abs(dfnet_master[i,0,i_lat])
+                                                                                # maxdfnet_lat[i_lat]=abs(dfnet_master_rad[i,0,i_lat])
                                                                                 maxdfnet_ind=i
                                                                 
     
@@ -2634,15 +2824,16 @@ for lapseloop in lapseloops:
                                                                     show()
                                                                     for i_lat in range(nlatcols):
                                                                         if(i_lat<nlatcols-1):
-                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(totuflux_master[nlayers,:,i_lat],axis=0),np.mean(totdflux_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
                                                                         else:
-                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(totuflux_master[nlayers,:,i_lat],axis=0),np.mean(totdflux_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
                                                                             print('-------------------------------------------------------------------')
     
 
     
                                                                 # if(abs(maxdfnet_tot) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>100 and np.max(abs(column_budgets_master))<eqb_col_budgs):
-                                                                if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>100 or (input_source==2 and ts > 10)) and np.max(abs(column_budgets_master))<eqb_col_budgs and np.min(lapse_eqb)==1):
+                                                                if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>100 or (input_source==2 and ts > 200)) and np.max(abs(column_budgets_master))<eqb_col_budgs and np.min(lapse_eqb)==1):
+                                                                # if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>100 or (input_source==2 and ts > 10)) and np.max(abs(column_budgets_master))<eqb_col_budgs):
                                                                 # if(np.max(abs(column_budgets_master))<eqb_col_budgs): # NJE temp fix for perts, remember to reset!
                                                                     if(plotted!=1):
                                                                         plotrrtmoutput()
