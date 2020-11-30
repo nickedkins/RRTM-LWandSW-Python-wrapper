@@ -604,7 +604,7 @@ timesteps=2000
 
 maxdfnet_tot=1.0
 
-toa_fnet_eqb=1.0e12
+toa_fnet_eqb=1.0
 
 
 # master switches for the basic type of input
@@ -690,7 +690,7 @@ for tbound_add in tbound_adds:
                
                                                             lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             if(lapse_source==0):
-                                                                lapse_master=np.ones((nzoncols,nlatcols)) * 6.5
+                                                                lapse_master=np.ones((nzoncols,nlatcols)) * 5.7
                                                             elif(lapse_source==1):
                                                                 for i_zon in range(nzoncols):
                                                                     lapse_master[i_zon,:]=np.array(createlatdistbn('Doug Mason Lapse Rate vs Latitude'))
@@ -2362,15 +2362,15 @@ for tbound_add in tbound_adds:
                                                                         #     for i_lay in range(pertlay,pertlay+6):
                                                                         #         tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert
 
-                                                                        if(i_lat==pertlat):
-                                                                            es=np.zeros(nlayers+1)
-                                                                            L_h2o=np.zeros(nlayers+1)
-                                                                            pert=np.zeros(nlayers)
-                                                                            ws=np.zeros(nlayers+1)
-                                                                            for i_lay in range(pertlay,pertlay+6):
-                                                                                t1=tavel[i_lay]-273.15
-                                                                                pert[i_lay] = 6.1094 * np.exp( (17.625*(t1+1.)) / ( (t1+1.) + 243.04 ) ) / (6.1094 * np.exp( (17.625*t1) / ( t1 + 243.04 ) ) ) 
-                                                                                tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert[i_lay]
+                                                                        # if(i_lat==pertlat):
+                                                                        #     es=np.zeros(nlayers+1)
+                                                                        #     L_h2o=np.zeros(nlayers+1)
+                                                                        #     pert=np.zeros(nlayers)
+                                                                        #     ws=np.zeros(nlayers+1)
+                                                                        #     for i_lay in range(pertlay,pertlay+6):
+                                                                        #         t1=tavel[i_lay]-273.15
+                                                                        #         pert[i_lay] = 6.1094 * np.exp( (17.625*(t1+1.)) / ( (t1+1.) + 243.04 ) ) / (6.1094 * np.exp( (17.625*t1) / ( t1 + 243.04 ) ) ) 
+                                                                        #         tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert[i_lay]
                                                                                 
                                                                         for i_cld in range(nclouds):
                                                                             # cld_lays_master[i_zon,i_lat,i_cld]=np.argmin(abs(altz/1000.-altbins[i_cld]))
