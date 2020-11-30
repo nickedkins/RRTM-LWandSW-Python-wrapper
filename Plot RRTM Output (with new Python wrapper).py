@@ -149,7 +149,6 @@ def plotrrtmoutput_masters():
             elif(cti_type==3):
                 cti=np.int(cti_wmo[i_zon,i_lat])
             plt.plot(tz_master[cti,i_zon,i_lat], pz_master[ cti, i_zon, i_lat ],'o' )
-            plt.plot(tz_master[inv_ind,i_zon,i_lat],pz_master[inv_ind,i_zon,i_lat],'o')
             # plt.plot(tz_master[np.int(cti_td[i_zon,i_lat]),i_zon,i_lat], pz_master[np.int(cti_td[i_zon,i_lat]),i_zon,i_lat], '*' )
             # plt.plot(tz_master[cti,i_zon,i_lat], altz_master[ cti, i_zon, i_lat ],'o' )
             # plt.ylim(4000,12000)
@@ -701,11 +700,6 @@ for directory in directories:
                         cti_wmo[i_zon,i_lat]=i
                         break
                 # cti_wmo[i_zon,i_lat]=np.argmin(tz_master[:,i_zon,i_lat])
-                
-
-        pz_inds_dummy = np.argwhere(pz>800.)
-        inv_ind=np.argmax(tz_master[pz_inds_dummy,0,0])
-
 
 
         # latgridbounds=np.linspace(30,60.,nlatcols+1)
@@ -788,7 +782,7 @@ for directory in directories:
             plt.legend()
         if(plot_switch==0):
             plotrrtmoutput_masters()
-        # plt.plot(latgrid,lapsez_master[0,:],'-o')
+        # plt.plot(latgrid,lapse_master[0,:],'-o')
         # # plt.xlim(-60,60)
         # data=np.genfromtxt('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/Latitudinal Distributions/Doug Mason Lapse Rate vs Latitude.txt',delimiter=',')
         # plt.plot(data[:,0],data[:,1]*-1.)        
@@ -815,9 +809,6 @@ for directory in directories:
             # ptrop=np.diagonal(pz_master[cti_td,0,:])
             # ttrop=np.diagonal(tz_master[cti_td,0,:])
             tsurf=tz_master[0,0,:]
-            
-            
-                
             
             plt.subplot(222)
             if(fn=='SC79'):
