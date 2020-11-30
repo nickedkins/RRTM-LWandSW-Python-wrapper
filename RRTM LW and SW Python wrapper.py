@@ -50,7 +50,6 @@ def init_plotting():
 init_plotting()
 
 def logpplot(x,p,xlab,ylab,color='blue'):
-    # plt.semilogy(x,p,'-',c=color)
     plt.semilogy(x,p,'-',c=color,alpha=(float(ts)/timesteps)**1.0)
     plt.ylim(max(p),min(p))
     plt.xlabel(xlab)
@@ -75,7 +74,7 @@ def writeparamsarr(params,f):
             f.write(str(param[i]))
             f.write('\n')
 
-# write an input file to be read by rrtm.f (matching the format of the example input files)
+# write an input file to be read by the LW version of rrtm.f (matching the format of the example input files)
 def writeformattedinputfile_sw():
     f=open('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/SW/Input RRTM SW NJE Formatted','w+')
     f.write('INPUT_RRTM_SW NJE created\n')
@@ -107,6 +106,7 @@ def writeformattedinputfile_sw():
     f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
     f.close()
 
+# same as above but for SW, which has a slightly different format
 def writeformattedinputfile_lw():
     f=open('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/Input RRTM LW NJE Formatted','w+')
     f.write('INPUT_RRTM_SW NJE created\n')
@@ -127,7 +127,7 @@ def writeformattedinputfile_lw():
     f.write('%%%%%\n')
     f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
 
-# write formatted cloud fie for rrtm input
+# write formatted cloud file for rrtm input
 def writeformattedcloudfile():
     f=open('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/IN_CLD_RRTM NJE','w+')
     f.write('   {:2d}    {:1d}    {:1d}\n'.format(inflags_master[i_zon,i_lat].astype(int),iceflags_master[i_zon,i_lat].astype(int),liqflags_master[i_zon,i_lat].astype(int)))
@@ -145,6 +145,7 @@ def callrrtmlw():
     p = subprocess.Popen([loc])
     stdoutdata, stderrdata = p.communicate()
 
+# ditto for SW
 def callrrtmsw():
     loc = '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/SW/rrtmsw'
     os.chdir(project_dir+'/SW')
@@ -230,7 +231,8 @@ def convection(T,z,conv_log):
             if(conv_log==1):
                 conv[i]=1.
             T[i] = T[i-1] - lapse * dz
-            
+
+# same but for moist adiabatic lapse rate            
 def convection_moist(T,z,conv_log):
     T[0]=tbound
     for i in range(1,len(T)):
@@ -305,8 +307,7 @@ def read_misr():
     misr_cf_latalt_max = np.load(interpdir+'misr_cf_latalt.npy')
     misr_cf_latalt_max = np.nan_to_num(misr_cf_latalt_max)
     cfs = misr_cf_latalt_max
-    misr_alts = np.linspace(0,20,num=39)
-    # misr_alts = np.linspace(0,20,num=390)
+    misr_alts = np.linspace(0,20,num=39) # previously num=390
     misr_lats = np.linspace(-90,90,num=360)
     latbins = np.linspace(-90,90,num=nlatcols)
     # altbin_edges = np.linspace(0,10,num=nclouds+1)
@@ -318,11 +319,6 @@ def read_misr():
     od_low = 3.0
     od_mid = 3.0
     od_high = 0.3
-    extra_cld_tau = 0.3 
-    extra_cld_frac = 0.2
-    extra_cld_alt = 2.0
-    extra_cld_latcol = 2
-    extra_cld_cldcol = 2
     for i_lat in range(nlatcols):
         for i in range(len(altbins)):
             if (altbins[i] < 3.0):
@@ -360,6 +356,7 @@ def read_misr():
         clearfrac[col] = (1.0 - tempcloudfrac) / 2.0
     return binned_cf[i_lat,:],altbins,cld_taus
 
+# used 2D interpolation to get MISR cloud fraction for a given latitude and altitude
 def read_misr_2():
     interpdir = '/Users/nickedkins/Dropbox/Input Data for RCM Interpolation/'
     misr_cf_latalt_max = np.load(interpdir+'misr_cf_latalt.npy')
@@ -373,9 +370,6 @@ def read_misr_2():
     f = interpolate.interp2d(x, y, z, kind='linear')
     xx,yy=np.meshgrid(latgrid,altz/1000.)
     zz=f(latgrid,altz/1000.)
-    # od_low = 3.0
-    # od_mid = 3.0
-    # od_high = 0.3
     od_low = 1.5/50.
     od_mid = 1.5/50.
     od_high = 0.15/50.
@@ -393,6 +387,8 @@ def read_misr_2():
 
     return zz[1:,:].T, altz, cld_taus
 
+
+# use actual cloud optical depths from MISR (as well as fractions)
 def read_misr_3():
     interpdir='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/MISR Data/'
     misr_cf_latalt_max=np.load(interpdir+'fracs_latalt.npy')
@@ -417,6 +413,7 @@ def read_misr_3():
 
     return zz1[1:,:].T, altz, zz2[1:,:].T
 
+# same as misr_3 but calculate an 'effective cloud fraction' by multiplying MISR frac by MISR COD
 def read_misr_4():
     interpdir='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/MISR Data/'
     misr_cf_latalt_max=np.load(interpdir+'fracs_latalt.npy')
@@ -521,6 +518,7 @@ def read_erai():
     fal=interpolate_createprrtminput_sfc('fal',fal_lat_max,fal_lats)
     return q, o3, fal,r
 
+# read an input distribution of a variable vs latitude and interpolate to model lat grid
 def createlatdistbn(filename):
     fileloc = project_dir+'/Latitudinal Distributions/'+filename+'.txt'
     file = open(fileloc,'r')
@@ -547,15 +545,17 @@ def createlatdistbn(filename):
 #################functions###########################################################
 
 # set overall dimensions for model
-nlayers=60
-nzoncols=2
-nlatcols=1
+nlayers=60 # number of vertical layers
+nzoncols=2 # number of zonal columns (usually just 2: cloudy and clear)
+nlatcols=1 # number of latitude columns
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
+# create latgrid evenly spaced in latitude
 latgridbounds=np.linspace(60,90.,nlatcols+1)
 xgridbounds=np.sin(np.deg2rad(latgridbounds))
 
+# create latgrid evenly spaced in cos(lat)
 # xgridbounds=np.linspace(-0.,1.,nlatcols+1)
 # latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
 
@@ -563,27 +563,25 @@ latgrid=np.zeros(nlatcols)
 for i in range(nlatcols):
     latgrid[i]=(latgridbounds[i]+latgridbounds[i+1])/2.
 
-
+# create array of weights to multiply any variable by to get the area-weighted version ( if latgrid evenly spaced in cos(lat), latweights_area = 1 )
 latweights_area=np.zeros(nlatcols)
-# latweights=np.cos(np.deg2rad(latgrid))
-
 for i_xg in range(len(xgridbounds)-1):
     latweights_area[i_xg]=xgridbounds[i_xg+1]-xgridbounds[i_xg]
-
 latweights_area/=np.mean(latweights_area)
 
+# if there's only one lat column, pick its lat and set some nearby boundaries to enable interpolation over short interval
 if(nlatcols==1):
     latgrid=np.array([80.])
     latgridbounds=[latgrid[0]-5.,latgrid[0]+5.]
 
-nmol=7
+nmol=7 # number of gas molecule species
 # nclouds=10
-nclouds=nlayers
+nclouds=nlayers # number of cloud layers
 
-lw_on=1
-sw_on=1
+lw_on=1 # 0: don't call rrtm_lw, 1: do
+sw_on=1 # 0: don't call rrtm_sw, 1: do
 gravity=9.79764 # RCEMIP value
-avogadro=6.022e23
+avogadro=6.022e23 # avogadro's constant
 iatm=0 #0 for layer values, 1 for level values
 ixsect=0 #could be 1, but why?
 iscat=0 #just absorption and emission
@@ -595,18 +593,16 @@ iout=0 #for broadband only
 # iout=29
 # icld=0 #for clear sky
 icld=1  #for grey clouds
-ur_min=0.6
-ur_max=3.0
-eqb_maxhtr=1e-4
+ur_min=0.6 # minimum value for under-relaxation constant
+ur_max=3.0 # minimum value for under-relaxation constant
+eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating rate is below this value (if not using dfnet to determine eqb)
 # eqb_maxdfnet=1e-4
 
-eqb_maxdfnet=0.1*(60./nlayers)
-eqb_col_budgs=1.0e12
-timesteps=2000
-
-maxdfnet_tot=1.0
-
-toa_fnet_eqb=1.0e12
+eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
+eqb_col_budgs=1.0e12 # max equilibrium value of total column energy budget at TOA
+timesteps=2000 # number of timesteps until model exits
+maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here)
+toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
 
 
 # master switches for the basic type of input
@@ -616,56 +612,46 @@ prev_output_file='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Pyt
 lapse_sources=[4] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 
 adv_locs=[0] # 0: heating everywhere, 1: heating only in tropopause
-nbs=[2]
+nbs=[2] # power for power law scaling of z distbn of heating from horizontal transport (from XXX)
 adv_on=np.zeros(nlatcols) # 0: no advective heating, 1: advective heating on
-# if(nlatcols==1):
-#   adv_on=0
+if(nlatcols==1):
+  adv_on=0
 
-
-zen=np.zeros((nlatcols,365,24))
-insol=np.zeros((nlatcols,365,24))
-zenlats=np.zeros(nlatcols)
+zen=np.zeros((nlatcols,365,24)) # solar zenith angle
+insol=np.zeros((nlatcols,365,24)) # insolation
+zenlats=np.zeros(nlatcols) 
 insollats=np.zeros(nlatcols)
 solar_constant=1368.
 
-
-
-
-
-# lapseloops=np.arange(4,11)
+# lapseloops=np.arange(4,11) # global average critical lapse rates to loop over
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
 c_merids=[0.] #meridional transport coefficient
 
+extra_forcings=[0.] # add an extra TOA forcing to any box
+fixed_sws=np.array([340.]) # for using a fixed value of total SW absorption instead of using RRTM_SW
+tbounds=np.array([300.]) # initalise lower boundary temperature
+wklfacs=[1.0] # multiply number of molecules of a gas species by this factor in a given lat and layer range defined later
+wklfac_co2s=[1.] # ditto for co2 specifically
 
-extra_forcings=[0.]
-fixed_sws=np.array([340.])
-tbounds=np.array([300.])
-wklfacs=[1.0]
-wklfac_co2s=[1.]
-
+# location of perturbations to number of gas molecules
 pertzons=[0]
 pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
 perts=[1.0]
 
-tbound_adds=[0.]
+tbound_adds=[0.] # add a constant to tbound 
 
-# pertzons=[0]
-# pertlats=[0,1,2,3,4]
-# pertmols=[7] #don't do zero!
-# pertlays=[0,6,12,18,24,30,36,42,48,54]
-# perts=[2.]
+#################################################################### end of variable intialisation ##################################################################################
 
-
-######################################################################################################################################################
-
+# calculate total number of parameter combinations (number of model runs)
 i_loops=0
 totloops=np.float(len(pertzons)*len(pertlats)*len(pertmols)*len(pertlays)*len(perts)*len(c_merids)*len(c_zonals)*len(adv_locs)*len(nbs)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources) )
-print(totloops, 'totloops')
-# loop over a parameter range: fixed_sw, tbound, wklfac
+looptime = 60
+print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(totloops), totloops*looptime/60.))
+print()
 
 for tbound_add in tbound_adds:
     for lapse_source in lapse_sources:
@@ -2831,9 +2817,6 @@ for tbound_add in tbound_adds:
                                                                             print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
                                                                             print('-------------------------------------------------------------------')
     
-
-    
-                                                                # if(abs(maxdfnet_tot) < eqb_maxdfnet and abs(toa_fnet) < toa_fnet_eqb and ts>100 and np.max(abs(column_budgets_master))<eqb_col_budgs):
                                                                 if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>100 or (input_source==2 and ts > 200)) and np.max(abs(column_budgets_master))<eqb_col_budgs and np.min(lapse_eqb)==1):
                                                                 # if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>100 or (input_source==2 and ts > 10)) and np.max(abs(column_budgets_master))<eqb_col_budgs):
                                                                 # if(np.max(abs(column_budgets_master))<eqb_col_budgs): # NJE temp fix for perts, remember to reset!
