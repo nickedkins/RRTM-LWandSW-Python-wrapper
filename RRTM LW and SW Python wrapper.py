@@ -2345,10 +2345,18 @@ for tbound_add in tbound_adds:
                                                                         #     if(i%10!=0):
                                                                         #         cld_fracs_master[i_zon,:,i]=0.
                                                                         #         tauclds_master[0,:,i]=0.
-                                                                                
+                                                                            
+
                                                                         if(i_lat==pertlat):
+                                                                            es=np.zeros(nlayers+1)
+                                                                            L_h2o=np.zeros(nlayers+1)
+                                                                            pert=np.zeros(nlayers)
+                                                                            ws=np.zeros(nlayers+1)
                                                                             for i_lay in range(pertlay,pertlay+6):
                                                                                 tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert
+                                                                                t1=tavel[i_lay]-273.15
+                                                                                pert[i_lay] = 6.1094 * np.exp( (17.625*(t1+1.)) / ( (t1+1.) + 243.04 ) ) / (6.1094 * np.exp( (17.625*t1) / ( t1 + 243.04 ) ) ) 
+                                                                                tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert[i_lay]
                                                                                 
                                                                         for i_cld in range(nclouds):
                                                                             # cld_lays_master[i_zon,i_lat,i_cld]=np.argmin(abs(altz/1000.-altbins[i_cld]))
