@@ -15,6 +15,8 @@ from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGr
 tstart = datetime.datetime.now()
 project_dir = '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/'
 
+print('testing https')
+
 def init_plotting():
     plt.rcParams['figure.figsize'] = (10,10)
     plt.rcParams['font.size'] = 10
