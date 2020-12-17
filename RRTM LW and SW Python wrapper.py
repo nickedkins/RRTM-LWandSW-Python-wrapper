@@ -612,7 +612,7 @@ prev_output_file='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Pyt
 lapse_sources=[4] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 
 adv_locs=[0] # 0: heating everywhere, 1: heating only in tropopause
-nbs=[2] # power for power law scaling of z distbn of heating from horizontal transport (from XXX)
+nbs=[2] # power for power law scaling of z distbn of heating from horizontal transport (from Cronin and Jansen, “Analytic Radiative-Advective Equilibrium as a Model for High-Latitude Climate.”)
 adv_on=np.zeros(nlatcols) # 0: no advective heating, 1: advective heating on
 if(nlatcols==1):
   adv_on=0

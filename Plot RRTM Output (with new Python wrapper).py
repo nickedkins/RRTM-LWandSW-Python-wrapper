@@ -8,6 +8,10 @@ from scipy import interpolate
 # import pandas as pd
 # from pandas import ExcelWriter
 # from pandas import ExcelFile
+import datetime
+
+datetime.datetime.now()
+print(datetime.datetime.now())
 
 print('Started')
 plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops
@@ -36,7 +40,7 @@ def colors(n):
   return ret
 
 def init_plotting():
-    plt.rcParams['figure.figsize'] = (20,20)
+    plt.rcParams['figure.figsize'] = (10,10)
     plt.rcParams['font.size'] = 20
     plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
@@ -1426,4 +1430,5 @@ baseline_tbound = 267.29358913282624-0.3
 # # print tbound_all_dirfil[0,:,0]
 
 # # matplotlib.pyplot.subplots_adjust(left=0.05, bottom=0.05, right=0.84, top=0.9, wspace=0.35, hspace=0.35)
+plt.annotate('test',(10,10))
 show()
