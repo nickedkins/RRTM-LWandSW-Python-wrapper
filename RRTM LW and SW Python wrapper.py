@@ -671,11 +671,8 @@ for tbound_add in tbound_adds:
                                                             print('loop {} of {}, {} percent done '.format(i_loops,totloops,i_loops/totloops*100.))
                                                             i_loops+=1
     
-    
                 #########################################################################################################################################################
               
-                                                                
-               
                                                             lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             if(lapse_source==0):
                                                                 lapse_master=np.ones((nzoncols,nlatcols)) * 6.5
@@ -684,7 +681,6 @@ for tbound_add in tbound_adds:
                                                                     lapse_master[i_zon,:]=np.array(createlatdistbn('Doug Mason Lapse Rate vs Latitude'))
                                                                 lapse_master*=-1.
                
-                
                                                             # calculate insolation at a given latitude, day, and hour
                                                             for i_lat in range(nlatcols):
                                                                 for day in range(1,365):
@@ -698,12 +694,12 @@ for tbound_add in tbound_adds:
                                                                             zen[i_lat,day,hour] = np.arccos(np.sin(Xrad)*np.sin(Yrad) + np.cos(Xrad)*np.cos(Yrad)*np.cos(Hrad))
                                                                             insol[i_lat,day,hour] = solar_constant * np.cos(zen[i_lat,day,hour])
                                                                         else:
-                                                                            insol[i_lat,day,hour]
+                                                                            insol[i_lat,day,hour] = 0.
                                                             # average over day and hour to give annual mean insolation at a given latitude
                                                             for i_lat in range(nlatcols):
                                                                 insollats[i_lat] = np.sum(insol[i_lat,:,:]) / np.size(insol[i_lat,:,:])
                                                                 zenlats[i_lat] = np.sum(zen[i_lat,:,:]) / np.size(zen[i_lat,:,:])
-                                                            # calculate annaul average solar zenith angle for a given latitude required to give the calculated annual average insolation at that latitude
+                                                            # calculate annual average solar zenith angle for a given latitude required to give the calculated annual average insolation at that latitude
                                                             szas = np.rad2deg(np.arccos(insollats/solar_constant))
                                                             
                                                             if(master_input==1):
@@ -717,7 +713,6 @@ for tbound_add in tbound_adds:
                                                             #     surf_lowlev_coupled=1
     
                                                             # Declare variables
-                                                            
                                                             cti=0
                                                             surf_rh=0.8
                                                             vol_mixh2o_min = 1e-6
@@ -2090,20 +2085,15 @@ for tbound_add in tbound_adds:
                                                                         wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
                                                                         wkl[7,i] = mperlayr[i] * 1.0e-4 * vol_mixo2*0.
                                                                     
-    
-    
-    
                                                                 color=[]
                                                                 for i in range(nlayers+1):
                                                                     color.append('#%06X' % randint(0, 0xFFFFFF))
-    
-    
+        
                                                                 if(master_input==6): #ERA-I
                                                                     q,o3,fal,r = read_erai()
                                                             
                                                             if(input_source==2):
                                                                 q,o3,fal,r = read_erai()
-    
     
                                                             dmid=np.ones(nlatcols)*10.
                                                             dtrop=np.ones(nlatcols)*15.
@@ -2117,9 +2107,6 @@ for tbound_add in tbound_adds:
     
                                                             # main loop (timestepping)
                                                             for ts in range(timesteps):
-                                                                                   
-                                                                # dmid=[10.]
-                                                                # dtrop=[15.]
     
                                                                 for i_lat in range(nlatcols):
                                                                    
@@ -2152,16 +2139,13 @@ for tbound_add in tbound_adds:
                                                                     lapse_master[0,i_lat]=lapse
                                                                     lapse_master[1,i_lat]=lapse
     
-    
                                                                     for i_zon in range(nzoncols):
     
                                                                         if(ts>1 or input_source==1 or input_source==2):
     
-                                                                            tbound=tbound_master[i_zon,i_lat]
-    
+                                                                            tbound=tbound_master[i_zon,i_lat]    
                                                                             tz=tz_master[:,i_zon,i_lat]
-                                                                            tavel=tavel_master[:,i_zon,i_lat]
-    
+                                                                            tavel=tavel_master[:,i_zon,i_lat]    
                                                                             pz=pz_master[:,i_zon,i_lat]
                                                                             pavel=pavel_master[:,i_zon,i_lat]
                                                                             altz=altz_master[:,i_zon,i_lat]
@@ -2174,8 +2158,7 @@ for tbound_add in tbound_adds:
                                                                             wkl[5,:]=wkl_master[:,i_zon,4,i_lat]
                                                                             wkl[6,:]=wkl_master[:,i_zon,5,i_lat]
                                                                             wkl[7,:]=wkl_master[:,i_zon,6,i_lat]
-                                                                            wbrodl=wbrodl_master[:,i_zon,i_lat]
-    
+                                                                            wbrodl=wbrodl_master[:,i_zon,i_lat]    
                                                                             toa_fnet=toa_fnet_master[i_zon,i_lat]
     
                                                                             # inflags=inflags_master[:,i_lat]
@@ -2196,31 +2179,21 @@ for tbound_add in tbound_adds:
                                                                             fnet_lw=fnet_lw_master[:,i_zon,i_lat]
                                                                             fnet_sw=fnet_sw_master[:,i_zon,i_lat]
                                                                             
-    
-    
-                                                                            # zonal_transps[0]=(tbound_master[1]-tbound_master[0])*5.
-                                                                            # zonal_transps[1]=zonal_transps[0]*-1.
-                                                                            
-                                                                        H=7.
+                                                                        H=7. #fix scale height here
                                                                         phi=np.deg2rad(latgrid)
                                                                         phi_edges=np.deg2rad(latgridbounds)
                                                                         
                                                                         if(lapse_source==1):
                                                                             lapse_eqb[i_lat]=1
                                                                         
-                                                                        if(lapse_source==2):
-                                                                        
+                                                                        if(lapse_source==2):                                                                        
                                                                             if(abs(latgrid[i_lat])<90):
-                                                                                
-                                                                                conv_on_lats[i_lat]=1
-                                                                            
+                                                                                conv_on_lats[i_lat]=1                                                                            
                                                                                 if(nlatcols>1):
                                                                                     f=interp1d(latgrid,tbound_master[0,:],bounds_error=False,fill_value="extrapolate")
                                                                                     tbound_edges=f(latgridbounds)                                                                    
-                                                                                    dmid[i_lat]=H * np.log( 1. - ( np.tan( phi[i_lat] ) * (tbound_edges[i_lat+1]-tbound_edges[i_lat]) ) / ( (phi_edges[i_lat+1] - phi_edges[i_lat]) * H * (9.8-lapse)) ) * 1.5
-            
+                                                                                    dmid[i_lat]=H * np.log( 1. - ( np.tan( phi[i_lat] ) * (tbound_edges[i_lat+1]-tbound_edges[i_lat]) ) / ( (phi_edges[i_lat+1] - phi_edges[i_lat]) * H * (9.8-lapse)) ) * 1.5            
                                                                                 dtrop[i_lat]=0.8*2.26e6*(6.1094*exp(17.625*(np.mean(tbound_master[:,i_lat])-273.15)/(np.mean(tbound_master[:,i_lat])-273.15+243.04)))/pz[0]*0.622/(1e3*(9.8-lapse) ) * 1.5
-                                                                                # ztrop_h82[i_lat]=dtrop[i_lat]
                                                                                 ztrop_h82[i_lat]=np.max([dmid[i_lat],dtrop[i_lat]])
                                                                                 ztrop_h82_ind[i_lat]=np.argmin(np.abs(altz/1000.-ztrop_h82[i_lat]))
                                                                                 
@@ -2238,7 +2211,7 @@ for tbound_add in tbound_adds:
                                                                                     else:
                                                                                         ztrop[i_lat]=np.mean(altz_master[np.int(np.mean(np.argmin(tz_master[:,0,i_lat]))),:,i_lat])/1000.
                                                                                     
-                                                                                    if( abs(ztrop[i_lat]-ztrop_h82[i_lat]) < 1.0):
+                                                                                    if( abs(ztrop[i_lat]-ztrop_h82[i_lat]) < 1.0): #H82 tightness criterion
                                                                                         lapse_eqb[i_lat]=1
                                                                                         lapse_master[0,i_lat]=lapse
                                                                                     else:
@@ -2265,7 +2238,6 @@ for tbound_add in tbound_adds:
                                                                             midtrop_ind = np.max([np.int( np.mean( cti_master[:,i_lat] )/2 ),nlayers/10.*6.]).astype('int')
                                                                             f=interp1d(latgrid,tbound_master[0,:],bounds_error=False,fill_value="extrapolate")
                                                                             tbound_edges=f(latgridbounds)
-                                                                            # gamma_c = 9.8 + np.tan( np.deg2rad( latgrid[i_lat] ) ) / (altz[midtrop_ind]/1000.) * ( tbound_edges[i_lat+1]-tbound_edges[i_lat] ) / ( np.deg2rad(latgridbounds[i_lat+1] - latgridbounds[i_lat]) )
                                                                             if(i_lat<nlatcols-1):
                                                                                 gamma_c = 9.8 + np.tan( np.deg2rad( latgrid[i_lat] ) ) / (altz[midtrop_ind]/1000.) * ( tz_master[midtrop_ind,0,i_lat+1] - tz_master[midtrop_ind,0,i_lat] ) / ( np.deg2rad(latgridbounds[i_lat+1] - latgridbounds[i_lat]) )
                                                                             else:
@@ -2312,8 +2284,6 @@ for tbound_add in tbound_adds:
                                                                             convection(tz,altz,conv_log=1)
                                                                             lapse_master[0,i_lat]=lapse
                                                                             
-                                                                            
-                                                                                
                                                                             # else:
                                                                             #     conv_on_lats[i_lat]=0
                                                                             #     adv_on[i_lat]=1
@@ -2352,9 +2322,9 @@ for tbound_add in tbound_adds:
                                                                             pert=np.zeros(nlayers)
                                                                             ws=np.zeros(nlayers+1)
                                                                             for i_lay in range(pertlay,pertlay+6):
-                                                                                tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert
-                                                                                t1=tavel[i_lay]-273.15
-                                                                                pert[i_lay] = 6.1094 * np.exp( (17.625*(t1+1.)) / ( (t1+1.) + 243.04 ) ) / (6.1094 * np.exp( (17.625*t1) / ( t1 + 243.04 ) ) ) 
+                                                                                # tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert
+                                                                                t1=tavel[i_lay]-273.15 # temperature in Celsius
+                                                                                pert[i_lay] = 6.1094 * np.exp( (17.625*(t1+1.)) / ( (t1+1.) + 243.04 ) ) / (6.1094 * np.exp( (17.625*t1) / ( t1 + 243.04 ) ) ) #perturbation equivalent to that of the relative increase of water vapor with a 1 K increase in temperature
                                                                                 tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert[i_lay]
                                                                                 
                                                                         for i_cld in range(nclouds):
@@ -2392,7 +2362,7 @@ for tbound_add in tbound_adds:
                                                                             
                                                                             if(input_source==0 or input_source==2):
                                                                                 conv=np.zeros(nlayers+1) #reset to zero
-                                                                                conv[0]=1
+                                                                                conv[0]=1 # set conv of lowest layer to on, otherwise it sometimes gets misidentified 
     
                                                                                 if(master_input==0 or master_input==3):
                                                                                     surf_rh=0.8
@@ -2426,7 +2396,7 @@ for tbound_add in tbound_adds:
                                                                                     elif(i_zon==1):
                                                                                         # wkl[1,:]=wkl[1,:]/2.
                                                                                         wkl[1,:]=wkl[1,:]/1.
-                                                                                    wkl[1,:]=np.clip(wkl[1,:],0,0.2)
+                                                                                    wkl[1,:]=np.clip(wkl[1,:],0,0.2) # sensible bounds for H2O amount
     
                                                                             # if(i_zon==1 and ts==1):
                                                                             #   wkl[1,:]=wkl_master[:,i_zon,0]*wklfac
@@ -2437,7 +2407,7 @@ for tbound_add in tbound_adds:
                                                                         #   tbound+=dtbound
     
     
-    
+                                                                        # perturb surface temperature to reduce column energy imbalance
                                                                         if((input_source==0 and ts>150) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
                                                                             dtbound=column_budgets_master[i_zon,i_lat]*0.01
@@ -2465,11 +2435,13 @@ for tbound_add in tbound_adds:
                                                                                 for i_lay in range(pertlay,pertlay+6):
                                                                                     wkl[pertmol,i_lay]*=pert
     
+                                                                        # the actual meat! call the compiled RRTM executable for LW radiative transfer
                                                                         if(lw_on==1):
                                                                             writeformattedinputfile_lw()
                                                                             callrrtmlw()
                                                                             totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
     
+                                                                        # call the compiled RRTM executable for SW radiative transfer, but as infrequently as possible because it's expensive
                                                                         # if((ts==2 or (abs(maxdfnet_tot) < eqb_maxdfnet*10. and stepssinceswcalled>500)) and sw_on==1):
                                                                         # if((sw_on==1 and ts%300==1 and input_source==0) or ((input_source==1 or input_source==2) and (ts==3 and sw_on==1))):
                                                                         if(rad_eqb[i_lat]==1 and sw_called<nlatcols*2  and sw_on==1 or (sw_on==1 and (ts==5 or ts==300) )):
@@ -2482,6 +2454,7 @@ for tbound_add in tbound_adds:
                                                                             totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
                                                                         stepssinceswcalled+=1
     
+                                                                        # perturb gas amounts in 6 layer blocks (should be 100 hPa, so will change)
                                                                         if(input_source==1 or input_source==2):
                                                                             if(i_zon==pertzon and i_lat==pertlat):
                                                                                 for i_lay in range(pertlay,pertlay+6):
@@ -2489,27 +2462,24 @@ for tbound_add in tbound_adds:
     
                                                                         prev_htr=htr
     
+                                                                        # normalise the fluxes to match DW SW of 238 Wm^-2
                                                                         if(ts>1 and master_input==2):
                                                                             totuflux_sw*=(238./fnet_sw[nlayers])
                                                                             totdflux_sw*=(238./fnet_sw[nlayers])
                                                                             htr_sw*=(238./fnet_sw[nlayers])
                                                                             fnet_sw*=(238./fnet_sw[nlayers])
+                                                                            
+                                                                        # add LW and SW fluxes together
                                                                         totuflux=totuflux_lw+totuflux_sw
                                                                         totdflux=totdflux_lw+totdflux_sw
                                                                         fnet=fnet_sw-fnet_lw
                                                                         htr=htr_lw+htr_sw
-    
-    
-                                                                        # print 'sza= ',sza, 'totdflux_sw[nlayers]= ',totdflux_sw[nlayers]
-    
+
                                                                         # writeoutputfile_masters()
     
                                                                         # toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
                                                                         toa_fnet=fnet_sw[nlayers]-fnet_lw[nlayers]
-                                                                        # print i_zon, i_lat, toa_fnet, totdflux[nlayers], totuflux[nlayers], sza, semiss
-                                                                        # print (totdflux[nlayers],totuflux[nlayers],toa_fnet,totdflux_lw[nlayers],totdflux_sw[nlayers],totuflux_lw[nlayers],totuflux_sw[nlayers])
                                                                         # toa_fnet=totdflux[nlayers]-totuflux[nlayers]+zonal_transps[i_zon] #net total downward flux at TOA  NJE now accounting for zonal transport
-                                                                        # toa_fnet=256.731-totuflux[nlayers]+0.0077 # NJE fix later
     
                                                                         prev_maxhtr=maxhtr*1.0
                                                                         re_htrs = np.where(conv==0,htr,0.)
@@ -2546,10 +2516,7 @@ for tbound_add in tbound_adds:
     
                                                                             if(surf_lowlev_coupled==1):
                                                                                 tz[0]=tbound
-    
-    
-                                                                            
-    
+
                                                                             if(conv_on_lats[i_lat]==1 and (abs(latgrid[i_lat])<60. or lapse_source!=2) ):
                                                                                 convection(tavel,altavel,1)
                                                                                 convection(tz,altz,1)
