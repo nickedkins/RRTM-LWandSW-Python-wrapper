@@ -2534,44 +2534,11 @@ for tbound_add in tbound_adds:
         
                                                                             cti_master[i_zon,i_lat]=cti
     
-                                                                        # Q=np.zeros(nzoncols)
-                                                                        # Qv=np.zeros(nzoncols)
-                                                                        # esat_lowlay=np.zeros(nzoncols)
-                                                                        # esat_bound=np.zeros(nzoncols)
-                                                                        # qsat_lowlay=np.zeros(nzoncols)
-                                                                        # qsat_bound=np.zeros(nzoncols)
-                                                                        # qstar=np.zeros(nzoncols)
-                                                                        # Evap=np.zeros(nzoncols)
-                                                                        # Fah=np.zeros(nzoncols)
-                                                                        # col_budg=np.zeros(nzoncols)
-                                                                        # deltheta=85.
-                                                                        # cp=1.003
-                                                                        # L=2429.8
-                                                                        # r=0.8
-                                                                        # A1=1.
-                                                                        # A2=1.
-    
-                                                                        # for k in range(2):
-                                                                        #     for i_zon2 in range(nzoncols):
-                                                                        #         Q[i_zon2]=(fnet_master[nlayers,i_zon2]-fnet_master[0,i_zon2])
-                                                                        #         esat_lowlay[i_zon2] = 6.1094*exp(17.625*(tz_master[0,i_zon2]-273.15)/(tz_master[0,i_zon2]-273.15+243.04))
-                                                                        #         esat_bound[i_zon2] = 6.1094*exp(17.625*(tbound_master[i_zon2]-273.15)/(tbound_master[i_zon2]-273.15+243.04))
-                                                                        #         qsat_lowlay[i_zon2]=0.622*esat_lowlay[i_zon2]/(pz_master[0,i_zon2]-esat_lowlay[i_zon2])
-                                                                        #         qsat_bound[i_zon2]=0.622*esat_bound[i_zon2]/(pz_master[0,i_zon2]-esat_bound[i_zon2])
-                                                                        #         qstar[i_zon2]=qsat_bound[i_zon2]-r*qsat_lowlay[i_zon2]
-                                                                        #         b=L*qstar[1]/(cp*deltheta)
-                                                                        #         Qv[i_zon2]=(1-b)*Q[i_zon2]
-                                                                        #         Evap[i_zon2]=-b*Q[i_zon2]
-                                                                        # Fah[0]=A2/A1*Qv[1]
-                                                                        # Fah[1]=-1.*Fah[0]
-    
-                                                                        # zonal_transps=Fah
+                                                                        # treat zonal transport as a diffusion
                                                                         zonal_transps_master[0,i_lat]=(tbound_master[1,i_lat]-tbound_master[0,i_lat])*c_zonal
                                                                         zonal_transps_master[1,i_lat]=(tbound_master[0,i_lat]-tbound_master[1,i_lat])*c_zonal
-                                                                        # zonal_transps[1,i_lat]=zonal_transps[0,i_lat]*-1.
-                                                                        # zonal_transps=[0,0]
-                                                                        # column_budgets[i_zon]=340.+fnet[nlayers]+zonal_transps[i_zon]
     
+                                                                        # treat meridional transport as diffusion
                                                                         if(nlatcols>1):
                                                                             # mti=np.int(nlayers/2) # merid transp index
                                                                             mti=1
@@ -2587,14 +2554,9 @@ for tbound_add in tbound_adds:
     
                                                                         
                                                                         column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+zonal_transps_master[i_zon,i_lat]+extra_forcing  #nje forcing
-    
-                                                                        # if(i_zon==0):
-                                                                        #   column_budgets[i_zon]+=Evap[1]
-                                                                        # else:
-                                                                        #   column_budgets[i_zon]-=Evap[1]
-    
-                                                                        
-    
+
+
+                                                                        # add current values of variables to master arrays
                                                                         tz_master[:,i_zon,i_lat]=tz
                                                                         tavel_master[:,i_zon,i_lat]=tavel
                                                                         pz_master[:,i_zon,i_lat]=pz
@@ -2636,31 +2598,29 @@ for tbound_add in tbound_adds:
                                                                         for i_mol in range(1,nmol):
                                                                             wkl_master[:,i_zon,i_mol-1,i_lat] = wkl[i_mol,:]
                                                                             # wkl_master[:,i_zon,i_mol,i_lat] = wkl[i_mol,:]
-    
-    
+
                                                                         #  end i_zon loop
     
                                                                     # end loop latcols
     
-                                                                
+                                                                # caluclate dFnet/dp to use as eqb criterion instead of htr
                                                                 for i_lat in range(nlatcols):
                                                                     for i_zon in range(nzoncols):
                                                                         for i in range(nlayers):
                                                                             dfnet_master_rad[i,i_zon,i_lat]=fnet_master[i+1,i_zon,i_lat]-fnet_master[i,i_zon,i_lat]
                                                                             dpz_master[i,i_zon,i_lat]=pz_master[i+1,i_zon,i_lat]-pz_master[i,i_zon,i_lat]
     
-    
                                                                 # mtransp_dummy_tot=extra_forcing
                                                                 
-    
                                                                 Q_adv=np.zeros((nlayers,nzoncols,nlatcols))
     
                                                                 # for i in range(nlayers):
                                                                 #   dfnet_master_adv[i,i_zon,i_lat]=mtransp_dummy_tot*(pz[i]-pz[i+1])/(pz[0])
     
+                                                                # calculate advective flux vertical profile based on total meridional transport
                                                                 for i_lat in range(nlatcols):
                                                                     for i_zon in range(nzoncols):
-                                                                        mtransp_dummy_tot=toa_fnet_master[i_zon,i_lat]*-1.*0.65
+                                                                        mtransp_dummy_tot=toa_fnet_master[i_zon,i_lat]*-1.*0.65 # factor at the end to ensure stability, but fix later
                                                                         # mtransp_dummy_tot=merid_transps_master[i_zon,i_lat]
                                                                         if(adv_loc==0):
                                                                             for i in range(nlayers):
@@ -2677,32 +2637,22 @@ for tbound_add in tbound_adds:
                                                                         #         dfnet_master_adv[i,i_zon,i_lat]=Q_adv[i,i_zon,i_lat]
                                                                                 
                                                                 dfnet_master_adv=Q_adv                                                                            
-    
-                                                                # dfnet_master_adv[i,i_zon,i_lat]=n_adv * b_adv * mtransp_dummy_tot*(pz[i]-pz[i+1])/(pz[0])
-    
                                                                 dfnet_master=dfnet_master_adv+dfnet_master_rad
-
-                                                                # print('rad', i_zon, i_lat, dfnet_master_rad[:,i_zon,i_lat])
-                                                                # print( 'adv', i_zon, i_lat, dfnet_master_adv[:,i_zon,i_lat])
-                                                                # print('rad + adv',i_zon, i_lat,  dfnet_master_rad[:,i_zon,i_lat] + dfnet_master_adv[:,i_zon,i_lat] )
     
+                                                                # perturb temperature vertical profile by heating rates or flux divergences to approach equilibrium
                                                                 if(input_source==0 or input_source==2):
                                                                     for i_lat in range(nlatcols):
                                                                         for i_zon in range(nzoncols):
                                                                             for i in range(nlayers):
                                                                                 cldweights=[1.,0.]
-    #                                                                           dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*2.*undrelax_lats[i_lat]*(60./nlayers)
                                                                                 dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]
                                                                                 dT=np.clip(dT,-maxdT[i_lat],maxdT[i_lat])
                                                                                 if(input_source==2):
                                                                                     dT*=2.
-                                                                                # dT=np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights)*-1.*2.*4.
-                                                                                # dT=np.clip(dT,-dmax,dmax)
-                                                                                # dT = htr[i]/3. #undrelax
-                                                                                # dT=np.clip(dT,-dmax,dmax)
                                                                                 tavel_master[i,i_zon,i_lat]+=dT
                                                                         tavel_master=np.clip(tavel_master,tmin,tmax)
-    
+
+                                                                # find the maximum dfnet in any layer to work out distance from equilibrium    
                                                                 re_dfnets=np.where(conv_master[cti+1:-1]==0,dfnet_master[cti+1:],0.)
                                                                 maxdfnet_lat=np.zeros(nlatcols)
                                                                 maxdfnet_ind=0
@@ -2732,7 +2682,6 @@ for tbound_add in tbound_adds:
                                                                             # if(abs(maxdfnet_lat[i_lat])>abs(prev_max_dfnet_lat[i_lat])):
                                                                                 # undrelax_lats[i_lat]/=1.5
                                                                                 # maxdT[i_lat]/=2.
-                                                                                # print('dT in {:2d} relaxed to {:5.3f}'.format(i_lat,maxdT[i_lat]))
                                                                             prev_max_dfnet_lat[i_lat]=maxdfnet_lat[i_lat]*1.0
                                                                     maxdfnet_tot=np.max(np.abs(maxdfnet_lat))
                                                                 else:
@@ -2750,12 +2699,7 @@ for tbound_add in tbound_adds:
     
                                                                 # maxdfnet_ind=np.argmax(abs(re_dfnets),axis=0)
                                                                 # maxdfnet=dfnet[maxdfnet_ind]
-
-                                                                # # rad_eqb=0
-                                                                # if(abs(maxdfnet_tot) < eqb_maxdfnet and ts>50):
-                                                                #     rad_eqb=1
-                                                                
-                                                                
+                                                                                                                                
                                                                 for i_lat in range(nlatcols):
                                                                     rad_eqb[i_lat]=0
                                                                     if(abs(maxdfnet_lat[i_lat] ) < eqb_maxdfnet and ts>50 ):
@@ -2765,14 +2709,13 @@ for tbound_add in tbound_adds:
                                                                 # if(np.max(abs(column_budgets_master))<eqb_col_budgs):
                                                                 #     colbudg_eqb=1
                                                                 
-                                                                
                                                                 for i_lat in range(nlatcols):
                                                                     colbudg_eqb[i_lat]=0
                                                                     if(abs(np.mean(column_budgets_master[:,i_lat]) ) < eqb_col_budgs and ts>50 ):
                                                                         colbudg_eqb[i_lat]=1
                                                                 
 
-                                                                # printeqbseek
+                                                                # print eqbseek
                                                                 if(ts%20==0):
                                                                     print( '{: 4d}|'.format(ts))
                                                                     ts_rec.append(ts)
@@ -2814,7 +2757,7 @@ for tbound_add in tbound_adds:
                                                                     filewritten=1
     
                                                                 # end timesteps loop
-    
+                                                                
                                                             writeoutputfile_masters()
     
                                                             if(plotted==0):
