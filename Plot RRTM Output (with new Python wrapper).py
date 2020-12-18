@@ -205,7 +205,7 @@ def plotrrtmoutput_masters():
             plt.axvline(-eqb_maxdfnet,linestyle='--')
             plt.axvline(eqb_maxdfnet,linestyle='--')
             plt.ylim(1000,10)
-            plt.xlim(-0.2,0.2)
+            # plt.xlim(-0.2,0.2)
             plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
             plt.ylabel('Pressure (hPa)')
             plt.grid(True,which='both')
@@ -235,7 +235,7 @@ if('.DS_Store' in a):
 nfiles=len(a)
 
 nlayers=60
-nlatcols=5
+nlatcols=1
 
 
 
@@ -705,6 +705,8 @@ for directory in directories:
                         break
                 # cti_wmo[i_zon,i_lat]=np.argmin(tz_master[:,i_zon,i_lat])
 
+
+        print(cld_fracs_master[0,0,1])
 
         # latgridbounds=np.linspace(30,60.,nlatcols+1)
         # xgridbounds=np.sin(np.deg2rad(latgridbounds))    
@@ -1430,5 +1432,5 @@ baseline_tbound = 267.29358913282624-0.3
 # # print tbound_all_dirfil[0,:,0]
 
 # # matplotlib.pyplot.subplots_adjust(left=0.05, bottom=0.05, right=0.84, top=0.9, wspace=0.35, hspace=0.35)
-plt.annotate('test',(10,10))
+# plt.annotate('test',(10,10))
 show()

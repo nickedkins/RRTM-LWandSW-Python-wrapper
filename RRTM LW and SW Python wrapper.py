@@ -571,7 +571,7 @@ latweights_area/=np.mean(latweights_area)
 
 # if there's only one lat column, pick its lat and set some nearby boundaries to enable interpolation over short interval
 if(nlatcols==1):
-    latgrid=np.array([80.])
+    latgrid=np.array([45.])
     latgridbounds=[latgrid[0]-5.,latgrid[0]+5.]
 
 nmol=7 # number of gas molecule species
@@ -600,8 +600,8 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
 eqb_col_budgs=1.0e12 # max equilibrium value of total column energy budget at TOA
-timesteps=2000 # number of timesteps until model exits
-maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here)
+timesteps=1000 # number of timesteps until model exits
+maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here)re
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
 
 
@@ -2138,6 +2138,10 @@ for tbound_add in tbound_adds:
                                                                         # lapse=lapseloop
                                                                     lapse_master[0,i_lat]=lapse
                                                                     lapse_master[1,i_lat]=lapse
+                                                                    
+                                                                    cld_fracs_master=np.zeros((nzoncols,nlatcols,nclouds))
+                                                                    tauclds_master=np.zeros((nzoncols,nlatcols,nclouds))
+                                                                    ssaclds_master=np.zeros((nzoncols,nlatcols,nclouds))
     
                                                                     for i_zon in range(nzoncols):
     
@@ -2295,16 +2299,27 @@ for tbound_add in tbound_adds:
                                                                         # cld_fracs_master[i_zon,i_lat,:],altbins,tauclds_master[0,i_lat,:]=read_misr()
     #                                                                   cld_fracs_master[i_zon,:,:],altbins,tauclds_master[0,:,:]=read_misr_2()
     #                                                                   if(ts==1):
+
+        
                                                                         # cld_fracs_master[i_zon,:,:],altbins,tauclds_master[0,:,:]=read_misr_3()
+                                                                        
+                                                                        # manual cloud properties
+                                                                        cld_fracs_master[0,0,30]=0.5
+                                                                        tauclds_master[0,0,30]=3.0
+                                                                        ssaclds_master[0,0,30]=0.5
+                                                                        
+                                                                        cld_fracs_master[1,0,40]=0.5
+                                                                        tauclds_master[1,0,40]=3.0
+                                                                        ssaclds_master[1,0,40]=0.5
+                                                                        
                                                                         # cld_lay_v2=0
                                                                         # cf_mro=0
                                                                         # od_eff=0
-                                                                        cld_lay_v2[i_lat], cf_mro[i_lat], od_eff[i_lat] = read_misr_4()
-                                                                        
-                                                                        cld_fracs_master[i_zon,:,np.int(cld_lay_v2[i_lat]-1)]=cf_mro[i_lat]
-                                                                        tauclds_master[i_zon,:,np.int(cld_lay_v2[i_lat]-1)]=od_eff[i_lat]
-                                                                        ssaclds_master=np.zeros((nzoncols,nlatcols,nclouds))
-                                                                        ssaclds_master[i_zon,:,np.int(cld_lay_v2[i_lat]-1)]=0.5
+                                                                        # cld_lay_v2[i_lat], cf_mro[i_lat], od_eff[i_lat] = read_misr_4()                                                                        
+                                                                        # cld_fracs_master[i_zon,:,np.int(cld_lay_v2[i_lat]-1)]=cf_mro[i_lat]
+                                                                        # tauclds_master[i_zon,:,np.int(cld_lay_v2[i_lat]-1)]=od_eff[i_lat]
+                                                                        # ssaclds_master=np.zeros((nzoncols,nlatcols,nclouds))
+                                                                        # ssaclds_master[i_zon,:,np.int(cld_lay_v2[i_lat]-1)]=0.5
                                                                         
                                                                         # cld_fracs_master[i_zon,:,np.int(nlayers/1.5)]=0.68
                                                                         # tauclds_master[i_zon,:,np.int(nlayers/1.5)]=6.0
@@ -2743,7 +2758,7 @@ for tbound_add in tbound_adds:
                                                                     print('Equilibrium reached!')
                                                                     os.system('say "Equilibrium reached"')
                                                                     # writeoutputfile()
-                                                                    # writeoutputfile_masters()
+                                                                    writeoutputfile_masters()
                                                                     filewritten=1
                                                                     break
                                                                 elif(ts==timesteps-1):
@@ -2753,12 +2768,14 @@ for tbound_add in tbound_adds:
                                                                         plotrrtmoutput()
                                                                         plotted=1
                                                                     # writeoutputfile()
-                                                                    # writeoutputfile_masters()
+                                                                    writeoutputfile_masters()
                                                                     filewritten=1
     
                                                                 # end timesteps loop
                                                                 
-                                                            writeoutputfile_masters()
+                                                            print('output called')
+                                                            if(filewritten!=1):
+                                                                writeoutputfile_masters()
     
                                                             if(plotted==0):
                                                                 plotrrtmoutput()
