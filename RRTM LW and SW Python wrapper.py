@@ -15,8 +15,6 @@ from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGr
 tstart = datetime.datetime.now()
 project_dir = '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/'
 
-print('testing https')
-
 def init_plotting():
     plt.rcParams['figure.figsize'] = (10,10)
     plt.rcParams['font.size'] = 10
@@ -546,7 +544,7 @@ def createlatdistbn(filename):
 
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
-nzoncols=2 # number of zonal columns (usually just 2: cloudy and clear)
+nzoncols=5 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
@@ -2304,13 +2302,19 @@ for tbound_add in tbound_adds:
                                                                         # cld_fracs_master[i_zon,:,:],altbins,tauclds_master[0,:,:]=read_misr_3()
                                                                         
                                                                         # manual cloud properties
-                                                                        cld_fracs_master[0,0,30]=0.5
-                                                                        tauclds_master[0,0,30]=3.0
-                                                                        ssaclds_master[0,0,30]=0.5
                                                                         
-                                                                        cld_fracs_master[1,0,40]=0.5
-                                                                        tauclds_master[1,0,40]=3.0
-                                                                        ssaclds_master[1,0,40]=0.5
+                                                                        cf_tot = 0.5
+                                                                        tau_tot = 3.
+                                                                        ssa_tot = 0.5
+                                                                        cldlay_dums = np.linspace(1,np.int(nlayers/2),nzoncols)
+                                                                        # cldlay_dum = np.int(np.linspace(1,np.int(nlayers/2),nzoncols)[i_zon])
+                                                                        
+                                                                        for cldlay_dum in cldlay_dums:
+                                                                            cldlay_dum=np.int(cldlay_dum)
+                                                                            cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/nzoncols
+                                                                            tauclds_master[i_zon,0,cldlay_dum]=tau_tot/nzoncols
+                                                                            ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/nzoncols
+
                                                                         
                                                                         # cld_lay_v2=0
                                                                         # cf_mro=0
@@ -2340,7 +2344,7 @@ for tbound_add in tbound_adds:
                                                                                 # tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert
                                                                                 t1=tavel[i_lay]-273.15 # temperature in Celsius
                                                                                 pert[i_lay] = 6.1094 * np.exp( (17.625*(t1+1.)) / ( (t1+1.) + 243.04 ) ) / (6.1094 * np.exp( (17.625*t1) / ( t1 + 243.04 ) ) ) #perturbation equivalent to that of the relative increase of water vapor with a 1 K increase in temperature
-                                                                                tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert[i_lay]
+                                                                                # tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert[i_lay]
                                                                                 
                                                                         for i_cld in range(nclouds):
                                                                             # cld_lays_master[i_zon,i_lat,i_cld]=np.argmin(abs(altz/1000.-altbins[i_cld]))
@@ -2659,7 +2663,8 @@ for tbound_add in tbound_adds:
                                                                     for i_lat in range(nlatcols):
                                                                         for i_zon in range(nzoncols):
                                                                             for i in range(nlayers):
-                                                                                cldweights=[1.,0.]
+                                                                                # cldweights=[1.,0.]
+                                                                                cldweights=np.ones(nzoncols)*1.0/nzoncols
                                                                                 dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]
                                                                                 dT=np.clip(dT,-maxdT[i_lat],maxdT[i_lat])
                                                                                 if(input_source==2):
@@ -2773,7 +2778,6 @@ for tbound_add in tbound_adds:
     
                                                                 # end timesteps loop
                                                                 
-                                                            print('output called')
                                                             if(filewritten!=1):
                                                                 writeoutputfile_masters()
     
