@@ -639,6 +639,10 @@ pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
 perts=[1.0]
+# nzoncolss=np.arange(1,10)
+nzoncols=1
+
+ncloudcolss=np.arange(1,10)
 
 tbound_adds=[0.] # add a constant to tbound 
 
@@ -651,15 +655,17 @@ looptime = 60
 print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(totloops), totloops*looptime/60.))
 print()
 
-for tbound_add in tbound_adds:
-    for lapse_source in lapse_sources:
-        for adv_loc in adv_locs:
-            for nb in nbs:
-                for wklfac_co2 in wklfac_co2s:
-                    for c_zonal in c_zonals:
-                        for c_merid in c_merids:
-                            for extra_forcing in extra_forcings:
-                                for fixed_sw in fixed_sws:
+# for nzoncols in nzoncolss:
+for ncloudcols in ncloudcolss:
+    for tbound_add in tbound_adds:
+        for lapse_source in lapse_sources:
+            for adv_loc in adv_locs:
+                for nb in nbs:
+                    for wklfac_co2 in wklfac_co2s:
+                        for c_zonal in c_zonals:
+                            for c_merid in c_merids:
+                                for extra_forcing in extra_forcings:
+                                    # for fixed_sw in fixed_sws:
                                     for wklfac in wklfacs:
                                         for pert in perts:
                                             for pertmol in pertmols:
@@ -930,7 +936,7 @@ for tbound_add in tbound_adds:
                                                             cld_fracs_master=np.zeros((nzoncols,nlatcols,nclouds))
                                                             tauclds_master=np.ones((nzoncols,nlatcols,nclouds))*1e-3
                                                             ssaclds_master=np.ones((nzoncols,nlatcols,nclouds))*0.5/nlayers
-                                                            ssaclds_master[1,:,:]=np.ones((nlatcols,nclouds))*1e-3
+                                                            # ssaclds_master[1,:,:]=np.ones((nlatcols,nclouds))*1e-3
     
                                                             tbound_master=np.zeros((nzoncols,nlatcols))
                                                             toa_fnet_master=np.zeros((nzoncols,nlatcols))
@@ -2134,8 +2140,9 @@ for tbound_add in tbound_adds:
                                                                         lapse=lapse_master[0,i_lat]
                                                                         # lapse=6.5
                                                                         # lapse=lapseloop
-                                                                    lapse_master[0,i_lat]=lapse
-                                                                    lapse_master[1,i_lat]=lapse
+                                                                    lapse_master[:,i_lat]=np.ones(nzoncols)*lapse
+                                                                    # lapse_master[0,i_lat]=lapse
+                                                                    # lapse_master[1,i_lat]=lapse
                                                                     
                                                                     cld_fracs_master=np.zeros((nzoncols,nlatcols,nclouds))
                                                                     tauclds_master=np.zeros((nzoncols,nlatcols,nclouds))
@@ -2306,14 +2313,19 @@ for tbound_add in tbound_adds:
                                                                         cf_tot = 0.5
                                                                         tau_tot = 3.
                                                                         ssa_tot = 0.5
-                                                                        cldlay_dums = np.linspace(1,np.int(nlayers/2),nzoncols)
+                                                                        cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
                                                                         # cldlay_dum = np.int(np.linspace(1,np.int(nlayers/2),nzoncols)[i_zon])
+                                                                        
+                                                                        # cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/nzoncols
+                                                                        # tauclds_master[i_zon,0,cldlay_dum]=tau_tot/nzoncols
+                                                                        # ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/nzoncols
+                                                                        
                                                                         
                                                                         for cldlay_dum in cldlay_dums:
                                                                             cldlay_dum=np.int(cldlay_dum)
-                                                                            cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/nzoncols
-                                                                            tauclds_master[i_zon,0,cldlay_dum]=tau_tot/nzoncols
-                                                                            ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/nzoncols
+                                                                            cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/ncloudcols
+                                                                            tauclds_master[i_zon,0,cldlay_dum]=tau_tot/ncloudcols
+                                                                            ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/ncloudcols
 
                                                                         
                                                                         # cld_lay_v2=0
@@ -2554,8 +2566,8 @@ for tbound_add in tbound_adds:
                                                                             cti_master[i_zon,i_lat]=cti
     
                                                                         # treat zonal transport as a diffusion
-                                                                        zonal_transps_master[0,i_lat]=(tbound_master[1,i_lat]-tbound_master[0,i_lat])*c_zonal
-                                                                        zonal_transps_master[1,i_lat]=(tbound_master[0,i_lat]-tbound_master[1,i_lat])*c_zonal
+                                                                        # zonal_transps_master[0,i_lat]=(tbound_master[1,i_lat]-tbound_master[0,i_lat])*c_zonal
+                                                                        # zonal_transps_master[1,i_lat]=(tbound_master[0,i_lat]-tbound_master[1,i_lat])*c_zonal
     
                                                                         # treat meridional transport as diffusion
                                                                         if(nlatcols>1):

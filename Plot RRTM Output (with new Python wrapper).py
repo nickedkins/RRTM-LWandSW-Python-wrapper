@@ -11,17 +11,20 @@ from scipy import interpolate
 import datetime
 
 datetime.datetime.now()
-print(datetime.datetime.now())
+# print(datetime.datetime.now())
+# print('Started')
 
-print('Started')
-plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops
+plot_switch=3 # 0: T(p) and dfnet(p), 1: lapse and trops
 cti_type=3 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RAE expts/lapse comps/Qadv=toafnet*advfac/nl=60,ncols=5,wmo,70-90/'
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cloud overlap method tests/vary nzoncols or nclouds/all in one/',
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cloud overlap method tests/vary nzoncols or nclouds/one in each/'
+'/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cloud overlap method tests/vary nzoncols or nclouds/all in all/'
 ]
 
+nzoncols=1
 
 def colors(n):
   ret = []
@@ -242,7 +245,7 @@ nlatcols=1
 nmol=7
 nclouds=nlayers
 
-nzoncols=2
+# nzoncols=1
 
 # # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 latgridbounds=np.linspace(-60,60.,nlatcols+1)
@@ -451,9 +454,9 @@ for directory in directories:
 
     filenames = []
     dir_label = directory.split('/')[-2]
-    print
-    print(dir_label)
-    print
+    # print
+    # print(dir_label)
+    # print
     a = sorted(listdir(directory))
     filenames.append(a)
     if('.DS_Store' in a):
@@ -464,7 +467,7 @@ for directory in directories:
         # if(fn=='2020_09_17 19_05_52'):
         #     continue
             
-        print(fn)
+        # print(fn)
         output_file = directory + fn
         f=open(output_file,'r')
 
@@ -487,7 +490,6 @@ for directory in directories:
         icos    =   int (   f.readline().rstrip('\n')   )
         iform   =   int (   f.readline().rstrip('\n')   )
         nlayers =   int (   f.readline().rstrip('\n')   )
-        print(nlayers)
         nmol    =   int (   f.readline().rstrip('\n')   )
         psurf   =   float   (   f.readline().rstrip('\n')   )
         pmin    =   float   (   f.readline().rstrip('\n')   )
@@ -539,7 +541,6 @@ for directory in directories:
         eqb_maxdfnet=float  (   f.readline().rstrip('\n')   )
         toa_fnet_eqb=float  (   f.readline().rstrip('\n')   )
         nlatcols=int    (   f.readline().rstrip('\n')   )
-        print(nlatcols)
         # nlatcols=9
         # f.readline()
 
@@ -583,7 +584,7 @@ for directory in directories:
         cld_fracs_master=np.zeros((nzoncols,nlatcols,nclouds))
         tauclds_master=np.ones((nzoncols,nlatcols,nclouds))*0.01
         ssaclds_master=np.ones((nzoncols,nlatcols,nclouds))*1.0
-        ssaclds_master[1,:,:]=np.ones((nlatcols,nclouds))*0.01
+        # ssaclds_master[1,:,:]=np.ones((nlatcols,nclouds))*0.01
 
         tbound_master=np.ones((nzoncols,nlatcols))
         toa_fnet_master=np.ones((nzoncols,nlatcols))
@@ -676,6 +677,8 @@ for directory in directories:
         for x in vars_master_lat:
             for i in range(nlatcols):
                 x[i]=f.readline()
+                
+        print(np.mean(fnet_lw_master[-1,:,0]), np.mean(fnet_sw_master[-1,:,0]))
 
 
         cti_td=np.zeros((nzoncols,nlatcols))
@@ -706,7 +709,6 @@ for directory in directories:
                 # cti_wmo[i_zon,i_lat]=np.argmin(tz_master[:,i_zon,i_lat])
 
 
-        print(cld_fracs_master[0,0,1])
 
         # latgridbounds=np.linspace(30,60.,nlatcols+1)
         # xgridbounds=np.sin(np.deg2rad(latgridbounds))    
@@ -844,25 +846,26 @@ for directory in directories:
             plt.legend()
            
             
+
             
         
-        tbound_all_dirfil[:,i_file,i_dir,:]=tbound_master
-        tz_all_dirfil[:,:,i_file,i_dir]=tz_master
-        zonal_transps_all_dirfil[:,i_file,i_dir,:]=zonal_transps_master
-        merid_transps_all_dirfil[:,i_file,i_dir,:]=merid_transps_master*-1.
-        totuflux_all_dirfil[:,:,i_file,i_dir,:]=totuflux_master
-        totuflux_all_dirfil_lw[:,:,i_file,i_dir,:]=totuflux_lw_master
-        fnet_all_dirfil[:,:,i_file,i_dir,:]=fnet_master
-        fnet_sw_dirfil[:,:,i_file,i_dir,:]=fnet_sw_master
-        fnet_lw_dirfil[:,:,i_file,i_dir,:]=fnet_lw_master
-        lapse_master_dirfil[:,i_file,i_dir,:]=lapse_master
-        altz_all_dirfil[:,:,i_file,i_dir,:]=altz_master
-        pz_all_dirfil[:,:,i_file,i_dir,:]=pz_master
-        cti_all_dirfil[:,i_file,i_dir,:]=cti_master
-        cti_td_all_dirfil[:,i_file,i_dir,:]=cti_td
-        cti_cp_all_dirfil[:,i_file,i_dir,:]=cti_cp
-        cti_wmo_all_dirfil[:,i_file,i_dir,:]=cti_wmo
-        # lapse_td_all_dirfil[:,i_file,i_dir,:]=cti_td
+        # tbound_all_dirfil[:,i_file,i_dir,:]=tbound_master
+        # tz_all_dirfil[:,:,i_file,i_dir]=tz_master
+        # zonal_transps_all_dirfil[:,i_file,i_dir,:]=zonal_transps_master
+        # merid_transps_all_dirfil[:,i_file,i_dir,:]=merid_transps_master*-1.
+        # totuflux_all_dirfil[:,:,i_file,i_dir,:]=totuflux_master
+        # totuflux_all_dirfil_lw[:,:,i_file,i_dir,:]=totuflux_lw_master
+        # fnet_all_dirfil[:,:,i_file,i_dir,:]=fnet_master
+        # fnet_sw_dirfil[:,:,i_file,i_dir,:]=fnet_sw_master
+        # fnet_lw_dirfil[:,:,i_file,i_dir,:]=fnet_lw_master
+        # lapse_master_dirfil[:,i_file,i_dir,:]=lapse_master
+        # altz_all_dirfil[:,:,i_file,i_dir,:]=altz_master
+        # pz_all_dirfil[:,:,i_file,i_dir,:]=pz_master
+        # cti_all_dirfil[:,i_file,i_dir,:]=cti_master
+        # cti_td_all_dirfil[:,i_file,i_dir,:]=cti_td
+        # cti_cp_all_dirfil[:,i_file,i_dir,:]=cti_cp
+        # cti_wmo_all_dirfil[:,i_file,i_dir,:]=cti_wmo
+        # # lapse_td_all_dirfil[:,i_file,i_dir,:]=cti_td
         
         
         i_file+=1
@@ -871,27 +874,31 @@ for directory in directories:
 
 ###########################################################################################################################################################################################
 
-for i_dir in range(len(directories)):
-    for i_file in range(len(a)):
-        for i_zon in range(nzoncols):
-            for i_lat in range(nlatcols):
-                if(cti_type==1):
-                    cti=np.int(cti_td_all_dirfil[i_zon,i_file,i_dir,i_lat])
-                elif(cti_type==2):
-                    cti=np.int(cti_cp_all_dirfil[i_zon,i_file,i_dir,i_lat])
-                elif(cti_type==3):
-                    cti=np.int(cti_wmo_all_dirfil[i_zon,i_file,i_dir,i_lat])
-                dT=tz_all_dirfil[cti,i_zon,i_file,i_dir,i_lat] - tz_all_dirfil[0,i_zon,i_file,i_dir,i_lat]
-                dz=(altz_all_dirfil[cti,i_zon,i_file,i_dir,i_lat] - altz_all_dirfil[0,i_zon,i_file,i_dir,i_lat])/1000.
-                # print(altz_all_dirfil[100,i_zon,i_file,0,i_lat]/1000.,  altz_all_dirfil[0,i_zon,i_file,0,i_lat]/1000.)
-                lapse_td_all_dirfil[i_zon,i_file,i_dir,i_lat]=-dT/dz
-                ttrop=tz_all_dirfil[cti,i_zon,i_file,i_dir,i_lat]
-                ztrop=altz_all_dirfil[cti,i_zon,i_file,i_dir,i_lat]/1000.
-                ts_eff=ttrop+(-dT/dz)*ztrop
-                # plt.figure(2)
-                # plt.plot(latgrid[i_lat],ts_eff,'o')
-                # print(latgrid[i_Lat],lapse,)
-                
+# for i_dir in range(len(directories)):
+#     for i_file in range(len(a)):
+#         for i_zon in range(nzoncols):
+#             for i_lat in range(nlatcols):
+#                 if(cti_type==1):
+#                     cti=np.int(cti_td_all_dirfil[i_zon,i_file,i_dir,i_lat])
+#                 elif(cti_type==2):
+#                     cti=np.int(cti_cp_all_dirfil[i_zon,i_file,i_dir,i_lat])
+#                 elif(cti_type==3):
+#                     cti=np.int(cti_wmo_all_dirfil[i_zon,i_file,i_dir,i_lat])
+#                 dT=tz_all_dirfil[cti,i_zon,i_file,i_dir,i_lat] - tz_all_dirfil[0,i_zon,i_file,i_dir,i_lat]
+#                 dz=(altz_all_dirfil[cti,i_zon,i_file,i_dir,i_lat] - altz_all_dirfil[0,i_zon,i_file,i_dir,i_lat])/1000.
+#                 # print(altz_all_dirfil[100,i_zon,i_file,0,i_lat]/1000.,  altz_all_dirfil[0,i_zon,i_file,0,i_lat]/1000.)
+#                 lapse_td_all_dirfil[i_zon,i_file,i_dir,i_lat]=-dT/dz
+#                 ttrop=tz_all_dirfil[cti,i_zon,i_file,i_dir,i_lat]
+#                 ztrop=altz_all_dirfil[cti,i_zon,i_file,i_dir,i_lat]/1000.
+#                 ts_eff=ttrop+(-dT/dz)*ztrop
+#                 # plt.figure(2)
+#                 # plt.plot(latgrid[i_lat],ts_eff,'o')
+#                 # print(latgrid[i_Lat],lapse,)
+    
+# print(fnet_lw_dirfil[-1,0,:,0,0])            
+    
+# plt.plot(fnet_lw_dirfil[-1,0,:,0,0],'-o')
+
     
 
 if(plot_switch==1):
