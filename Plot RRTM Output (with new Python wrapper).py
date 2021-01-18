@@ -14,7 +14,7 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=3 # 0: T(p) and dfnet(p), 1: lapse and trops
+plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops
 cti_type=3 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
@@ -1439,5 +1439,9 @@ baseline_tbound = 267.29358913282624-0.3
 # # print tbound_all_dirfil[0,:,0]
 
 # # matplotlib.pyplot.subplots_adjust(left=0.05, bottom=0.05, right=0.84, top=0.9, wspace=0.35, hspace=0.35)
-# plt.annotate('test',(10,10))
+# plt.annotate('test',(0.5,0.5))
+# ax=plt.gca()
+# ax.text(0.5, 0.5, ". Axes: (0.5, 0.1)", transform=ax.transAxes)
+fig=plt.gcf()
+fig.suptitle(str(datetime.datetime.now()))
 show()
