@@ -204,9 +204,13 @@ C       OPEN (IRD,FILE='INPUT_RRTM',FORM='FORMATTED')
 C       OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM
 C      &-LWandSW-Python-wrapper/LW/run_examples/input_rrtm_MLS',FORM='FORM
 C      &ATTED')
-      open(ird,file='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-
-     &LWandSW-Python-wrapper/LW/Input RRTM LW NJE Formatted',form='forma
-     &tted')
+!      open(ird,file='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-
+!     &LWandSW-Python-wrapper/LW/Input RRTM LW NJE Formatted',form='forma
+!     &tted')
+
+      open(ird,file='Input RRTM LW NJE Formatted',form='formatted')
+     
+     
       
 
   

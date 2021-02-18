@@ -18,13 +18,13 @@ plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops
 cti_type=3 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/'
 # '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cloud overlap method tests/vary nzoncols or nclouds/all in one/',
 # '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cloud overlap method tests/vary nzoncols or nclouds/one in each/'
-'/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cloud overlap method tests/vary nzoncols or nclouds/all in all/'
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cloud overlap method tests/vary nzoncols or nclouds/all in all/'
 ]
 
-nzoncols=1
+nzoncols=2
 
 def colors(n):
   ret = []
@@ -138,8 +138,8 @@ def plotrrtmoutput():
 
 def plotrrtmoutput_masters():
     plt.figure(1)
-    for i_lat in range(0,nlatcols):
-    # for i_lat in [nlatcols]:
+    # for i_lat in range(0,nlatcols):
+    for i_lat in [0]:
         # for i_zon in range(nzoncols):
         for i_zon in [0]:
             plt.figure(1)
@@ -238,7 +238,7 @@ if('.DS_Store' in a):
 nfiles=len(a)
 
 nlayers=60
-nlatcols=1
+nlatcols=2
 
 
 

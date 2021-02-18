@@ -379,10 +379,11 @@ C       DO 1200 ILAY = 1,MXLAY
 
       IXMAX = MAXINPX
       IRD = 9
-      OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM
-     &-LWandSW-Python-wrapper/SW/Input RRTM SW NJE Formatted',FORM='FORM
-     &ATTED')
+!      OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM
+!     &-LWandSW-Python-wrapper/SW/Input RRTM SW NJE Formatted',FORM='FORM
+!     &ATTED')
       
+      OPEN (IRD,FILE='Input RRTM SW NJE Formatted',FORM='FORMATTED')
 C        OPEN (IRD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RRT
 C      &M-LWandSW-Python-wrapper/SW/example_runs/input_rrtm_sw_mls',FORM='
 C      &FORMATTED')

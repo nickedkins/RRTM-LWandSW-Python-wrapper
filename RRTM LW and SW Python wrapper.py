@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/'
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (10,10)
@@ -74,7 +74,7 @@ def writeparamsarr(params,f):
 
 # write an input file to be read by the LW version of rrtm.f (matching the format of the example input files)
 def writeformattedinputfile_sw():
-    f=open('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/SW/Input RRTM SW NJE Formatted','w+')
+    f=open(project_dir+'SW/Input RRTM SW NJE Formatted','w+')
     f.write('INPUT_RRTM_SW NJE created\n')
     f.write('0        1         2         3         4         5         6         7         8         9\n')
     f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
@@ -106,7 +106,7 @@ def writeformattedinputfile_sw():
 
 # same as above but for SW, which has a slightly different format
 def writeformattedinputfile_lw():
-    f=open('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/Input RRTM LW NJE Formatted','w+')
+    f=open(project_dir+'LW/Input RRTM LW NJE Formatted','w+')
     f.write('INPUT_RRTM_SW NJE created\n')
     f.write('0        1         2         3         4         5         6         7         8         9\n')
     f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
@@ -127,7 +127,7 @@ def writeformattedinputfile_lw():
 
 # write formatted cloud file for rrtm input
 def writeformattedcloudfile():
-    f=open('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/IN_CLD_RRTM NJE','w+')
+    f=open(project_dir+'IN_CLD_RRTM NJE','w+')
     f.write('   {:2d}    {:1d}    {:1d}\n'.format(inflags_master[i_zon,i_lat].astype(int),iceflags_master[i_zon,i_lat].astype(int),liqflags_master[i_zon,i_lat].astype(int)))
     for i_cld in range(nclouds):
         f.write('{} {:3d}{:10.5f}{:10.5f}{:10.5f}{:10.5f}{:10.5f}\n'.format(ctest,int(cld_lays_master[i_zon,i_lat,i_cld]),cld_fracs_master[i_zon,i_lat,i_cld],tauclds_master[i_zon,i_lat,i_cld],ssaclds_master[i_zon,i_lat,i_cld],radice,radliq))
@@ -138,21 +138,21 @@ def writeformattedcloudfile():
 
 # call the compiled rrtmlw executable
 def callrrtmlw():
-    loc = '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/rrtmlw'
+    loc = project_dir+'LW/rrtmlw'
     os.chdir(project_dir+'/LW')
     p = subprocess.Popen([loc])
     stdoutdata, stderrdata = p.communicate()
 
 # ditto for SW
 def callrrtmsw():
-    loc = '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/SW/rrtmsw'
+    loc = project_dir+'SW/rrtmsw'
     os.chdir(project_dir+'/SW')
     p = subprocess.Popen([loc])
     stdoutdata, stderrdata = p.communicate()
 
 # read output produced by rrtmlw executable for use in next timestep within this python wrapper
 def readrrtmoutput_lw():
-    f=open('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/LW/My Live Output RRTM')
+    f=open(project_dir+'LW/My Live Output RRTM')
     for i in range(0,nlayers+1):
         totuflux_lw[i] =  f.readline()
     for i in range(0,nlayers+1):
@@ -164,7 +164,7 @@ def readrrtmoutput_lw():
     return totuflux_lw,totdflux_lw,fnet_lw,htr_lw
 
 def readrrtmoutput_sw():
-    f=open('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/SW/My Live Output RRTM')
+    f=open(project_dir+'SW/My Live Output RRTM')
     for i in range(0,nlayers+1):
         totuflux_sw[i] =  f.readline()
     for i in range(0,nlayers+1):
@@ -388,7 +388,7 @@ def read_misr_2():
 
 # use actual cloud optical depths from MISR (as well as fractions)
 def read_misr_3():
-    interpdir='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/MISR Data/'
+    interpdir=project_dir+'MISR Data/'
     misr_cf_latalt_max=np.load(interpdir+'fracs_latalt.npy')
     cfs=misr_cf_latalt_max
     misr_cod_latalt_max=np.load(interpdir+'od_wghtd_latalt.npy')
@@ -413,7 +413,7 @@ def read_misr_3():
 
 # same as misr_3 but calculate an 'effective cloud fraction' by multiplying MISR frac by MISR COD
 def read_misr_4():
-    interpdir='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/MISR Data/'
+    interpdir=project_dir+'MISR Data/'
     misr_cf_latalt_max=np.load(interpdir+'fracs_latalt.npy')
     cfs=misr_cf_latalt_max
     misr_cod_latalt_max=np.load(interpdir+'od_wghtd_latalt.npy')
@@ -544,18 +544,18 @@ def createlatdistbn(filename):
 
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
-nzoncols=5 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=1 # number of latitude columns
+nzoncols=2 # number of zonal columns (usually just 2: cloudy and clear)
+nlatcols=2 # number of latitude columns
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
 # create latgrid evenly spaced in latitude
-latgridbounds=np.linspace(60,90.,nlatcols+1)
-xgridbounds=np.sin(np.deg2rad(latgridbounds))
+# latgridbounds=np.linspace(60,90.,nlatcols+1)
+# xgridbounds=np.sin(np.deg2rad(latgridbounds))
 
 # create latgrid evenly spaced in cos(lat)
-# xgridbounds=np.linspace(-0.,1.,nlatcols+1)
-# latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
+xgridbounds=np.linspace(-0.,1.,nlatcols+1)
+latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
 
 latgrid=np.zeros(nlatcols)
 for i in range(nlatcols):
@@ -598,7 +598,7 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
 eqb_col_budgs=1.0e12 # max equilibrium value of total column energy budget at TOA
-timesteps=1000 # number of timesteps until model exits
+timesteps=400 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here)re
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
 
@@ -606,8 +606,8 @@ toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file='/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/baselines/nl=590,ncol=5 [NH only]'
-lapse_sources=[4] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
+prev_output_file=project_dir+'_Useful Data/baselines/nl=590,ncol=5 [NH only]'
+lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 
 adv_locs=[0] # 0: heating everywhere, 1: heating only in tropopause
 nbs=[2] # power for power law scaling of z distbn of heating from horizontal transport (from Cronin and Jansen, “Analytic Radiative-Advective Equilibrium as a Model for High-Latitude Climate.”)
@@ -624,8 +624,8 @@ solar_constant=1368.
 # lapseloops=np.arange(4,11) # global average critical lapse rates to loop over
 lapseloops=[6]
 
-c_zonals=[0.] #zonal transport coefficient
-c_merids=[0.] #meridional transport coefficient
+c_zonals=[4.0] #zonal transport coefficient
+c_merids=[4.0] #meridional transport coefficient
 
 extra_forcings=[0.] # add an extra TOA forcing to any box
 fixed_sws=np.array([340.]) # for using a fixed value of total SW absorption instead of using RRTM_SW
@@ -642,7 +642,8 @@ perts=[1.0]
 # nzoncolss=np.arange(1,10)
 nzoncols=1
 
-ncloudcolss=np.arange(1,10)
+# ncloudcolss=np.arange(1,10)
+ncloudcolss=[1]
 
 tbound_adds=[0.] # add a constant to tbound 
 
@@ -729,9 +730,9 @@ for ncloudcols in ncloudcolss:
                                                             # tbound_inits=220. + np.cos(np.deg2rad(latgrid))*80.
                                                             tbound_inits=220. + np.cos(np.deg2rad(latgrid))*80.
                                                             # undrelax_lats= (2.0 - np.cos(np.deg2rad(latgrid)))*2.
-                                                            # data=np.genfromtxt('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/Latitudinal Distributions/Doug Mason Temperature vs Latitude NH.txt',delimiter=',')
-                                                            # data=np.genfromtxt('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/Latitudinal Distributions/Doug Mason Temperature vs Latitude.txt',delimiter=',')
-                                                            data=np.genfromtxt('/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/Latitudinal Distributions/HV19 inferred tbound.txt',delimiter=',')
+                                                            # data=np.genfromtxt(project_dir+'Latitudinal Distributions/Doug Mason Temperature vs Latitude NH.txt',delimiter=',')
+                                                            # data=np.genfromtxt(project_dir+'Latitudinal Distributions/Doug Mason Temperature vs Latitude.txt',delimiter=',')
+                                                            data=np.genfromtxt(project_dir+'Latitudinal Distributions/HV19 inferred tbound.txt',delimiter=',')
                                                             lat_obs=data[:,0]
                                                             tg_obs=data[:,1]
                                                             f=interp1d(lat_obs,tg_obs)
@@ -814,10 +815,10 @@ for ncloudcols in ncloudcolss:
                                                                 lapse=6.7
                                                             elif(master_input==5):
                                                                 lapse=6.2
-                                                            tmin=100.
+                                                            tmin=0.
                                                             if(master_input==5):
                                                                 tmin=200.
-                                                            tmax=340.
+                                                            tmax=1000.
                                                             rsp=287.04 # RCEMIP value
                                                             gravity=9.81
                                                             filewritten=0
@@ -2154,7 +2155,7 @@ for ncloudcols in ncloudcolss:
     
                                                                             tbound=tbound_master[i_zon,i_lat]    
                                                                             tz=tz_master[:,i_zon,i_lat]
-                                                                            tavel=tavel_master[:,i_zon,i_lat]    
+                                                                            tavel=tavel_master[:,i_zon,i_lat]
                                                                             pz=pz_master[:,i_zon,i_lat]
                                                                             pavel=pavel_master[:,i_zon,i_lat]
                                                                             altz=altz_master[:,i_zon,i_lat]
@@ -2445,7 +2446,7 @@ for ncloudcols in ncloudcolss:
                                                                             if(input_source==2):
                                                                                 dtbound*=2.
                                                                             dtbound=np.clip(dtbound,-dmax,dmax)
-                                                                            tbound+=dtbound*0.
+                                                                            tbound+=dtbound
                                                                         tbound=np.clip(tbound,tmin,tmax)
     
                                                                         # if(input_source==0 and master_input==5)
@@ -2465,6 +2466,11 @@ for ncloudcols in ncloudcolss:
                                                                             if(i_zon==pertzon and i_lat==pertlat):
                                                                                 for i_lay in range(pertlay,pertlay+6):
                                                                                     wkl[pertmol,i_lay]*=pert
+                                                                                 
+                                                                            
+                                                                         
+                                                                                    
+
     
                                                                         # the actual meat! call the compiled RRTM executable for LW radiative transfer
                                                                         if(lw_on==1):
@@ -2692,7 +2698,7 @@ for ncloudcols in ncloudcolss:
                                                                     for i_zon in range(nzoncols):
                                                                         # for i in range(np.int(cti_master[i_zon,i_lat])+1,nlayers-1):
                                                                         # radbott1=np.int(cti_master[i_zon,i_lat])+1
-                                                                        radbott1=nlayers-10
+                                                                        radbott1=nlayers-5
                                                                         rad_bottom=np.min([radbott1,nlayers-1]) 
                                                                         for i in range(rad_bottom,nlayers):
                                                                             if(abs(np.mean(dfnet_master[i,:,i_lat])) > abs(maxdfnet_lat[i_lat])):
@@ -2762,6 +2768,7 @@ for ncloudcols in ncloudcolss:
                                                                     for i_lat in range(nlatcols):
                                                                         if(i_lat<nlatcols-1):
                                                                             print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                            print(totuflux_lw_master[-1,0,0])
                                                                         else:
                                                                             print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
                                                                             print('-------------------------------------------------------------------')
