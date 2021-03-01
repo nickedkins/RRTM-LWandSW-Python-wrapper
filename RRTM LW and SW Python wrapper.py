@@ -81,7 +81,7 @@ def writeformattedinputfile_sw():
     f.write('$ Dynamic Formatted RRTM SW Input\n')
     f.write('                  {:2d}                             {:1d}                                {:1d} {:1d}   {:02d}    {:1d}   {:1d}{:1d}\n'.format(iaer,iatm,iscat,istrm,iout,icld,idelm,icos))
     f.write('            {:3d}   {:7.3f}    {:1d}'.format(juldat,sza,isolvar))
-    for i in range(29):
+    for i in range(29): 
         f.write('{:5.3f}'.format(solvar[i]))
     f.write('\n')
     f.write('           {:1d}  {:1d}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}{:5.3f}\n'.format(iemis,ireflect,semiss[15],semiss[16],semiss[17],semiss[18],semiss[19],semiss[20],semiss[21],semiss[22],semiss[23],semiss[24],semiss[25],semiss[26],semiss[27],semiss[28] ))
@@ -225,7 +225,7 @@ def convection(T,z,conv_log):
     for i in range(1,len(T)):
         dT = (T[i]-T[i-1])
         dz = (z[i]-z[i-1])/1000.
-        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 0.) and z[i]/1000. < 1000. ):
+        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 8.0) and z[i]/1000. < 1000. ):
             if(conv_log==1):
                 conv[i]=1.
             T[i] = T[i-1] - lapse * dz
@@ -545,7 +545,7 @@ def createlatdistbn(filename):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=2 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=2 # number of latitude columns
+nlatcols=5 # number of latitude columns
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
@@ -559,7 +559,7 @@ latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
 
 latgrid=np.zeros(nlatcols)
 for i in range(nlatcols):
-    latgrid[i]=(latgridbounds[i]+latgridbounds[i+1])/2.
+        latgrid[i]=(latgridbounds[i]+latgridbounds[i+1])/2.
 
 # create array of weights to multiply any variable by to get the area-weighted version ( if latgrid evenly spaced in cos(lat), latweights_area = 1 )
 latweights_area=np.zeros(nlatcols)
@@ -597,8 +597,8 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=1.0e12 # max equilibrium value of total column energy budget at TOA
-timesteps=400 # number of timesteps until model exits
+eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
+timesteps=1000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here)re
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
 
@@ -608,6 +608,7 @@ master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/baselines/nl=590,ncol=5 [NH only]'
 lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
+albedo_source=2
 
 adv_locs=[0] # 0: heating everywhere, 1: heating only in tropopause
 nbs=[2] # power for power law scaling of z distbn of heating from horizontal transport (from Cronin and Jansen, “Analytic Radiative-Advective Equilibrium as a Model for High-Latitude Climate.”)
@@ -620,18 +621,19 @@ insol=np.zeros((nlatcols,365,24)) # insolation
 zenlats=np.zeros(nlatcols) 
 insollats=np.zeros(nlatcols)
 solar_constant=1368.
+coalbedo=np.zeros(nlatcols)
 
 # lapseloops=np.arange(4,11) # global average critical lapse rates to loop over
 lapseloops=[6]
 
-c_zonals=[4.0] #zonal transport coefficient
-c_merids=[4.0] #meridional transport coefficient
+c_zonals=[8.] #zonal transport coefficient
+c_merids=[4.] #meridional transport coefficient
 
 extra_forcings=[0.] # add an extra TOA forcing to any box
 fixed_sws=np.array([340.]) # for using a fixed value of total SW absorption instead of using RRTM_SW
 tbounds=np.array([300.]) # initalise lower boundary temperature
 wklfacs=[1.0] # multiply number of molecules of a gas species by this factor in a given lat and layer range defined later
-wklfac_co2s=[1.] # ditto for co2 specifically
+wklfac_co2s=[1.,2.] # ditto for co2 specifically
 
 # location of perturbations to number of gas molecules
 pertzons=[0]
@@ -639,8 +641,8 @@ pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
 perts=[1.0]
-# nzoncolss=np.arange(1,10)
-nzoncols=1
+
+pert_zon_h2o=3.0
 
 # ncloudcolss=np.arange(1,10)
 ncloudcolss=[1]
@@ -2133,6 +2135,7 @@ for ncloudcols in ncloudcolss:
                                                                         # lapse=lapseloop
                                                                         if(master_input==6):
                                                                             semiss=np.ones(29)*(1.0-fal[i_lat])
+
     
                                                                     if(input_source==2):
                                                                         wbrodl = mperlayr_air * 1.0e-4
@@ -2150,6 +2153,16 @@ for ncloudcols in ncloudcolss:
                                                                     ssaclds_master=np.zeros((nzoncols,nlatcols,nclouds))
     
                                                                     for i_zon in range(nzoncols):
+                                                                        
+                                                                        if(albedo_source==2):
+                                                                            a_0=0.697
+                                                                            a_2=-0.0779
+                                                                            b_0=0.38
+                                                                            if(tbound_master[0,i_lat] < 263.):
+                                                                                coalbedo[i_lat] = b_0
+                                                                            else:
+                                                                                coalbedo[i_lat]= (a_0 + a_2 * 0.5*(3. * (np.sin( np.deg2rad(latgrid[i_lat]) )**2.) -1. ))
+                                                                            semiss = np.ones(29) * coalbedo[i_lat]
     
                                                                         if(ts>1 or input_source==1 or input_source==2):
     
@@ -2314,7 +2327,8 @@ for ncloudcols in ncloudcolss:
                                                                         cf_tot = 0.5
                                                                         tau_tot = 3.
                                                                         ssa_tot = 0.5
-                                                                        cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
+                                                                        # cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
+                                                                        cldlay_dums=[np.int(nlayers/2)]
                                                                         # cldlay_dum = np.int(np.linspace(1,np.int(nlayers/2),nzoncols)[i_zon])
                                                                         
                                                                         # cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/nzoncols
@@ -2324,9 +2338,14 @@ for ncloudcols in ncloudcolss:
                                                                         
                                                                         for cldlay_dum in cldlay_dums:
                                                                             cldlay_dum=np.int(cldlay_dum)
-                                                                            cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/ncloudcols
-                                                                            tauclds_master[i_zon,0,cldlay_dum]=tau_tot/ncloudcols
-                                                                            ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/ncloudcols
+                                                                            # cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/ncloudcols
+                                                                            # tauclds_master[i_zon,0,cldlay_dum]=tau_tot/ncloudcols
+                                                                            # ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/ncloudcols
+                                                                            
+                                                                            
+                                                                            cld_fracs_master[0,:,cldlay_dum]=cf_tot/ncloudcols
+                                                                            tauclds_master[0,:,cldlay_dum]=tau_tot/ncloudcols
+                                                                            ssaclds_master[0,:,cldlay_dum]=ssa_tot/ncloudcols
 
                                                                         
                                                                         # cld_lay_v2=0
@@ -2348,16 +2367,16 @@ for ncloudcols in ncloudcolss:
                                                                         #         cld_fracs_master[i_zon,:,i]=0.
                                                                         #         tauclds_master[0,:,i]=0.
 
-                                                                        if(i_lat==pertlat):
-                                                                            es=np.zeros(nlayers+1)
-                                                                            L_h2o=np.zeros(nlayers+1)
-                                                                            pert=np.zeros(nlayers)
-                                                                            ws=np.zeros(nlayers+1)
-                                                                            for i_lay in range(pertlay,pertlay+6):
-                                                                                # tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert
-                                                                                t1=tavel[i_lay]-273.15 # temperature in Celsius
-                                                                                pert[i_lay] = 6.1094 * np.exp( (17.625*(t1+1.)) / ( (t1+1.) + 243.04 ) ) / (6.1094 * np.exp( (17.625*t1) / ( t1 + 243.04 ) ) ) #perturbation equivalent to that of the relative increase of water vapor with a 1 K increase in temperature
-                                                                                # tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert[i_lay]
+                                                                        # if(i_lat==pertlat):
+                                                                        #     es=np.zeros(nlayers+1)
+                                                                        #     L_h2o=np.zeros(nlayers+1)
+                                                                        #     pert=np.zeros(nlayers)
+                                                                        #     ws=np.zeros(nlayers+1)
+                                                                        #     for i_lay in range(pertlay,pertlay+6):
+                                                                        #         # tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert
+                                                                        #         t1=tavel[i_lay]-273.15 # temperature in Celsius
+                                                                        #         pert[i_lay] = 6.1094 * np.exp( (17.625*(t1+1.)) / ( (t1+1.) + 243.04 ) ) / (6.1094 * np.exp( (17.625*t1) / ( t1 + 243.04 ) ) ) #perturbation equivalent to that of the relative increase of water vapor with a 1 K increase in temperature
+                                                                        #         # tauclds_master[0,i_lat,i_lay] = tauclds_master[0,i_lat,i_lay] * pert[i_lay]
                                                                                 
                                                                         for i_cld in range(nclouds):
                                                                             # cld_lays_master[i_zon,i_lat,i_cld]=np.argmin(abs(altz/1000.-altbins[i_cld]))
@@ -2420,14 +2439,14 @@ for ncloudcols in ncloudcolss:
                                                                                         # if(input_source==0):
                                                                                         rel_hum[i]=r[i,i_lat]/100.
                                                                                         vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
-                                                                                        # wkl[1,i] = vol_mixh2o[i]
-                                                                                        wkl[1,i]=q[i,i_lat]
+                                                                                        wkl[1,i] = vol_mixh2o[i] # ERA-I relative humidity
+                                                                                        # wkl[1,i]=q[i,i_lat] # ERA-I specific humidity
                                                                                     if(i_zon==0):
                                                                                         # wkl[1,:]=wkl[1,:]*2.
-                                                                                        wkl[1,:]=wkl[1,:]*1.
+                                                                                        wkl[1,:]=wkl[1,:]*(pert_zon_h2o**0.5)
                                                                                     elif(i_zon==1):
                                                                                         # wkl[1,:]=wkl[1,:]/2.
-                                                                                        wkl[1,:]=wkl[1,:]/1.
+                                                                                        wkl[1,:]=wkl[1,:]/(pert_zon_h2o**0.5)
                                                                                     wkl[1,:]=np.clip(wkl[1,:],0,0.2) # sensible bounds for H2O amount
     
                                                                             # if(i_zon==1 and ts==1):
@@ -2467,8 +2486,7 @@ for ncloudcols in ncloudcolss:
                                                                                 for i_lay in range(pertlay,pertlay+6):
                                                                                     wkl[pertmol,i_lay]*=pert
                                                                                  
-                                                                            
-                                                                         
+                                                                                    
                                                                                     
 
     
@@ -2572,8 +2590,8 @@ for ncloudcols in ncloudcolss:
                                                                             cti_master[i_zon,i_lat]=cti
     
                                                                         # treat zonal transport as a diffusion
-                                                                        # zonal_transps_master[0,i_lat]=(tbound_master[1,i_lat]-tbound_master[0,i_lat])*c_zonal
-                                                                        # zonal_transps_master[1,i_lat]=(tbound_master[0,i_lat]-tbound_master[1,i_lat])*c_zonal
+                                                                        zonal_transps_master[0,i_lat]=(tbound_master[1,i_lat]-tbound_master[0,i_lat])*c_zonal
+                                                                        zonal_transps_master[1,i_lat]=(tbound_master[0,i_lat]-tbound_master[1,i_lat])*c_zonal
     
                                                                         # treat meridional transport as diffusion
                                                                         if(nlatcols>1):
@@ -2702,8 +2720,8 @@ for ncloudcols in ncloudcolss:
                                                                         rad_bottom=np.min([radbott1,nlayers-1]) 
                                                                         for i in range(rad_bottom,nlayers):
                                                                             if(abs(np.mean(dfnet_master[i,:,i_lat])) > abs(maxdfnet_lat[i_lat])):
-                                                                                # maxdfnet_lat[i_lat]=abs(np.mean(dfnet_master[i,:,i_lat]))
-                                                                                maxdfnet_lat[i_lat]=abs(dfnet_master[i,0,i_lat])
+                                                                                maxdfnet_lat[i_lat]=abs(np.mean(dfnet_master[i,:,i_lat]))
+                                                                                # maxdfnet_lat[i_lat]=abs(dfnet_master[i,0,i_lat])
                                                                                 # maxdfnet_lat[i_lat]=abs(dfnet_master_rad[i,0,i_lat])
                                                                                 maxdfnet_ind=i
                                                                 
@@ -2768,7 +2786,6 @@ for ncloudcols in ncloudcolss:
                                                                     for i_lat in range(nlatcols):
                                                                         if(i_lat<nlatcols-1):
                                                                             print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
-                                                                            print(totuflux_lw_master[-1,0,0])
                                                                         else:
                                                                             print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
                                                                             print('-------------------------------------------------------------------')

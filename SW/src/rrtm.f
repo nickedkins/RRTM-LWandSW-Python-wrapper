@@ -628,12 +628,15 @@ C               cloud properties.
       DATA CPERCENT /'%'/
       IRDCLD = 11
 
-      OPEN(IRDCLD,FILE='IN_CLD_RRTM',FORM='FORMATTED')
+!      OPEN(IRDCLD,FILE='IN_CLD_RRTM',FORM='FORMATTED')
 C       OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RR
 C      &TM-LWandSW-Python-wrapper/LW/run_examples/in_cld_rrtm_MLS-cld1',FO
 C      &RM='FORMATTED')
-      OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/RR
-     &TM-LWandSW-Python-wrapper/IN_CLD_RRTM NJE',FORM='FORMATTED')
+      OPEN(IRDCLD,FILE='/Users/nickedkins/Dropbox/GitHub_Repositories/cl
+     &oned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/IN_CLD_RRTM N
+     &JE',FORM='FORMATTED')
+     
+     
       
 
 C     Read in cloud input option.  

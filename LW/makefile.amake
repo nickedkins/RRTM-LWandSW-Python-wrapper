@@ -20,19 +20,19 @@ DUMMY=
 #
 # Flags
 #
-ABSOFT_F95_FLAGS= -N113 -fpic -g -m64 -s -stack:1f40000 -v -z4
-ABSOFT_F77_FLAGS= -N113 -f77_compat -fpic -g -m64 -s -stack:1f40000 -v -z4
+ABSOFT_F95_FLAGS= -N113 -i8 -m64 -stack:1f40000
+ABSOFT_F77_FLAGS= -N113 -f77_compat -i8 -m64 -stack:1f40000
 RC_FLAGS=
-GCC_FLAGS= -g -m64
+GCC_FLAGS= -m64
 MAKE_FLAGS= -k
-ABSOFT_F95_LINKER_FLAGS=-IPA:debug=on -IPA:source_pu_order=on       -stack:1f40000 -m64 -fpic -g
+ABSOFT_F95_LINKER_FLAGS=-IPA:debug=on -IPA:source_pu_order=on       -stack:1f40000 -m64
 
 #
 # Name of the executable
 #
 TARGET=rrtmlw
 OUTDIR=.
-OBJDIR=./Debug
+OBJDIR=./Release
 
 #
 # Files for this executable
@@ -138,7 +138,7 @@ ScanAll: "$(OUTDIR)" "$(OBJDIR)" MakeDepsAll
 # Scan for all F77/F95, and c/c++ dependencies
 #
 MakeDepsAll:
-	$(MKDEP) -quiet "-pre./Debug/" -Y -modInfo -errdel -f90 -f makefile.amake -a -info  -N113 -f77_compat -fpic -g -m64 -s -stack:1f40000 -v -z4 -info "src/cldprop.f" "src/disort.f" "src/ErrPack.f" "src/extra.f" "src/k_g.f" "src/LINPAK.f" "src/RDI1MACH.f" "src/rrtatm.f" "src/rrtm.f" "src/rtr.f" "src/rtrcld.f" "src/rtrcldmr.f" "src/rtrdis.f" "src/rtreg.f" "src/rtregcld.f" "src/rtregcldmr.f" "src/setcoef.f" "src/taumol.f" 
+	$(MKDEP) -quiet "-pre./Release/" -Y -modInfo -errdel -f90 -f makefile.amake -a -info  -N113 -f77_compat -i8 -m64 -stack:1f40000 -info "src/cldprop.f" "src/disort.f" "src/ErrPack.f" "src/extra.f" "src/k_g.f" "src/LINPAK.f" "src/RDI1MACH.f" "src/rrtatm.f" "src/rrtm.f" "src/rtr.f" "src/rtrcld.f" "src/rtrcldmr.f" "src/rtrdis.f" "src/rtreg.f" "src/rtregcld.f" "src/rtregcldmr.f" "src/setcoef.f" "src/taumol.f" 
 # DO NOT DELETE THIS LINE - makedepend depends upon it.
 
 
@@ -163,10 +163,12 @@ MakeDepsAll:
 
 
 
-"./Debug/k_g.o": "src/k_gB01.f" "src/k_gB02.f" "src/k_gB03.f" "src/k_gB04.f"
-"./Debug/k_g.o": "src/k_gB05.f" "src/k_gB06.f" "src/k_gB07.f" "src/k_gB08.f"
-"./Debug/k_g.o": "src/k_gB09.f" "src/k_gB10.f" "src/k_gB11.f" "src/k_gB12.f"
-"./Debug/k_g.o": "src/k_gB13.f" "src/k_gB14.f" "src/k_gB15.f" "src/k_gB16.f"
+"./Release/k_g.o": "src/k_gB01.f" "src/k_gB02.f" "src/k_gB03.f"
+"./Release/k_g.o": "src/k_gB04.f" "src/k_gB05.f" "src/k_gB06.f"
+"./Release/k_g.o": "src/k_gB07.f" "src/k_gB08.f" "src/k_gB09.f"
+"./Release/k_g.o": "src/k_gB10.f" "src/k_gB11.f" "src/k_gB12.f"
+"./Release/k_g.o": "src/k_gB13.f" "src/k_gB14.f" "src/k_gB15.f"
+"./Release/k_g.o": "src/k_gB16.f"
 
 
 

@@ -14,15 +14,17 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops
+plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops
 cti_type=3 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cloud overlap method tests/vary nzoncols or nclouds/all in one/',
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cloud overlap method tests/vary nzoncols or nclouds/one in each/'
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/cloud overlap method tests/vary nzoncols or nclouds/all in all/'
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
+'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RRC transp and no transp/cloud working/cm=4, cz=8, pzh=3/era-i albedo/',
+'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RRC transp and no transp/cloud working/cm=4, cz=8, pzh=3/north albedo param/cm=4 cz=8/'
 ]
+
+c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
+c_merids=[2.0] #meridional transport coefficient
 
 nzoncols=2
 
@@ -138,12 +140,12 @@ def plotrrtmoutput():
 
 def plotrrtmoutput_masters():
     plt.figure(1)
-    # for i_lat in range(0,nlatcols):
-    for i_lat in [0]:
-        # for i_zon in range(nzoncols):
-        for i_zon in [0]:
+    for i_lat in range(0,nlatcols):
+    # for i_lat in [0]:
+        for i_zon in range(nzoncols):
+        # for i_zon in [0]:
             plt.figure(1)
-            plt.subplot(121)
+            plt.subplot(131)
             plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
             # plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat])
             # plt.semilogy(tavel_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(i_zon))
@@ -165,11 +167,11 @@ def plotrrtmoutput_masters():
             plt.ylabel('Pressure (hPa)')
             plt.grid(True,which='both')
             # plt.legend()
-            # plt.subplot(132)
-            # plt.semilogy(totuflux_lw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],label=fn)
-            # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
-            # plt.xlabel('totuflux')
-            # plt.legend()
+            plt.subplot(132)
+            plt.semilogy(totuflux_lw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],label=fn)
+            plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
+            plt.xlabel('totuflux')
+            plt.legend()
             # plt.subplot(333)
             # plt.semilogy(totdflux_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat])
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
@@ -197,10 +199,11 @@ def plotrrtmoutput_masters():
             # plt.semilogy(wbrodl_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-o')
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wbrodl')
-            plt.subplot(122)
+            plt.subplot(133)
             # plt.semilogy(np.mean(dfnet_master_adv[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='tot {}'.format(fn))
             # plt.semilogy(np.mean(dfnet_master_rad[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='tot {}'.format(fn))
             plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-',label='tot {}'.format(fn))
+            plt.xlim(-5,5)
             # plt.semilogy(np.mean(dfnet_master_rad[cti,:,i_lat],axis=0),pavel_master[cti,i_zon,i_lat],'o',label='tot {}'.format(fn))
             # plt.plot(np.mean(dfnet_master_rad[np.int(cti_td[i_zon,i_lat]),:,i_lat],axis=0), pz_master[np.int(cti_td[i_zon,i_lat]),i_zon,i_lat], '*' )
             # plt.semilogy(np.mean(dfnet_master_adv[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='adv {}'.format(fn))
@@ -238,7 +241,7 @@ if('.DS_Store' in a):
 nfiles=len(a)
 
 nlayers=60
-nlatcols=2
+nlatcols=5
 
 
 
@@ -419,7 +422,7 @@ vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemi
 
 nlayers_dirfil=nlayers
 nzoncols_dirfil=nzoncols
-# nfiles=7
+# nfiles=25
 # ndirs=2
 
 tbound_all_dirfil = np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
@@ -677,8 +680,6 @@ for directory in directories:
         for x in vars_master_lat:
             for i in range(nlatcols):
                 x[i]=f.readline()
-                
-        print(np.mean(fnet_lw_master[-1,:,0]), np.mean(fnet_sw_master[-1,:,0]))
 
 
         cti_td=np.zeros((nzoncols,nlatcols))
@@ -849,30 +850,54 @@ for directory in directories:
 
             
         
-        # tbound_all_dirfil[:,i_file,i_dir,:]=tbound_master
-        # tz_all_dirfil[:,:,i_file,i_dir]=tz_master
-        # zonal_transps_all_dirfil[:,i_file,i_dir,:]=zonal_transps_master
-        # merid_transps_all_dirfil[:,i_file,i_dir,:]=merid_transps_master*-1.
-        # totuflux_all_dirfil[:,:,i_file,i_dir,:]=totuflux_master
-        # totuflux_all_dirfil_lw[:,:,i_file,i_dir,:]=totuflux_lw_master
-        # fnet_all_dirfil[:,:,i_file,i_dir,:]=fnet_master
-        # fnet_sw_dirfil[:,:,i_file,i_dir,:]=fnet_sw_master
-        # fnet_lw_dirfil[:,:,i_file,i_dir,:]=fnet_lw_master
-        # lapse_master_dirfil[:,i_file,i_dir,:]=lapse_master
-        # altz_all_dirfil[:,:,i_file,i_dir,:]=altz_master
-        # pz_all_dirfil[:,:,i_file,i_dir,:]=pz_master
-        # cti_all_dirfil[:,i_file,i_dir,:]=cti_master
-        # cti_td_all_dirfil[:,i_file,i_dir,:]=cti_td
-        # cti_cp_all_dirfil[:,i_file,i_dir,:]=cti_cp
-        # cti_wmo_all_dirfil[:,i_file,i_dir,:]=cti_wmo
-        # # lapse_td_all_dirfil[:,i_file,i_dir,:]=cti_td
+        tbound_all_dirfil[:,i_file,i_dir,:]=tbound_master
+        tz_all_dirfil[:,:,i_file,i_dir]=tz_master
+        zonal_transps_all_dirfil[:,i_file,i_dir,:]=zonal_transps_master
+        merid_transps_all_dirfil[:,i_file,i_dir,:]=merid_transps_master
+        totuflux_all_dirfil[:,:,i_file,i_dir,:]=totuflux_master
+        totuflux_all_dirfil_lw[:,:,i_file,i_dir,:]=totuflux_lw_master
+        fnet_all_dirfil[:,:,i_file,i_dir,:]=fnet_master
+        fnet_sw_dirfil[:,:,i_file,i_dir,:]=fnet_sw_master
+        fnet_lw_dirfil[:,:,i_file,i_dir,:]=fnet_lw_master
+        lapse_master_dirfil[:,i_file,i_dir,:]=lapse_master
+        altz_all_dirfil[:,:,i_file,i_dir,:]=altz_master
+        pz_all_dirfil[:,:,i_file,i_dir,:]=pz_master
+        cti_all_dirfil[:,i_file,i_dir,:]=cti_master
+        cti_td_all_dirfil[:,i_file,i_dir,:]=cti_td
+        cti_cp_all_dirfil[:,i_file,i_dir,:]=cti_cp
+        cti_wmo_all_dirfil[:,i_file,i_dir,:]=cti_wmo
+        # lapse_td_all_dirfil[:,i_file,i_dir,:]=cti_td
         
         
         i_file+=1
+
+
+        
+        dTs=tbound_all_dirfil[:,1,i_dir,:]-tbound_all_dirfil[:,0,i_dir,:]
+        
+        
+
+        if(i_file%2==0):
+            # plt.plot(latgrid,dTs[0,:],'-o',label=dir_label+' cloudy')
+            # plt.plot(latgrid,dTs[1,:],'--o',label=dir_label+' clear')
+            # plt.plot(latgrid,dTs[1,:]-dTs[0,:],'--o',label=dir_label+' clear')
+            plt.plot(latgrid,np.mean(dTs[:,:],axis=0),'-o',label=dir_label)            
+            plt.xlabel('Latitude')
+            plt.ylabel('dT for 2xCO2')
+            # plt.ylim(0)
+            
+            print(dir_label,np.mean(dTs))
+        
+        plt.legend()
         
     i_dir+=1    
 
+
 ###########################################################################################################################################################################################
+
+
+    
+
 
 # for i_dir in range(len(directories)):
 #     for i_file in range(len(a)):
