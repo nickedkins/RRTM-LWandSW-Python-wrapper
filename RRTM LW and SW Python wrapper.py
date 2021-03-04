@@ -161,6 +161,7 @@ def readrrtmoutput_lw():
         fnet_lw[i] =  f.readline()
     for i in range(0,nlayers+1):
         htr_lw[i] =  f.readline()
+    f.close()
     return totuflux_lw,totdflux_lw,fnet_lw,htr_lw
 
 def readrrtmoutput_sw():
@@ -173,6 +174,7 @@ def readrrtmoutput_sw():
         fnet_sw[i] =  f.readline()
     for i in range(0,nlayers+1):
         htr_sw[i] =  f.readline()
+    f.close()
     return totuflux_sw,totdflux_sw,fnet_sw,htr_sw
 
 # plot main rrtm variables 
@@ -229,6 +231,7 @@ def convection(T,z,conv_log):
             if(conv_log==1):
                 conv[i]=1.
             T[i] = T[i-1] - lapse * dz
+    T=np.clip(T,tmin,tmax)
 
 # same but for moist adiabatic lapse rate            
 def convection_moist(T,z,conv_log):
@@ -544,8 +547,8 @@ def createlatdistbn(filename):
 
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
-nzoncols=2 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=5 # number of latitude columns
+nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
+nlatcols=1 # number of latitude columns
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
@@ -597,17 +600,17 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
-timesteps=1000 # number of timesteps until model exits
+eqb_col_budgs=0.01 # max equilibrium value of total column energy budget at TOA
+timesteps=500 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here)re
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
 
 
 # master switches for the basic type of input
-master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim
+master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/baselines/nl=590,ncol=5 [NH only]'
-lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
+lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=2
 
 adv_locs=[0] # 0: heating everywhere, 1: heating only in tropopause
@@ -630,37 +633,46 @@ c_zonals=[8.] #zonal transport coefficient
 c_merids=[4.] #meridional transport coefficient
 
 extra_forcings=[0.] # add an extra TOA forcing to any box
-fixed_sws=np.array([340.]) # for using a fixed value of total SW absorption instead of using RRTM_SW
+if(master_input==7):
+    fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
+fixed_sw_on=1
 tbounds=np.array([300.]) # initalise lower boundary temperature
 wklfacs=[1.0] # multiply number of molecules of a gas species by this factor in a given lat and layer range defined later
-wklfac_co2s=[1.,2.] # ditto for co2 specifically
+wklfac_co2s=[1.] # ditto for co2 specifically
 
 # location of perturbations to number of gas molecules
 pertzons=[0]
 pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
-perts=[1.0]
+perts=[1.00]
 
-pert_zon_h2o=3.0
+# pert_pbottoms = np.arange(1100,0,-100)
+pert_pbottoms = [1000.]
+pert_pwidth = 1000.
+
+pert_zon_h2o=1.0
 
 # ncloudcolss=np.arange(1,10)
 ncloudcolss=[1]
 
-tbound_adds=[0.] # add a constant to tbound 
+# tbound_adds=[0.] # add a constant to tbound 
+tbound_add=0
+
+b_rdwvs=np.arange(1,8)
 
 #################################################################### end of variable intialisation ##################################################################################
 
 # calculate total number of parameter combinations (number of model runs)
 i_loops=0
-totloops=np.float(len(pertzons)*len(pertlats)*len(pertmols)*len(pertlays)*len(perts)*len(c_merids)*len(c_zonals)*len(adv_locs)*len(nbs)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources) )
+totloops=np.float(len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(adv_locs)*len(nbs)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources) )
 looptime = 60
 print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(totloops), totloops*looptime/60.))
 print()
 
-# for nzoncols in nzoncolss:
+
 for ncloudcols in ncloudcolss:
-    for tbound_add in tbound_adds:
+    for b_rdwv in b_rdwvs:
         for lapse_source in lapse_sources:
             for adv_loc in adv_locs:
                 for nb in nbs:
@@ -668,13 +680,12 @@ for ncloudcols in ncloudcolss:
                         for c_zonal in c_zonals:
                             for c_merid in c_merids:
                                 for extra_forcing in extra_forcings:
-                                    # for fixed_sw in fixed_sws:
                                     for wklfac in wklfacs:
                                         for pert in perts:
                                             for pertmol in pertmols:
                                                 for pertlat in pertlats:
                                                     for pertzon in pertzons:
-                                                        for pertlay in pertlays:
+                                                        for pert_pbottom in pert_pbottoms:
                                                             print('loop {} of {}, {} percent done '.format(i_loops,totloops,i_loops/totloops*100.))
                                                             i_loops+=1
     
@@ -786,13 +797,16 @@ for ncloudcols in ncloudcolss:
                                                                 0.64,
                                                                 0.64,
                                                                 ])
-                                                            elif(master_input==3):
+                                                            elif(master_input==3 or master_input==7):
                                                                 semiss=np.ones(29)*0.93
                                                             iform=1
                                                             psurf=1000.
-                                                            if(master_input==3):
-                                                                psurf=1014.8
+                                                            if(master_input==3 or master_input==7):
+                                                                # psurf=1014.8
+                                                                psurf=1000.
                                                             pmin=1.
+                                                            if(master_input==3 or master_input==7):
+                                                                pmin=1.607
                                                             secntk='' #based on not appearing in input mls sw
                                                             cinp='' #based on not appearing in input mls sw
                                                             ipthak=3
@@ -803,7 +817,7 @@ for ncloudcols in ncloudcolss:
                                                                 sza=65.             #Solar zenith angle in degrees (0 deg is overhead).
                                                             elif(master_input==2):
                                                                 sza=45. #(RD repl)          #Solar zenith angle in degrees (0 deg is overhead).
-                                                            elif(master_input==3): # RCEMIP
+                                                            elif(master_input==3 or master_input==7): # RCEMIP
                                                                 sza=42.05
                                                             isolvar=0       #= 0 each band uses standard solar source function, corresponding to present day conditions. 
                                                                             #= 1 scale solar source function, each band will have the same scale factor applied, (equal to SOLVAR(16)). 
@@ -812,12 +826,17 @@ for ncloudcols in ncloudcolss:
                                                             if(master_input==3):
                                                                 isolvar=2
                                                                 solvar=np.ones(29)*409.6/1015.98791896 # different interpretation of 'insolation'
-                                                            lapse=5.7
+                                                            if(master_input==3):
+                                                                isolvar=2
+                                                                solvar=np.ones(29)*238.0 # different interpretation of 'insolation'
+                                                            lapse=5.8
                                                             if(master_input==3): # RCEMIP
                                                                 lapse=6.7
                                                             elif(master_input==5):
                                                                 lapse=6.2
-                                                            tmin=0.
+                                                            elif(master_input==7):
+                                                                lapse=5.8
+                                                            tmin=150.
                                                             if(master_input==5):
                                                                 tmin=200.
                                                             tmax=1000.
@@ -1944,7 +1963,7 @@ for ncloudcols in ncloudcolss:
                                                                     wbrodl=np.array(df['dry'][:-1])
                                                                     wbrodl=wbrodl[::-1]
     
-                                                                if(master_input==0 or master_input==6):
+                                                                if(master_input==0 or master_input==6 or master_input==7):
                                                                     pz=np.linspace(psurf,pmin,nlayers+1)
                                                                     for i in range(len(pavel)):
                                                                         pavel[i]=(pz[i]+pz[i+1])/2.
@@ -1961,6 +1980,7 @@ for ncloudcols in ncloudcolss:
                                                                     for i in range(nlayers):
                                                                         tavel[i]=(tz[i]+tz[i+1])/2.
                                                                     tavel[nlayers-1] = tavel[nlayers-2]
+                                                                    tavel=np.clip(tavel,tmin,tmax)
                                                                 elif(master_input==3): # RCEMIP hydrostatics
                                                                     # tbound=295.
                                                                     # tbound=280.
@@ -2021,6 +2041,8 @@ for ncloudcols in ncloudcolss:
     
                                                                 for i in range(nlayers):
                                                                     altavel[i]=(altz[i]+altz[i+1])/2.
+                                                                    
+                                                                
     
                                                                 for i in range(nlayers):
                                                                     # h2o (manabe mw67)
@@ -2073,6 +2095,25 @@ for ncloudcols in ncloudcolss:
                                                                         wkl[5,i]=0.# co
                                                                         wkl[6,i]=1650e-9 # ch4
                                                                         wkl[7,i]=0. # o2
+                                                                elif(master_input==7): # wkl RCEMIP mod RD
+                                                                    g1=3.6478
+                                                                    g2=0.83209
+                                                                    g3=11.3515
+                                                                    a_rdwv=12.*1.6e-3
+                                                                    # b_rdwv=4.
+                                                                    c_rdwv=1.e-6
+                                                                    for i in range(nlayers):
+                                                                        wbrodl[i] = mperlayr_air[i] * 1.0e-4
+                                                                        wkl[1,:]=(12. * 1.6e-3 * ( pavel / pz[0] ) ** 4. + 1.e-6)
+                                                                        wkl[1,:]=( a_rdwv * ( pavel / pz[0] ) ** b_rdwv + c_rdwv)
+                                                                        wkl[2,i]=348e-6 # co2
+                                                                        wkl[3,i]=g1*pz[i]**(g2)*np.exp(-1.0*(pz[i]/g3))*1e-6 # o3
+                                                                        wkl[4,i]=306e-9 # n2o
+                                                                        wkl[5,i]=0.# co
+                                                                        wkl[6,i]=1650e-9 # ch4
+                                                                        wkl[7,i]=0.209 # o2
+                                                                    wkl[1,:] *= 8.123297816734589e+26 / np.sum(wkl[1,:]*mperlayr)
+                                                                    print(np.sum(wkl[1,:]*mperlayr))
                                                                 elif(master_input==5):
                                                                     surf_rh=0.8
                                                                     for i in range(nlayers):
@@ -2127,9 +2168,10 @@ for ncloudcols in ncloudcolss:
                                                                     if(input_source==0):
                                                                         
                                                                         wbrodl = mperlayr_air * 1.0e-4
-                                                                        wkl[1,:]=q[:,i_lat]
+                                                                        if(master_input != 7):
+                                                                            wkl[1,:]=q[:,i_lat]
+                                                                            wkl[3,:]=o3[:,i_lat]
                                                                         wkl[2,:]=400e-6*wklfac_co2
-                                                                        wkl[3,:]=o3[:,i_lat]
                                                                         sza=szas[i_lat]
                                                                         lapse=lapse_master[0,i_lat]
                                                                         # lapse=lapseloop
@@ -2325,8 +2367,8 @@ for ncloudcols in ncloudcolss:
                                                                         # manual cloud properties
                                                                         
                                                                         cf_tot = 0.5
-                                                                        tau_tot = 3.
-                                                                        ssa_tot = 0.5
+                                                                        tau_tot = 3.*1e-3
+                                                                        ssa_tot = 0.5*1e-3
                                                                         # cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
                                                                         cldlay_dums=[np.int(nlayers/2)]
                                                                         # cldlay_dum = np.int(np.linspace(1,np.int(nlayers/2),nzoncols)[i_zon])
@@ -2461,7 +2503,7 @@ for ncloudcols in ncloudcolss:
                                                                         # perturb surface temperature to reduce column energy imbalance
                                                                         if((input_source==0 and ts>150) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
-                                                                            dtbound=column_budgets_master[i_zon,i_lat]*0.01
+                                                                            dtbound=column_budgets_master[i_zon,i_lat]*0.1
                                                                             if(input_source==2):
                                                                                 dtbound*=2.
                                                                             dtbound=np.clip(dtbound,-dmax,dmax)
@@ -2481,10 +2523,12 @@ for ncloudcols in ncloudcolss:
     
                                                                         writeformattedcloudfile()
     
-                                                                        if(input_source==1 or input_source==2):
+                                                                        if(input_source==1 or input_source==2 or master_input==7):
                                                                             if(i_zon==pertzon and i_lat==pertlat):
-                                                                                for i_lay in range(pertlay,pertlay+6):
-                                                                                    wkl[pertmol,i_lay]*=pert
+                                                                                for i_lay in range(nlayers):
+                                                                                    if(pz[i_lay] < pert_pbottom and pz[i_lay] > pert_pbottom - pert_pwidth ):
+                                                                                        wkl[pertmol,i_lay]*=pert
+                                                                                        # wkl[pertmol,i_lay]+=pert
                                                                                  
                                                                                     
                                                                                     
@@ -2499,7 +2543,7 @@ for ncloudcols in ncloudcolss:
                                                                         # call the compiled RRTM executable for SW radiative transfer, but as infrequently as possible because it's expensive
                                                                         # if((ts==2 or (abs(maxdfnet_tot) < eqb_maxdfnet*10. and stepssinceswcalled>500)) and sw_on==1):
                                                                         # if((sw_on==1 and ts%300==1 and input_source==0) or ((input_source==1 or input_source==2) and (ts==3 and sw_on==1))):
-                                                                        if(rad_eqb[i_lat]==1 and sw_called<nlatcols*2  and sw_on==1 or (sw_on==1 and (ts==5 or ts==300) )):
+                                                                        if(rad_eqb[i_lat]==1 and sw_called<nlatcols*2  and sw_on==1 or (sw_on==1 and (ts==50 or ts==300) )):
                                                                             sw_called+=1
                                                                         #   if(maxhtr<eqb_maxhtr):
                                                                             writeformattedinputfile_sw()
@@ -2510,10 +2554,12 @@ for ncloudcols in ncloudcolss:
                                                                         stepssinceswcalled+=1
     
                                                                         # perturb gas amounts in 6 layer blocks (should be 100 hPa, so will change)
-                                                                        if(input_source==1 or input_source==2):
+                                                                        if(input_source==1 or input_source==2 or master_input==7):
                                                                             if(i_zon==pertzon and i_lat==pertlat):
-                                                                                for i_lay in range(pertlay,pertlay+6):
-                                                                                    wkl[pertmol,i_lay]/=pert
+                                                                                for i_lay in range(nlayers):
+                                                                                    if(pz[i_lay] < pert_pbottom and pz[i_lay] > pert_pbottom - pert_pwidth ):
+                                                                                        wkl[pertmol,i_lay]/=pert
+                                                                                        # wkl[pertmol,i_lay]-=pert
     
                                                                         prev_htr=htr
     
@@ -2534,6 +2580,8 @@ for ncloudcols in ncloudcolss:
     
                                                                         # toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
                                                                         toa_fnet=fnet_sw[nlayers]-fnet_lw[nlayers]
+                                                                        if(fixed_sw_on==1):
+                                                                            toa_fnet=fixed_sw-fnet_lw[nlayers]
                                                                         # toa_fnet=totdflux[nlayers]-totuflux[nlayers]+zonal_transps[i_zon] #net total downward flux at TOA  NJE now accounting for zonal transport
     
                                                                         prev_maxhtr=maxhtr*1.0
@@ -2590,8 +2638,9 @@ for ncloudcols in ncloudcolss:
                                                                             cti_master[i_zon,i_lat]=cti
     
                                                                         # treat zonal transport as a diffusion
-                                                                        zonal_transps_master[0,i_lat]=(tbound_master[1,i_lat]-tbound_master[0,i_lat])*c_zonal
-                                                                        zonal_transps_master[1,i_lat]=(tbound_master[0,i_lat]-tbound_master[1,i_lat])*c_zonal
+                                                                        if(nzoncols==2):
+                                                                            zonal_transps_master[0,i_lat]=(tbound_master[1,i_lat]-tbound_master[0,i_lat])*c_zonal
+                                                                            zonal_transps_master[1,i_lat]=(tbound_master[0,i_lat]-tbound_master[1,i_lat])*c_zonal
     
                                                                         # treat meridional transport as diffusion
                                                                         if(nlatcols>1):
@@ -2701,7 +2750,10 @@ for ncloudcols in ncloudcolss:
                                                                             for i in range(nlayers):
                                                                                 # cldweights=[1.,0.]
                                                                                 cldweights=np.ones(nzoncols)*1.0/nzoncols
-                                                                                dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]
+                                                                                if(ts<300):
+                                                                                    dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]
+                                                                                else:
+                                                                                    dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]*1.0 
                                                                                 dT=np.clip(dT,-maxdT[i_lat],maxdT[i_lat])
                                                                                 if(input_source==2):
                                                                                     dT*=2.

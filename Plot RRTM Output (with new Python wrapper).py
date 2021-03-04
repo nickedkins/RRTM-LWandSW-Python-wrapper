@@ -15,12 +15,12 @@ datetime.datetime.now()
 # print('Started')
 
 plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops
-cti_type=3 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
+cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RRC transp and no transp/cloud working/cm=4, cz=8, pzh=3/era-i albedo/',
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RRC transp and no transp/cloud working/cm=4, cz=8, pzh=3/north albedo param/cm=4 cz=8/'
+'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/Expts for TE paper/nl=590/increase h2o by 7% in each layer/',
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/Expts for TE paper/nl=590/increase h2o by same absolute amount in each layer, giving 7% column increase/'
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -144,8 +144,9 @@ def plotrrtmoutput_masters():
     # for i_lat in [0]:
         for i_zon in range(nzoncols):
         # for i_zon in [0]:
+            
             plt.figure(1)
-            plt.subplot(131)
+            plt.subplot(121)
             plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
             # plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat])
             # plt.semilogy(tavel_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(i_zon))
@@ -167,11 +168,12 @@ def plotrrtmoutput_masters():
             plt.ylabel('Pressure (hPa)')
             plt.grid(True,which='both')
             # plt.legend()
-            plt.subplot(132)
-            plt.semilogy(totuflux_lw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],label=fn)
-            plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
-            plt.xlabel('totuflux')
-            plt.legend()
+            
+            # plt.subplot(132)
+            # plt.semilogy(totuflux_lw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],label=fn)
+            # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
+            # plt.xlabel('totuflux')
+            # plt.legend()
             # plt.subplot(333)
             # plt.semilogy(totdflux_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat])
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
@@ -181,11 +183,12 @@ def plotrrtmoutput_masters():
             # # plt.semilogy(totdflux_master[:,i_zon,i_lat]-totuflux_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat])
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('fnet')
-            # plt.subplot(335)
-            # plt.semilogy(wkl_master[:,i_zon,0,i_lat],pavel_master[:,i_zon,i_lat],label=fn)
-            # # plt.legend()
+            
+            # # plt.subplot(335)
+            # plt.loglog(wkl_master[:,i_zon,0,i_lat],pavel_master[:,i_zon,i_lat],label=fn)
             # plt.ylim(np.max(pz_master[:,i_zon,i_lat]),np.min(pz_master[:,i_zon,i_lat]))
             # plt.xlabel('wkl1')
+            
             # plt.subplot(336)
             # plt.semilogy(wkl_master[:,i_zon,1,i_lat],pavel_master[:,i_zon,i_lat],label=str(i_file))
             # # plt.legend()
@@ -199,11 +202,12 @@ def plotrrtmoutput_masters():
             # plt.semilogy(wbrodl_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-o')
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wbrodl')
-            plt.subplot(133)
+            
+            plt.subplot(122)
             # plt.semilogy(np.mean(dfnet_master_adv[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='tot {}'.format(fn))
             # plt.semilogy(np.mean(dfnet_master_rad[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='tot {}'.format(fn))
             plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-',label='tot {}'.format(fn))
-            plt.xlim(-5,5)
+            # plt.xlim(-5,5)
             # plt.semilogy(np.mean(dfnet_master_rad[cti,:,i_lat],axis=0),pavel_master[cti,i_zon,i_lat],'o',label='tot {}'.format(fn))
             # plt.plot(np.mean(dfnet_master_rad[np.int(cti_td[i_zon,i_lat]),:,i_lat],axis=0), pz_master[np.int(cti_td[i_zon,i_lat]),i_zon,i_lat], '*' )
             # plt.semilogy(np.mean(dfnet_master_adv[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='adv {}'.format(fn))
@@ -211,11 +215,13 @@ def plotrrtmoutput_masters():
             plt.axvline(-eqb_maxdfnet,linestyle='--')
             plt.axvline(eqb_maxdfnet,linestyle='--')
             plt.ylim(1000,10)
+            # plt.ylim(1000,600)
             # plt.xlim(-0.2,0.2)
             plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
             plt.ylabel('Pressure (hPa)')
             plt.grid(True,which='both')
             # plt.legend()
+            
             # plt.subplot(133)
             # lapsedum=np.zeros(nlayers)
             # tzdum=tz_master[:,i_zon,i_lat]
@@ -241,7 +247,7 @@ if('.DS_Store' in a):
 nfiles=len(a)
 
 nlayers=60
-nlatcols=5
+nlatcols=1
 
 
 
@@ -447,7 +453,7 @@ pertzons=[0]
 pertlats=[0,1,2,3,4]
 pertmols=[7] #don't do zero!
 pertlays=[0,6,12,18,24,30,36,42,48,54]
-perts=[2.]
+perts=[1]
 
 totuflux_all_prp=np.zeros((len(perts), len(pertmols), len(pertlats),len(pertzons), len(pertlays) ))
 tbound_all_prp=np.zeros((len(perts), len(pertmols), len(pertlats),len(pertzons), len(pertlays) ))
@@ -847,6 +853,28 @@ for directory in directories:
             plt.legend()
            
             
+        if(nlatcols>1):
+            ztrop=np.diagonal(altz_master[cti,0,:]/1000.)
+            ptrop=np.diagonal(pz_master[cti,0,:])
+            ttrop=np.diagonal(tz_master[cti,0,:])
+        else:
+            ztrop=altz_master[cti,0,0]/1000.
+            ptrop=pz_master[cti,0,0]
+            ttrop=tz_master[cti,0,0]
+        tsurf=tz_master[0,0,0]
+        
+        
+        
+        print('ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(ztrop, ptrop, ttrop, tsurf))
+        
+        argefold = np.argmin(abs(wkl_master[0,0,0,0]/wkl_master[:,0,0,0]-2.718))
+        Hh2o = altz_master[argefold,0,0]/1000.
+        
+        print('h2o scale height = {: 4.2f}'.format(Hh2o))
+        plt.xlabel('Water vapour scale height (km)')
+        plt.ylabel('Surface temperature (K)')
+        plt.figure(1)
+        plt.plot(Hh2o,tsurf,'o',c='b')
 
             
         
@@ -873,20 +901,18 @@ for directory in directories:
 
 
         
-        dTs=tbound_all_dirfil[:,1,i_dir,:]-tbound_all_dirfil[:,0,i_dir,:]
-        
-        
+        # dTs=tbound_all_dirfil[:,1,i_dir,:]-tbound_all_dirfil[:,0,i_dir,:]
 
-        if(i_file%2==0):
-            # plt.plot(latgrid,dTs[0,:],'-o',label=dir_label+' cloudy')
-            # plt.plot(latgrid,dTs[1,:],'--o',label=dir_label+' clear')
-            # plt.plot(latgrid,dTs[1,:]-dTs[0,:],'--o',label=dir_label+' clear')
-            plt.plot(latgrid,np.mean(dTs[:,:],axis=0),'-o',label=dir_label)            
-            plt.xlabel('Latitude')
-            plt.ylabel('dT for 2xCO2')
-            # plt.ylim(0)
+        # if(i_file%2==0):
+        #     # plt.plot(latgrid,dTs[0,:],'-o',label=dir_label+' cloudy')
+        #     # plt.plot(latgrid,dTs[1,:],'--o',label=dir_label+' clear')
+        #     # plt.plot(latgrid,dTs[1,:]-dTs[0,:],'--o',label=dir_label+' clear')
+        #     plt.plot(latgrid,np.mean(dTs[:,:],axis=0),'-o',label=dir_label)            
+        #     plt.xlabel('Latitude')
+        #     plt.ylabel('dT for 2xCO2')
+        #     # plt.ylim(0)
             
-            print(dir_label,np.mean(dTs))
+        #     print(dir_label,np.mean(dTs))
         
         plt.legend()
         
@@ -896,7 +922,14 @@ for directory in directories:
 ###########################################################################################################################################################################################
 
 
-    
+# pert_pbottoms = np.arange(1000,0,-100) 
+
+# plt.figure(1)
+# plt.title('Absolute perturbation of 0.001 g/kg')
+# plt.plot(tz_all_dirfil[0,0,1:,0,0]-tz_all_dirfil[0,0,0,0,0],pert_pbottoms-50,'-o')
+# plt.ylim(1000,10)
+# plt.xlabel('Temperature change (K)')
+# plt.ylabel('Pressure at centre of 100 hPa perturbed region (hPa)')
 
 
 # for i_dir in range(len(directories)):
@@ -1468,5 +1501,5 @@ baseline_tbound = 267.29358913282624-0.3
 # ax=plt.gca()
 # ax.text(0.5, 0.5, ". Axes: (0.5, 0.1)", transform=ax.transAxes)
 fig=plt.gcf()
-fig.suptitle(str(datetime.datetime.now()))
+# fig.suptitle(str(datetime.datetime.now()))
 show()
