@@ -546,9 +546,16 @@ def createlatdistbn(filename):
 #################functions###########################################################
 
 # set overall dimensions for model
-nlayers=60 # number of vertical layers
+nlayers=120 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
+
+# master switches for the basic type of input
+master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
+input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
+prev_output_file=project_dir+'_Useful Data/baselines/nl=590,ncol=5 [NH only]'
+lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
+albedo_source=2
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
@@ -558,6 +565,7 @@ nlatcols=1 # number of latitude columns
 
 # create latgrid evenly spaced in cos(lat)
 xgridbounds=np.linspace(-0.,1.,nlatcols+1)
+xgridbounds=[0.95,1.0]
 latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
 
 latgrid=np.zeros(nlatcols)
@@ -581,6 +589,12 @@ nclouds=nlayers # number of cloud layers
 
 lw_on=1 # 0: don't call rrtm_lw, 1: do
 sw_on=1 # 0: don't call rrtm_sw, 1: do
+fixed_sw_on=0
+if(master_input==7):
+    fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
+if(sw_on==0):
+    fixed_sw_on=1
+fixed_sw=240.
 gravity=9.79764 # RCEMIP value
 avogadro=6.022e23 # avogadro's constant
 iatm=0 #0 for layer values, 1 for level values
@@ -599,19 +613,15 @@ ur_max=3.0 # minimum value for under-relaxation constant
 eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating rate is below this value (if not using dfnet to determine eqb)
 # eqb_maxdfnet=1e-4
 
+
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.01 # max equilibrium value of total column energy budget at TOA
+eqb_col_budgs=0.001 # max equilibrium value of total column energy budget at TOA
 timesteps=500 # number of timesteps until model exits
-maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here)re
+maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
 
 
-# master switches for the basic type of input
-master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
-input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file=project_dir+'_Useful Data/baselines/nl=590,ncol=5 [NH only]'
-lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
-albedo_source=2
+
 
 adv_locs=[0] # 0: heating everywhere, 1: heating only in tropopause
 nbs=[2] # power for power law scaling of z distbn of heating from horizontal transport (from Cronin and Jansen, “Analytic Radiative-Advective Equilibrium as a Model for High-Latitude Climate.”)
@@ -633,9 +643,9 @@ c_zonals=[8.] #zonal transport coefficient
 c_merids=[4.] #meridional transport coefficient
 
 extra_forcings=[0.] # add an extra TOA forcing to any box
-if(master_input==7):
-    fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
-fixed_sw_on=1
+
+
+
 tbounds=np.array([300.]) # initalise lower boundary temperature
 wklfacs=[1.0] # multiply number of molecules of a gas species by this factor in a given lat and layer range defined later
 wklfac_co2s=[1.] # ditto for co2 specifically
@@ -659,9 +669,13 @@ ncloudcolss=[1]
 # tbound_adds=[0.] # add a constant to tbound 
 tbound_add=0
 
-b_rdwvs=np.arange(1,8)
+# b_rdwvs=np.arange(1,8)
+b_rdwv = 4.
 
-#################################################################### end of variable intialisation ##################################################################################
+zclddums = np.linspace(1,10,5)
+# zclddums=[5.]
+
+#################################################################### end of variable initialisation ##################################################################################
 
 # calculate total number of parameter combinations (number of model runs)
 i_loops=0
@@ -672,7 +686,7 @@ print()
 
 
 for ncloudcols in ncloudcolss:
-    for b_rdwv in b_rdwvs:
+    for zclddum in zclddums:
         for lapse_source in lapse_sources:
             for adv_loc in adv_locs:
                 for nb in nbs:
@@ -802,8 +816,8 @@ for ncloudcols in ncloudcolss:
                                                             iform=1
                                                             psurf=1000.
                                                             if(master_input==3 or master_input==7):
-                                                                # psurf=1014.8
-                                                                psurf=1000.
+                                                                psurf=1014.8
+                                                                # psurf=1000.
                                                             pmin=1.
                                                             if(master_input==3 or master_input==7):
                                                                 pmin=1.607
@@ -1975,7 +1989,7 @@ for ncloudcols in ncloudcolss:
                                                                         altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
                                                                     altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
                                                                     # tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
-                                                                    tz=np.ones(nlayers+1) * tbound-6.5*altz/1000.
+                                                                    tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
                                                                     tz=np.clip(tz,tmin,tmax)
                                                                     for i in range(nlayers):
                                                                         tavel[i]=(tz[i]+tz[i+1])/2.
@@ -2366,11 +2380,11 @@ for ncloudcols in ncloudcolss:
                                                                         
                                                                         # manual cloud properties
                                                                         
-                                                                        cf_tot = 0.5
-                                                                        tau_tot = 3.*1e-3
-                                                                        ssa_tot = 0.5*1e-3
+                                                                        cf_tot = 0.99
+                                                                        tau_tot = 3.0
+                                                                        ssa_tot = 0.01
                                                                         # cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
-                                                                        cldlay_dums=[np.int(nlayers/2)]
+                                                                        # cldlay_dums=[np.int(nlayers/2)]
                                                                         # cldlay_dum = np.int(np.linspace(1,np.int(nlayers/2),nzoncols)[i_zon])
                                                                         
                                                                         # cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/nzoncols
@@ -2378,16 +2392,18 @@ for ncloudcols in ncloudcolss:
                                                                         # ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/nzoncols
                                                                         
                                                                         
-                                                                        for cldlay_dum in cldlay_dums:
-                                                                            cldlay_dum=np.int(cldlay_dum)
-                                                                            # cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/ncloudcols
-                                                                            # tauclds_master[i_zon,0,cldlay_dum]=tau_tot/ncloudcols
-                                                                            # ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/ncloudcols
+                                                                        # for cldlay_dum in cldlay_dums:
+                                                                        #     cldlay_dum=np.int(cldlay_dum)
+                                                                        #     # cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/ncloudcols
+                                                                        #     # tauclds_master[i_zon,0,cldlay_dum]=tau_tot/ncloudcols
+                                                                        #     # ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/ncloudcols
+                                                                        
+                                                                        cldlay_dum=np.argmin(abs(altz/1000.-zclddum))
                                                                             
                                                                             
-                                                                            cld_fracs_master[0,:,cldlay_dum]=cf_tot/ncloudcols
-                                                                            tauclds_master[0,:,cldlay_dum]=tau_tot/ncloudcols
-                                                                            ssaclds_master[0,:,cldlay_dum]=ssa_tot/ncloudcols
+                                                                        cld_fracs_master[0,:,cldlay_dum]=cf_tot/ncloudcols
+                                                                        tauclds_master[0,:,cldlay_dum]=tau_tot/ncloudcols
+                                                                        ssaclds_master[0,:,cldlay_dum]=ssa_tot/ncloudcols
 
                                                                         
                                                                         # cld_lay_v2=0
@@ -2501,7 +2517,7 @@ for ncloudcols in ncloudcolss:
     
     
                                                                         # perturb surface temperature to reduce column energy imbalance
-                                                                        if((input_source==0 and ts>150) or input_source==2):
+                                                                        if((input_source==0 and ts>100) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
                                                                             dtbound=column_budgets_master[i_zon,i_lat]*0.1
                                                                             if(input_source==2):
@@ -2842,7 +2858,7 @@ for ncloudcols in ncloudcolss:
                                                                             print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
                                                                             print('-------------------------------------------------------------------')
     
-                                                                if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>100 or (input_source==2 and ts > 200)) and np.max(abs(column_budgets_master))<eqb_col_budgs and np.min(lapse_eqb)==1):
+                                                                if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>200 or (input_source==2 and ts > 200)) and np.max(abs(column_budgets_master))<eqb_col_budgs and np.min(lapse_eqb)==1):
                                                                 # if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>100 or (input_source==2 and ts > 10)) and np.max(abs(column_budgets_master))<eqb_col_budgs):
                                                                 # if(np.max(abs(column_budgets_master))<eqb_col_budgs): # NJE temp fix for perts, remember to reset!
                                                                     if(plotted!=1):
