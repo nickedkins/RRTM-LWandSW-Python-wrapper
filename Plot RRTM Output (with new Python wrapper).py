@@ -14,15 +14,12 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops
+plot_switch=2 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/Expts for TE paper/cloud height/phase space batch/tau=0.1, ssa=0.005/',
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/Expts for TE paper/cloud height/phase space batch/tau=0.1, ssa=0.5/',
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/Expts for TE paper/cloud height/phase space batch/tau=10, ssa=0.005/',
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/Expts for TE paper/cloud height/phase space batch/tau=10, ssa=0.5/',
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
+'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/histogram/v2/'
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -149,8 +146,8 @@ def plotrrtmoutput_masters():
             
             plt.figure(1)
             plt.subplot(121)
-            # plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
-            plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat])
+            plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
+            # plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat])
             # plt.semilogy(tavel_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(i_zon))
             if(cti_type==0):
                 cti=np.int(cti_master[i_zon,i_lat])
@@ -165,11 +162,11 @@ def plotrrtmoutput_masters():
             # plt.plot(tz_master[cti,i_zon,i_lat], altz_master[ cti, i_zon, i_lat ],'o' )
             # plt.ylim(4000,12000)
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
-            # plt.ylim(1000,10)
+            plt.ylim(1000,10)
             plt.xlabel('T (K)')
             plt.ylabel('Pressure (hPa)')
             plt.grid(True,which='both')
-            plt.legend()
+            # plt.legend()
             
             # plt.subplot(331)
             # plt.semilogy(totuflux_lw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],label=fn)
@@ -227,17 +224,10 @@ def plotrrtmoutput_masters():
             # plt.xlabel('wbrodl')
             
             plt.subplot(122)
-            # plt.semilogy(np.mean(dfnet_master_adv[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='tot {}'.format(fn))
-            # plt.semilogy(np.mean(dfnet_master_rad[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='tot {}'.format(fn))
-            plt.plot(np.mean(dfnet_master[:,:,i_lat],axis=1),altavel_master[:,i_zon,i_lat],'-',label='tot {}'.format(fn))
-            # plt.xlim(-5,5)
-            # plt.semilogy(np.mean(dfnet_master_rad[cti,:,i_lat],axis=0),pavel_master[cti,i_zon,i_lat],'o',label='tot {}'.format(fn))
-            # plt.plot(np.mean(dfnet_master_rad[np.int(cti_td[i_zon,i_lat]),:,i_lat],axis=0), pz_master[np.int(cti_td[i_zon,i_lat]),i_zon,i_lat], '*' )
-            # plt.semilogy(np.mean(dfnet_master_adv[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='adv {}'.format(fn))
-            # plt.semilogy(np.mean(dfnet_master_rad[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-.',label='rad {}'.format(fn))
+            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
             plt.axvline(-eqb_maxdfnet,linestyle='--')
             plt.axvline(eqb_maxdfnet,linestyle='--')
-            # plt.ylim(1000,10)
+            plt.ylim(1000,10)
             # plt.ylim(1000,600)
             plt.xlim(-5,5)
             plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
@@ -269,7 +259,7 @@ if('.DS_Store' in a):
     a.remove('.DS_Store')
 nfiles=len(a)
 
-nlayers=120
+nlayers=60
 nlatcols=1
 
 
@@ -879,19 +869,19 @@ for directory in directories:
             plt.legend()
            
             
-        if(nlatcols>1):
-            ztrop=np.diagonal(altz_master[cti,0,:]/1000.)
-            ptrop=np.diagonal(pz_master[cti,0,:])
-            ttrop=np.diagonal(tz_master[cti,0,:])
-        else:
-            ztrop=altz_master[cti,0,0]/1000.
-            ptrop=pz_master[cti,0,0]
-            ttrop=tz_master[cti,0,0]
+        # if(nlatcols>1):
+        #     ztrop=np.diagonal(altz_master[cti,0,:]/1000.)
+        #     ptrop=np.diagonal(pz_master[cti,0,:])
+        #     ttrop=np.diagonal(tz_master[cti,0,:])
+        # else:
+        #     ztrop=altz_master[cti,0,0]/1000.
+        #     ptrop=pz_master[cti,0,0]
+        #     ttrop=tz_master[cti,0,0]
         tsurf=tz_master[0,0,0]
         
         
         
-        print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
+        # print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
         
         # argefold = np.argmin(abs(wkl_master[0,0,0,0]/wkl_master[:,0,0,0]-2.718))
         # Hh2o = altz_master[argefold,0,0]/1000.
@@ -947,15 +937,97 @@ for directory in directories:
 
 ########################################################################## end read files #################################################################################################################
 
-tbaseline=274.210
+if(plot_switch==2):
 
-zclddums = np.linspace(1,10,5)
+    cf_tots = [0.5,0.6]
+    clr_tots = np.ones(len(cf_tots))-cf_tots
+    cldlats = np.arange(nlatcols)
+    tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
+    pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
+    # tau_tots = [ 0.15, 6.5, 220 ]
+    # pclddums = [ 1000, 560, 50 ]
+    
+    toalws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
+    dtoalws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
+    toasws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
+    dtoasws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
+    
+    i=0
+    for icf in range(len(cf_tots)):
+        for icl in range(len(cldlats)):
+            for itt in range(len(tau_tots)):
+                for ipc in range(len(pclddums)):
+                    toalws[icf, icl, itt, ipc] = fnet_lw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_lw_dirfil[-1,1,i,0,0]*clr_tots[icf]
+                    toasws[icf, icl, itt, ipc] = fnet_sw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_sw_dirfil[-1,1,i,0,0]*clr_tots[icf]
+                    i+=1
+    
+    dtoalws = toalws[0,:,:,:] - toalws[1,:,:,:]
+    crklw = dtoalws / 10.
+    # crklw = np.amax(crklw) - crklw
+    dtoasws = toasws[0,:,:,:] - toasws[1,:,:,:]
+    crksw = -dtoasws / 10.
+    # crksw = np.amin(crksw) - crksw
+    
+    vmax=2
+    vmin=-1.*vmax
+    
+    plt.figure(1)
+    
+    plt.subplot(311)
+    plt.title('LW')
+    plt.imshow(crklw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax)
+    plt.xlabel('cloud tau')
+    plt.ylabel('cloud p')
+    plt.colorbar()
+    
+    plt.subplot(312)
+    plt.title('SW')
+    plt.imshow(crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax)
+    plt.xlabel('cloud tau')
+    plt.ylabel('cloud p')
+    plt.colorbar()
+    
+    plt.subplot(313)
+    plt.title('Net')
+    plt.imshow(crklw[0,:,::-1].T+crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax)
+    plt.xlabel('cloud tau')
+    plt.ylabel('cloud p')
+    plt.colorbar()    
 
+# plt.subplot(131)
+# plt.imshow(crklw[0,:,::-1].T,vmin=-2.5,vmax=2.5,cmap='bwr')
+# plt.colorbar()
 
-for i_dir in range(ndirs):
-    plt.plot(tbound_all_dirfil[0,:,i_dir,0], zclddums,'-o',label=dir_labels[i_dir])
-    plt.legend()
+# cf_tots = [0.5, 0.6]
+# cldlats = np.arange(nlatcols)
+# pclddums = np.linspace(500,900,10)
 
+# dTs = np.zeros( ( len(cldlats), len(pclddums) ) )
+
+# i=0
+# for icl in range(len(cldlats)):
+#     for ipc in range(len(pclddums)):
+#         dTs[icl, ipc] = tbound_all_dirfil[0,i+1,0,icl] - tbound_all_dirfil[0,i,0,icl]
+#         i+=2
+
+# # plt.imshow(dTs)
+# # plt.colorbar()
+
+# plt.semilogy(dTs[0,:],pclddums,'-o')
+# plt.ylim(900,500)
+
+# xx,yy=np.meshgrid(latgrid,pclddums)
+# zz=dTs.T
+
+# vmax=np.abs(np.amax(dTs))
+# vmin=-1.*vmax
+
+# plt.figure(1)
+# plt.contourf(xx,yy,zz,vmax=vmax,vmin=vmin,cmap='bwr',levels=100)
+# plt.xlabel('Latitude')
+# plt.ylabel('Pressure')
+# plt.ylim(900,500)
+# plt.colorbar()
 
 # pert_pbottoms = np.arange(1000,0,-100) 
 
@@ -1056,19 +1128,6 @@ if(plot_switch==1):
     #     plt.ylabel('Tropopause height (km)')
     # plt.legend()
    
-
-
-if(plot_switch==2):
-    advs=[30.,60.,90.,120.,150.]
-    # advs=40
-    
-    for i_dir in range(len(directories)):
-        dir_label = directories[i_dir].split('/')[-2]
-        plt.figure(1)
-        plt.plot(advs,lapse_td_all_dirfil[0,:,i_dir,0],'-o',label=dir_label)
-        plt.xlabel('Total advective flux (Wm$^{-2}$)')
-        plt.ylabel('Lapse rate (K/km)')
-        plt.legend()
     
 
 # plt.figure(1)
