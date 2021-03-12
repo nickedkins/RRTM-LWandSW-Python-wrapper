@@ -19,7 +19,7 @@ cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
 # '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/histogram/v2/'
+'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/histogram/v3 lat=80/'
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -961,6 +961,9 @@ if(plot_switch==2):
                     toasws[icf, icl, itt, ipc] = fnet_sw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_sw_dirfil[-1,1,i,0,0]*clr_tots[icf]
                     i+=1
     
+    xticks= tau_tots
+    yticks = pclddums
+    
     dtoalws = toalws[0,:,:,:] - toalws[1,:,:,:]
     crklw = dtoalws / 10.
     # crklw = np.amax(crklw) - crklw
@@ -975,7 +978,8 @@ if(plot_switch==2):
     
     plt.subplot(311)
     plt.title('LW')
-    plt.imshow(crklw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax)
+    plt.imshow(crklw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[0.15,220,800,50])
+    plt.gca().set_xticklabels(tau_tots)
     plt.xlabel('cloud tau')
     plt.ylabel('cloud p')
     plt.colorbar()
