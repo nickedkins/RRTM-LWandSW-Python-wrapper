@@ -14,13 +14,13 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops
+plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops
 cti_type=3 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RRC transp and no transp/cloud working/cm=4, cz=8, pzh=3/era-i albedo/',
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RRC transp and no transp/cloud working/cm=4, cz=8, pzh=3/north albedo param/cm=4 cz=8/'
+'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RRC transp and no transp/cloud working/cm=4, cz=8, pzh=3/era-i albedo/',
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RRC transp and no transp/cloud working/cm=4, cz=8, pzh=3/north albedo param/cm=4 cz=8/'
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -145,7 +145,7 @@ def plotrrtmoutput_masters():
         for i_zon in range(nzoncols):
         # for i_zon in [0]:
             plt.figure(1)
-            plt.subplot(131)
+            plt.subplot(121)
             plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
             # plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat])
             # plt.semilogy(tavel_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(i_zon))
@@ -167,11 +167,11 @@ def plotrrtmoutput_masters():
             plt.ylabel('Pressure (hPa)')
             plt.grid(True,which='both')
             # plt.legend()
-            plt.subplot(132)
-            plt.semilogy(totuflux_lw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],label=fn)
-            plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
-            plt.xlabel('totuflux')
-            plt.legend()
+            # plt.subplot(132)
+            # plt.semilogy(totuflux_lw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],label=fn)
+            # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
+            # plt.xlabel('totuflux')
+            # plt.legend()
             # plt.subplot(333)
             # plt.semilogy(totdflux_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat])
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
@@ -199,7 +199,7 @@ def plotrrtmoutput_masters():
             # plt.semilogy(wbrodl_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-o')
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wbrodl')
-            plt.subplot(133)
+            plt.subplot(122)
             # plt.semilogy(np.mean(dfnet_master_adv[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='tot {}'.format(fn))
             # plt.semilogy(np.mean(dfnet_master_rad[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'--',label='tot {}'.format(fn))
             plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-',label='tot {}'.format(fn))
@@ -873,20 +873,18 @@ for directory in directories:
 
 
         
-        dTs=tbound_all_dirfil[:,1,i_dir,:]-tbound_all_dirfil[:,0,i_dir,:]
-        
-        
+        # dTs=tbound_all_dirfil[:,1,i_dir,:]-tbound_all_dirfil[:,0,i_dir,:]
 
-        if(i_file%2==0):
-            # plt.plot(latgrid,dTs[0,:],'-o',label=dir_label+' cloudy')
-            # plt.plot(latgrid,dTs[1,:],'--o',label=dir_label+' clear')
-            # plt.plot(latgrid,dTs[1,:]-dTs[0,:],'--o',label=dir_label+' clear')
-            plt.plot(latgrid,np.mean(dTs[:,:],axis=0),'-o',label=dir_label)            
-            plt.xlabel('Latitude')
-            plt.ylabel('dT for 2xCO2')
-            # plt.ylim(0)
+        # if(i_file%2==0):
+        #     # plt.plot(latgrid,dTs[0,:],'-o',label=dir_label+' cloudy')
+        #     # plt.plot(latgrid,dTs[1,:],'--o',label=dir_label+' clear')
+        #     # plt.plot(latgrid,dTs[1,:]-dTs[0,:],'--o',label=dir_label+' clear')
+        #     plt.plot(latgrid,np.mean(dTs[:,:],axis=0),'-o',label=dir_label)            
+        #     plt.xlabel('Latitude')
+        #     plt.ylabel('dT for 2xCO2')
+        #     # plt.ylim(0)
             
-            print(dir_label,np.mean(dTs))
+        #     print(dir_label,np.mean(dTs))
         
         plt.legend()
         
