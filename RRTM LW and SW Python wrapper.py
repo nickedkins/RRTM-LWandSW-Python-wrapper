@@ -546,16 +546,19 @@ def createlatdistbn(filename):
 #################functions###########################################################
 
 # set overall dimensions for model
-nlayers=60 # number of vertical layers
-nzoncols=2 # number of zonal columns (usually just 2: cloudy and clear)
+nlayers=590 # number of vertical layers
+nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
-input_source=2 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
+master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
+input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6'
 lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0
+
+detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
+plot_eqb_approach = 1
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
@@ -589,12 +592,12 @@ nclouds=nlayers # number of cloud layers
 
 lw_on=1 # 0: don't call rrtm_lw, 1: do
 sw_on=1 # 0: don't call rrtm_sw, 1: do
-fixed_sw_on=0
+fixed_sw_on=1
+fixed_sw=240.
 if(master_input==7):
     fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
 if(sw_on==0):
     fixed_sw_on=1
-fixed_sw=240.
 gravity=9.79764 # RCEMIP value
 avogadro=6.022e23 # avogadro's constant
 iatm=0 #0 for layer values, 1 for level values
@@ -613,15 +616,12 @@ ur_max=3.0 # minimum value for under-relaxation constant
 eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating rate is below this value (if not using dfnet to determine eqb)
 # eqb_maxdfnet=1e-4
 
-
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.005 # max equilibrium value of total column energy budget at TOA
-timesteps=100 # number of timesteps until model exits
+eqb_col_budgs=0.001 # max equilibrium value of total column energy budget at TOA
+timesteps=2000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
+
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
-
-
-
 
 # adv_locs=[0] # 0: heating everywhere, 1: heating only in tropopause
 adv_loc=0
@@ -656,11 +656,13 @@ pertzons=[0]
 pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
-perts=[1.00]
+perts=[0.001]
+pert_type=1 # 0: relative, 1: absolute
 
-# pert_pbottoms = np.arange(1100,0,-100)
-pert_pbottoms = [1000.]
 pert_pwidth = 1000.
+pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
+# pert_pbottoms = [1000.]
+
 
 pert_zon_h2o=1.0
 
@@ -673,14 +675,14 @@ tbound_add=0
 # b_rdwvs=np.arange(1,8)
 b_rdwv = 4.
 
-# pclddums = np.linspace(500,900,1)
-cf_tots = [ 0.5, 0.6 ]
 cldlats = np.arange(nlatcols)
+# cf_tots = [ 0.5, 0.6 ]
+# tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ] #isccp numbers
+# pclddums = [ 800, 680, 560, 440, 310, 180, 50 ] #isccp numbers
 
-tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
-pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
-# tau_tots = [ 0.15, 6.5, 220 ]
-# pclddums = [ 1000, 560, 50 ]
+cf_tots = [ 0.0 ]
+tau_tots = [ 0.0 ]
+pclddums = [ 500. ]
 
 
 
@@ -689,7 +691,7 @@ pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
 # calculate total number of parameter combinations (number of model runs)
 i_loops=0
 totloops=np.float(len(pclddums) * len(cldlats) * len(cf_tots) * len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources)*len(tau_tots))
-looptime = 90
+looptime = 15 * (nlayers/60.)
 print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(totloops), totloops*looptime/60.))
 print()
 
@@ -774,6 +776,7 @@ for cf_tot in cf_tots:
                                                             f=interp1d(lat_obs,tg_obs)
                                                             tbound_inits=f(latgrid)
                                                             undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*2. #for nl=60
+                                                            undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl=100
                                                             # undrelax_lats=np.ones(nlatcols)*0.5 #for nl=590
                                                             iemiss=2 #surface emissivity. Keep this fixed for now.
                                                             iemis=2
@@ -2136,7 +2139,6 @@ for cf_tot in cf_tots:
                                                                         wkl[6,i]=1650e-9 # ch4
                                                                         wkl[7,i]=0.209 # o2
                                                                     wkl[1,:] *= 8.123297816734589e+26 / np.sum(wkl[1,:]*mperlayr)
-                                                                    print(np.sum(wkl[1,:]*mperlayr))
                                                                 elif(master_input==5):
                                                                     surf_rh=0.8
                                                                     for i in range(nlayers):
@@ -2529,7 +2531,7 @@ for cf_tot in cf_tots:
                                                                         # perturb surface temperature to reduce column energy imbalance
                                                                         if((input_source==0 and ts>100) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
-                                                                            dtbound=column_budgets_master[i_zon,i_lat]*0.1
+                                                                            dtbound=column_budgets_master[i_zon,i_lat]*undrelax_lats[0]*0.05
                                                                             if(input_source==2):
                                                                                 dtbound=0.
                                                                                 # dtbound*=1.
@@ -2554,8 +2556,10 @@ for cf_tot in cf_tots:
                                                                             if(i_zon==pertzon and i_lat==pertlat):
                                                                                 for i_lay in range(nlayers):
                                                                                     if(pz[i_lay] < pert_pbottom and pz[i_lay] > pert_pbottom - pert_pwidth ):
-                                                                                        wkl[pertmol,i_lay]*=pert
-                                                                                        # wkl[pertmol,i_lay]+=pert
+                                                                                        if(pert_type==0):
+                                                                                            wkl[pertmol,i_lay]*=pert
+                                                                                        elif(pert_type==1):
+                                                                                            wkl[pertmol,i_lay]+=pert
                                                                                  
                                                                                     
                                                                                     
@@ -2585,8 +2589,10 @@ for cf_tot in cf_tots:
                                                                             if(i_zon==pertzon and i_lat==pertlat):
                                                                                 for i_lay in range(nlayers):
                                                                                     if(pz[i_lay] < pert_pbottom and pz[i_lay] > pert_pbottom - pert_pwidth ):
-                                                                                        wkl[pertmol,i_lay]/=pert
-                                                                                        # wkl[pertmol,i_lay]-=pert
+                                                                                        if(pert_type==0):
+                                                                                            wkl[pertmol,i_lay]/=pert
+                                                                                        elif(pert_type==1):
+                                                                                            wkl[pertmol,i_lay]-=pert
     
                                                                         prev_htr=htr
     
@@ -2852,7 +2858,7 @@ for cf_tot in cf_tots:
                                                                 
     
                                                                 # print eqbseek
-                                                                if(ts%20==0):
+                                                                if(ts%20==0 and plot_eqb_approach==1 ):
                                                                     print( '{: 4d}|'.format(ts))
                                                                     ts_rec.append(ts)
                                                                     maxdfnet_rec.append(np.max(maxdfnet_lat))
@@ -2863,12 +2869,13 @@ for cf_tot in cf_tots:
                                                                     plt.axhline(eqb_maxdfnet,linestyle='--')
                                                                     # plt.ylim(-abs(np.array(maxdfnet_rec[:-10])), abs(np.array(maxdfnet_rec[:-10])))
                                                                     show()
-                                                                    for i_lat in range(nlatcols):
-                                                                        if(i_lat<nlatcols-1):
-                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
-                                                                        else:
-                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
-                                                                            print('-------------------------------------------------------------------')
+                                                                    if(detail_print==1):
+                                                                        for i_lat in range(nlatcols):
+                                                                            if(i_lat<nlatcols-1):
+                                                                                print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                            else:
+                                                                                print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                                print('-------------------------------------------------------------------')
     
                                                                 if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>200 or (input_source==2 and ts > 200)) and np.max(abs(column_budgets_master))<eqb_col_budgs and np.min(lapse_eqb)==1):
                                                                 # if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>100 or (input_source==2 and ts > 10)) and np.max(abs(column_budgets_master))<eqb_col_budgs):
@@ -2877,7 +2884,7 @@ for cf_tot in cf_tots:
                                                                         plotrrtmoutput()
                                                                         plotted=1
                                                                     print('Equilibrium reached!')
-                                                                    os.system('say "Equilibrium reached"')
+                                                                    # os.system('say "Equilibrium reached"')
                                                                     # writeoutputfile()
                                                                     writeoutputfile_masters()
                                                                     filewritten=1

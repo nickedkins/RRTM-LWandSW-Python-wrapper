@@ -14,12 +14,14 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=2 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK
+plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
 # '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/histogram/v2/'
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RD expts for TE paper water vapor perts/nl=590/absolute/all layers pert/',
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RD expts for TE paper water vapor perts/nl=590/absolute/layer perts/'
+'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RD expts for TE paper water vapor perts/nl=590/relative/layer perts/'
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -259,7 +261,7 @@ if('.DS_Store' in a):
     a.remove('.DS_Store')
 nfiles=len(a)
 
-nlayers=60
+nlayers=590
 nlatcols=1
 
 
@@ -809,8 +811,8 @@ for directory in directories:
         if(fn[0]=='0'):
             continue
 
-        if(i_file==len(a)):
-            plt.legend()
+        # if(i_file==len(a)):
+        #     plt.legend()
         if(plot_switch==0):
             plotrrtmoutput_masters()
         # plt.plot(latgrid,lapse_master[0,:],'-o')
@@ -869,19 +871,19 @@ for directory in directories:
             plt.legend()
            
             
-        # if(nlatcols>1):
-        #     ztrop=np.diagonal(altz_master[cti,0,:]/1000.)
-        #     ptrop=np.diagonal(pz_master[cti,0,:])
-        #     ttrop=np.diagonal(tz_master[cti,0,:])
-        # else:
-        #     ztrop=altz_master[cti,0,0]/1000.
-        #     ptrop=pz_master[cti,0,0]
-        #     ttrop=tz_master[cti,0,0]
+        if(nlatcols>1):
+            ztrop=np.diagonal(altz_master[cti,0,:]/1000.)
+            ptrop=np.diagonal(pz_master[cti,0,:])
+            ttrop=np.diagonal(tz_master[cti,0,:])
+        else:
+            ztrop=altz_master[cti,0,0]/1000.
+            ptrop=pz_master[cti,0,0]
+            ttrop=tz_master[cti,0,0]
         tsurf=tz_master[0,0,0]
         
         
         
-        # print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
+        print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
         
         # argefold = np.argmin(abs(wkl_master[0,0,0,0]/wkl_master[:,0,0,0]-2.718))
         # Hh2o = altz_master[argefold,0,0]/1000.
@@ -930,7 +932,7 @@ for directory in directories:
             
         #     print(dir_label,np.mean(dTs))
         
-        plt.legend()
+        # plt.legend()
         
     i_dir+=1    
 
@@ -1029,15 +1031,19 @@ if(plot_switch==2):
 # plt.ylim(900,500)
 # plt.colorbar()
 
-# pert_pbottoms = np.arange(1000,0,-100) 
-
-# plt.figure(1)
-# plt.title('Absolute perturbation of 0.001 g/kg')
-# plt.plot(tz_all_dirfil[0,0,1:,0,0]-tz_all_dirfil[0,0,0,0,0],pert_pbottoms-50,'-o')
-# plt.ylim(1000,10)
-# plt.xlabel('Temperature change (K)')
-# plt.ylabel('Pressure at centre of 100 hPa perturbed region (hPa)')
-
+if(plot_switch==3):
+    pert_pwidth = 100.
+    pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
+    
+    plt.figure(1)
+    plt.title('Absolute perturbation of 0.001 g/kg')
+    # plt.title('Relative perturbation of 7%')
+    plt.plot(tz_all_dirfil[0,0,1:,0,0]-tz_all_dirfil[0,0,0,0,0],pert_pbottoms[1:]-pert_pwidth/2,'-o')
+    plt.ylim(1000,-50)
+    plt.xlabel('Temperature change (K)')
+    plt.ylabel('Pressure at centre of {: 4.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
+    
+print('Total T change: {: 6.4f} K'.format(np.sum(tz_all_dirfil[0,0,1:,0,0]-tz_all_dirfil[0,0,0,0,0])))
 
 # for i_dir in range(len(directories)):
 #     for i_file in range(len(a)):
