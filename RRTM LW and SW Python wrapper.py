@@ -210,7 +210,7 @@ def plotrrtmoutput():
     plt.ylabel('pz')
     plt.legend()
     plt.subplot(335)
-    plt.semilogy(tavel,pavel,'o',c='b')5
+    plt.semilogy(tavel,pavel,'o',c='b')
     plt.ylim(max(pz),min(pz))
     plt.subplot(336)
     logpplot(wbrodl,pavel,'wbrodl','pavel')
@@ -546,7 +546,7 @@ def createlatdistbn(filename):
 #################functions###########################################################
 
 # set overall dimensions for model
-nlayers=590 # number of vertical layers
+nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
@@ -617,8 +617,8 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.001 # max equilibrium value of total column energy budget at TOA
-timesteps=2000 # number of timesteps until model exits
+eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
+timesteps=500 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
@@ -663,12 +663,12 @@ pertzons=[0]
 pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
-perts=[0.001]
-pert_type=1 # 0: relative, 1: absolute
+perts=[1.0]
+pert_type=0 # 0: relative, 1: absolute
 
 pert_pwidth = 1000.
-pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
-# pert_pbottoms = [1000.]
+# pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
+pert_pbottoms = [1000.]
 
 
 pert_zon_h2o=1.0
@@ -679,8 +679,8 @@ ncloudcols=1
 # tbound_adds=[0.] # add a constant to tbound 
 tbound_add=0
 
-# b_rdwvs=np.arange(1,8)
-b_rdwv = 4.
+b_rdwvs = np.logspace(start=np.log10(1), stop=np.log10(8), num=10, base=10.)
+# b_rdwv = 4.
 
 cldlats = np.arange(nlatcols)
 # cf_tots = [ 0.5, 0.6 ]
@@ -691,7 +691,7 @@ cf_tots = [ 0.0 ]
 tau_tots = [ 0.0 ]
 pclddums = [ 500. ]
 
-
+cf_tot=0.0
 
 #################################################################### end of variable initialisation ##################################################################################
 
@@ -703,7 +703,8 @@ print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(tot
 print()
 
 
-for cf_tot in cf_tots:
+# for cf_tot in cf_tots:
+for b_rdwv in b_rdwvs:
     for cldlat in cldlats:
         for tau_tot in tau_tots:
             for pclddum in pclddums:
@@ -782,9 +783,12 @@ for cf_tot in cf_tots:
                                                             tg_obs=data[:,1]
                                                             f=interp1d(lat_obs,tg_obs)
                                                             tbound_inits=f(latgrid)
-                                                            undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*2. #for nl=60
-                                                            undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl=100
-                                                            # undrelax_lats=np.ones(nlatcols)*0.5 #for nl=590
+                                                            if(nlayers==60):
+                                                                undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*2. #for nl=60
+                                                            elif(nlayers==100):
+                                                                undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl=100
+                                                            elif(nlayers==590):
+                                                                undrelax_lats=np.ones(nlatcols)*0.5 #for nl=590
                                                             iemiss=2 #surface emissivity. Keep this fixed for now.
                                                             iemis=2
                                                             ireflect=0 #for Lambert reflection

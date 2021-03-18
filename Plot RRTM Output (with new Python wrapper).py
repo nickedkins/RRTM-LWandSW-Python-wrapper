@@ -18,10 +18,10 @@ plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapo
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
+'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
 # '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RD expts for TE paper water vapor perts/nl=590/absolute/all layers pert/',
 # '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RD expts for TE paper water vapor perts/nl=590/absolute/layer perts/'
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RD expts for TE paper water vapor perts/nl=590/relative/layer perts/'
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RD expts for TE paper water vapor perts/nl=590/relative/layer perts/'
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -261,7 +261,7 @@ if('.DS_Store' in a):
     a.remove('.DS_Store')
 nfiles=len(a)
 
-nlayers=590
+nlayers=60
 nlatcols=1
 
 
@@ -885,14 +885,31 @@ for directory in directories:
         
         print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
         
-        # argefold = np.argmin(abs(wkl_master[0,0,0,0]/wkl_master[:,0,0,0]-2.718))
-        # Hh2o = altz_master[argefold,0,0]/1000.
+        argefold = np.argmin(abs(wkl_master[0,0,0,0]/wkl_master[:,0,0,0]-2.718))
+        Hh2o = altz_master[argefold,0,0]/1000.
+        # b_rdwvs=np.arange(1,8)
         
         # print('h2o scale height = {: 4.2f}'.format(Hh2o))
         # plt.xlabel('Water vapour scale height (km)')
         # plt.ylabel('Surface temperature (K)')
-        # plt.figure(1)
-        # plt.plot(Hh2o,tsurf,'o',c='b')
+        plt.figure(1)
+        plt.subplot(221)
+        plt.plot(Hh2o,tsurf,'o',c='b')
+        plt.xlabel('H$_2$O scale height (km)')
+        plt.ylabel('$T_{surf}$')
+        plt.subplot(222)
+        plt.plot(Hh2o,ttrop,'o',c='b')
+        plt.xlabel('H$_2$O scale height (km)')
+        plt.ylabel('$T_{trop}$')
+        plt.subplot(223)
+        plt.plot(Hh2o,ztrop,'o',c='b')
+        plt.xlabel('H$_2$O scale height (km)')
+        plt.ylabel('$z_{trop}$')
+        plt.subplot(224)
+        plt.plot(Hh2o,ptrop,'o',c='b')
+        plt.xlabel('H$_2$O scale height (km)')
+        plt.ylabel('$p_{trop}$')
+        
 
             
         
