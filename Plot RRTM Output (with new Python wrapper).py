@@ -14,12 +14,15 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK
+plot_switch=2 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/histogram/v3 lat=80/'
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/histogram/v3 lat=80/',
+# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/histogram/v2 lat=45/'
+'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/histogram/v4 lat=0/'
+
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -44,7 +47,7 @@ def colors(n):
   return ret
 
 def init_plotting():
-    plt.rcParams['figure.figsize'] = (10,10)
+    plt.rcParams['figure.figsize'] = (15,15)
     plt.rcParams['font.size'] = 20
     plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
@@ -929,8 +932,7 @@ for directory in directories:
         #     # plt.ylim(0)
             
         #     print(dir_label,np.mean(dTs))
-        
-        plt.legend()
+    
         
     i_dir+=1    
 
@@ -978,25 +980,41 @@ if(plot_switch==2):
     
     plt.subplot(311)
     plt.title('LW')
-    plt.imshow(crklw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[0.15,220,800,50])
-    plt.gca().set_xticklabels(tau_tots)
-    plt.xlabel('cloud tau')
-    plt.ylabel('cloud p')
-    plt.colorbar()
+    plt.imshow(crklw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
+    plt.gca().set_xticklabels(tau_tots[::2])
+    plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
+    plt.gca().set_yticklabels(pclddums[::2])
+    plt.xlabel(r'$\tau$')
+    plt.ylabel(r'CTP (hPa)')
+    cbar = plt.colorbar()
+    cbar.set_label(r'$Wm^{-2}\%^{-1}$', rotation=270,labelpad=20)
     
     plt.subplot(312)
     plt.title('SW')
-    plt.imshow(crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax)
-    plt.xlabel('cloud tau')
-    plt.ylabel('cloud p')
-    plt.colorbar()
+    plt.imshow(crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
+    plt.gca().set_xticklabels(tau_tots[::2])
+    plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
+    plt.gca().set_yticklabels(pclddums[::2])
+    plt.xlabel(r'$\tau$')
+    plt.ylabel(r'CTP (hPa)')
+    cbar = plt.colorbar()
+    cbar.set_label(r'$Wm^{-2}\%^{-1}$', rotation=270,labelpad=20)
     
     plt.subplot(313)
     plt.title('Net')
-    plt.imshow(crklw[0,:,::-1].T+crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax)
-    plt.xlabel('cloud tau')
-    plt.ylabel('cloud p')
-    plt.colorbar()    
+    plt.imshow(crklw[0,:,::-1].T+crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
+    plt.gca().set_xticklabels(tau_tots[::2])
+    plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
+    plt.gca().set_yticklabels(pclddums[::2])
+    plt.xlabel(r'$\tau$')
+    plt.ylabel(r'CTP (hPa)')
+    cbar = plt.colorbar()
+    cbar.set_label(r'$Wm^{-2}\%^{-1}$', rotation=270,labelpad=20)
+    
+    plt.gcf().suptitle(r'Cloud radiative kernels at 0$\degree$ N',ha='center',y=1.0,x=0.69, va='center')
 
 # plt.subplot(131)
 # plt.imshow(crklw[0,:,::-1].T,vmin=-2.5,vmax=2.5,cmap='bwr')

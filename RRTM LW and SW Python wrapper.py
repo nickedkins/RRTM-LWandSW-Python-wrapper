@@ -553,7 +553,7 @@ nlatcols=1 # number of latitude columns
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=2 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file=project_dir+'_Useful Data/baselines/nlats=1, nlayers=60, nzoncols=2, 80deg, master_input=6'
+prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6, lat=0'
 lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0
 
@@ -580,7 +580,7 @@ latweights_area/=np.mean(latweights_area)
 
 # if there's only one lat column, pick its lat and set some nearby boundaries to enable interpolation over short interval
 if(nlatcols==1):
-    latgrid=np.array([80.])
+    latgrid=np.array([0.])
     latgridbounds=[latgrid[0]-5.,latgrid[0]+5.]
 
 nmol=7 # number of gas molecule species
@@ -643,7 +643,7 @@ lapseloops=[6]
 c_zonals=[0.] #zonal transport coefficient
 c_merids=[4.] #meridional transport coefficient
 
-extra_forcings=[80.] # add an extra TOA forcing to any box
+extra_forcings=[-60.] # add an extra TOA forcing to any box
 
 
 
@@ -674,14 +674,14 @@ tbound_add=0
 b_rdwv = 4.
 
 cldlats = np.arange(nlatcols)
+
 cf_tots = [ 0.5, 0.6 ]
 tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
 pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
+
 # cf_tots = [ 0.0 ]
 # tau_tots = [ 2.45 ]
 # pclddums = [ 560 ]
-
-
 
 #################################################################### end of variable initialisation ##################################################################################
 
@@ -2530,8 +2530,8 @@ for cf_tot in cf_tots:
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
                                                                             dtbound=column_budgets_master[i_zon,i_lat]*0.1
                                                                             if(input_source==2):
-                                                                                # dtbound=0.
-                                                                                dtbound*=1.
+                                                                                dtbound=0.
+                                                                                # dtbound*=1.
                                                                             dtbound=np.clip(dtbound,-dmax,dmax)
                                                                             tbound+=dtbound
                                                                         tbound=np.clip(tbound,tmin,tmax)
@@ -2782,8 +2782,8 @@ for cf_tot in cf_tots:
                                                                                     dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]*1.0 
                                                                                 dT=np.clip(dT,-maxdT[i_lat],maxdT[i_lat])
                                                                                 if(input_source==2):
-                                                                                    # dT=0.
-                                                                                    dT*=1.
+                                                                                    dT=0.
+                                                                                    # dT*=1.
                                                                                 tavel_master[i,i_zon,i_lat]+=dT
                                                                         tavel_master=np.clip(tavel_master,tmin,tmax)
     
