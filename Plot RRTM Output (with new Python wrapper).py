@@ -24,9 +24,13 @@ directories = [
 # '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/RD expts for TE paper water vapor perts/nl=590/relative/layer perts/'
 ]
 
+
+
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficient
 
+nlayers=590
+nlatcols=1
 nzoncols=2
 
 def colors(n):
@@ -261,8 +265,7 @@ if('.DS_Store' in a):
     a.remove('.DS_Store')
 nfiles=len(a)
 
-nlayers=60
-nlatcols=1
+
 
 
 
