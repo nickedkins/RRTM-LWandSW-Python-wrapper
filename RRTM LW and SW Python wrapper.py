@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (10,10)
@@ -616,7 +616,7 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
 eqb_col_budgs=0.001 # max equilibrium value of total column energy budget at TOA
-timesteps=500 # number of timesteps until model exits
+timesteps=10 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
 
@@ -672,8 +672,8 @@ tbound_add=0
 # b_rdwvs=np.arange(1,8)
 b_rdwv = 4.
 
-zclddums = np.linspace(1,10,5)
-# zclddums=[5.]
+# zclddums = np.linspace(1,10,5)
+zclddums=[5.]
 
 #################################################################### end of variable initialisation ##################################################################################
 

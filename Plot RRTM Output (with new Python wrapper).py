@@ -18,7 +18,7 @@ plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
 # '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/Expts for TE paper/cloud height/phase space batch/tau=0.1, ssa=0.005/',
 # '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/Expts for TE paper/cloud height/phase space batch/tau=0.1, ssa=0.5/',
 # '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/Expts for TE paper/cloud height/phase space batch/tau=10, ssa=0.005/',
@@ -952,9 +952,9 @@ tbaseline=274.210
 zclddums = np.linspace(1,10,5)
 
 
-for i_dir in range(ndirs):
-    plt.plot(tbound_all_dirfil[0,:,i_dir,0], zclddums,'-o',label=dir_labels[i_dir])
-    plt.legend()
+# for i_dir in range(ndirs):
+#     plt.plot(tbound_all_dirfil[0,:,i_dir,0], zclddums,'-o',label=dir_labels[i_dir])
+#     plt.legend()
 
 
 # pert_pbottoms = np.arange(1000,0,-100) 
