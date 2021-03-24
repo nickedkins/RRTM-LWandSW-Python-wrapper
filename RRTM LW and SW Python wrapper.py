@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (10,10)
@@ -227,7 +227,7 @@ def convection(T,z,conv_log):
     for i in range(1,len(T)):
         dT = (T[i]-T[i-1])
         dz = (z[i]-z[i-1])/1000.
-        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 1.0) and z[i]/1000. < 1000. ):
+        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 0.0) and z[i]/1000. < 1000. ):
             if(conv_log==1):
                 conv[i]=1.
             T[i] = T[i-1] - lapse * dz
@@ -546,7 +546,7 @@ def createlatdistbn(filename):
 #################functions###########################################################
 
 # set overall dimensions for model
-nlayers=590 # number of vertical layers
+nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
@@ -617,8 +617,8 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.001 # max equilibrium value of total column energy budget at TOA
-timesteps=2000 # number of timesteps until model exits
+eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
+timesteps=500 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
@@ -660,8 +660,8 @@ perts=[0.001]
 pert_type=1 # 0: relative, 1: absolute
 
 pert_pwidth = 1000.
-pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
-# pert_pbottoms = [1000.]
+# pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
+pert_pbottoms = [1000.]
 
 
 pert_zon_h2o=1.0
@@ -680,8 +680,8 @@ cldlats = np.arange(nlatcols)
 # tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ] #isccp numbers
 # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ] #isccp numbers
 
-cf_tots = [ 0.0 ]
-tau_tots = [ 0.0 ]
+cf_tots = [ 0.5 ]
+tau_tots = [ 1e-4 ]
 pclddums = [ 500. ]
 
 
@@ -2393,7 +2393,8 @@ for cf_tot in cf_tots:
                                                                         
                                                                         # cf_tot = 0.6
                                                                         # tau_tot = 3.0
-                                                                        ssa_tot = 0.5
+                                                                        # ssa_tot = 0.5
+                                                                        ssa_tot = 0.0
                                                                         # cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
                                                                         # cldlay_dums=[np.int(nlayers/2)]
                                                                         # cldlay_dum = np.int(np.linspace(1,np.int(nlayers/2),nzoncols)[i_zon])
