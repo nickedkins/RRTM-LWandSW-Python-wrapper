@@ -26,7 +26,7 @@ directories = [
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficient
 
-nlayers=100
+nlayers=590
 nlatcols=1
 nzoncols=2
 
@@ -883,13 +883,14 @@ for directory in directories:
         
         
         
-        print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
-        
+        # print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
+        print('{: 6.4f}, {: 6.4f}, {: 6.4f}, {: 6.4f} '.format(ztrop, ptrop, ttrop, tsurf))
+         
         argefold = np.argmin(abs(wkl_master[0,0,0,0]/wkl_master[:,0,0,0]-2.718))
         Hh2o = altz_master[argefold,0,0]/1000.
         # b_rdwvs=np.arange(1,8)
         
-        # print('h2o scale height = {: 4.2f}'.format(Hh2o))
+        # print('{: 4.2f}'.format(Hh2o))
         # plt.xlabel('Water vapour scale height (km)')
         # plt.ylabel('Surface temperature (K)')
         plt.figure(1)
