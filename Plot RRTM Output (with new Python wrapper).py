@@ -18,11 +18,7 @@ plot_switch=2 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Current Output/',
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/histogram/v3 lat=80/',
-# '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/histogram/v2 lat=45/'
-'/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/histogram/v4 lat=0/'
-
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -944,10 +940,14 @@ if(plot_switch==2):
     cf_tots = [0.5,0.6]
     clr_tots = np.ones(len(cf_tots))-cf_tots
     cldlats = np.arange(nlatcols)
-    tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
-    pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
-    # tau_tots = [ 0.15, 6.5, 220 ]
-    # pclddums = [ 1000, 560, 50 ]
+
+    # tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
+    # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
+
+    # edge cases for CRKs
+    cf_tots = [ 0.5, 0.6 ]
+    tau_tots = [ 0.15, 220 ]
+    pclddums = [ 800, 50 ]
     
     toalws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
     dtoalws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
@@ -973,7 +973,7 @@ if(plot_switch==2):
     crksw = -dtoasws / 10.
     # crksw = np.amin(crksw) - crksw
     
-    vmax=2
+    vmax=np.amax(np.abs(crksw))
     vmin=-1.*vmax
     
     plt.figure(1)

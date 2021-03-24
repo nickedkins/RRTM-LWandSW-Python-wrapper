@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Dropbox/GitHub_Repositories/cloned-RRTM-Python-wrapper/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (10,10)
@@ -615,8 +615,8 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 
 
 eqb_maxdfnet=0.01*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.005e12 # max equilibrium value of total column energy budget at TOA
-timesteps=100 # number of timesteps until model exits
+eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
+timesteps=1000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
 
@@ -675,13 +675,16 @@ b_rdwv = 4.
 
 cldlats = np.arange(nlatcols)
 
-cf_tots = [ 0.5, 0.6 ]
-tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
-pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
+# full CRKs
+# cf_tots = [ 0.5, 0.6 ]
+# tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
+# pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
 
-# cf_tots = [ 0.0 ]
-# tau_tots = [ 2.45 ]
-# pclddums = [ 560 ]
+
+# edge cases for CRKs
+cf_tots = [ 0.5, 0.6 ]
+tau_tots = [ 0.15, 220 ]
+pclddums = [ 800, 50 ]
 
 #################################################################### end of variable initialisation ##################################################################################
 
@@ -2530,8 +2533,8 @@ for cf_tot in cf_tots:
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
                                                                             dtbound=column_budgets_master[i_zon,i_lat]*0.1
                                                                             if(input_source==2):
-                                                                                dtbound=0.
-                                                                                # dtbound*=1.
+                                                                                # dtbound=0.
+                                                                                dtbound*=1.
                                                                             dtbound=np.clip(dtbound,-dmax,dmax)
                                                                             tbound+=dtbound
                                                                         tbound=np.clip(tbound,tmin,tmax)
@@ -2782,8 +2785,8 @@ for cf_tot in cf_tots:
                                                                                     dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]*1.0 
                                                                                 dT=np.clip(dT,-maxdT[i_lat],maxdT[i_lat])
                                                                                 if(input_source==2):
-                                                                                    dT=0.
-                                                                                    # dT*=1.
+                                                                                    # dT=0.
+                                                                                    dT*=1.
                                                                                 tavel_master[i,i_zon,i_lat]+=dT
                                                                         tavel_master=np.clip(tavel_master,tmin,tmax)
     
