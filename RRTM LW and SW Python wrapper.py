@@ -681,8 +681,8 @@ cldlats = np.arange(nlatcols)
 # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ] #isccp numbers
 
 cf_tots = [ 0.5 ]
-tau_tots = [ 1e-4 ]
-pclddums = [ 500. ]
+tau_tots = [ 0.,10.]
+pclddums = [ 150. ]
 
 
 
@@ -2393,8 +2393,7 @@ for cf_tot in cf_tots:
                                                                         
                                                                         # cf_tot = 0.6
                                                                         # tau_tot = 3.0
-                                                                        # ssa_tot = 0.5
-                                                                        ssa_tot = 0.0
+                                                                        ssa_tot = 0.5
                                                                         # cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
                                                                         # cldlay_dums=[np.int(nlayers/2)]
                                                                         # cldlay_dum = np.int(np.linspace(1,np.int(nlayers/2),nzoncols)[i_zon])
