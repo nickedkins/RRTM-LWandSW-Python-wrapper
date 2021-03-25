@@ -18,7 +18,8 @@ plot_switch=2 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/transport on/'
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -259,7 +260,7 @@ if('.DS_Store' in a):
 nfiles=len(a)
 
 nlayers=60
-nlatcols=1
+nlatcols=2
 
 
 
@@ -946,13 +947,15 @@ if(plot_switch==2):
 
     # edge cases for CRKs
     cf_tots = [ 0.5, 0.6 ]
-    tau_tots = [ 0.15, 220 ]
-    pclddums = [ 800, 50 ]
+    tau_tots = [ 0.15, 6.5 ]
+    pclddums = [ 800, 440, 50 ]
     
     toalws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
     dtoalws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
     toasws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
     dtoasws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
+    tgs = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
+    dtgs = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
     
     i=0
     for icf in range(len(cf_tots)):
@@ -961,6 +964,7 @@ if(plot_switch==2):
                 for ipc in range(len(pclddums)):
                     toalws[icf, icl, itt, ipc] = fnet_lw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_lw_dirfil[-1,1,i,0,0]*clr_tots[icf]
                     toasws[icf, icl, itt, ipc] = fnet_sw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_sw_dirfil[-1,1,i,0,0]*clr_tots[icf]
+                    tgs[icf, icl, itt, ipc] = tbound_all_dirfil[0,i,0,0]*cf_tots[icf] + tbound_all_dirfil[1,i,0,0]*clr_tots[icf]
                     i+=1
     
     xticks= tau_tots
@@ -972,15 +976,55 @@ if(plot_switch==2):
     dtoasws = toasws[0,:,:,:] - toasws[1,:,:,:]
     crksw = -dtoasws / 10.
     # crksw = np.amin(crksw) - crksw
+    dtgs = tgs[0,:,:,:] - tgs[1,:,:,:]
+    crktgs = dtgs / 10.
     
-    vmax=np.amax(np.abs(crksw))
+    vmax=np.amax(np.abs(crktgs))
     vmin=-1.*vmax
     
     plt.figure(1)
     
-    plt.subplot(311)
-    plt.title('LW')
-    plt.imshow(crklw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    # plt.subplot(311)
+    # plt.title('LW')
+    # plt.imshow(crklw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    # plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
+    # plt.gca().set_xticklabels(tau_tots[::2])
+    # plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
+    # plt.gca().set_yticklabels(pclddums[::2])
+    # plt.xlabel(r'$\tau$')
+    # plt.ylabel(r'CTP (hPa)')
+    # cbar = plt.colorbar()
+    # cbar.set_label(r'$Wm^{-2}\%^{-1}$', rotation=270,labelpad=20)
+    
+    # plt.subplot(312)
+    # plt.title('SW')
+    # plt.imshow(crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    # plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
+    # plt.gca().set_xticklabels(tau_tots[::2])
+    # plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
+    # plt.gca().set_yticklabels(pclddums[::2])
+    # plt.xlabel(r'$\tau$')
+    # plt.ylabel(r'CTP (hPa)')
+    # cbar = plt.colorbar()
+    # cbar.set_label(r'$Wm^{-2}\%^{-1}$', rotation=270,labelpad=20)
+    
+    # plt.subplot(313)
+    # plt.title('Net')
+    # plt.imshow(crklw[0,:,::-1].T+crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    # plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
+    # plt.gca().set_xticklabels(tau_tots[::2])
+    # plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
+    # plt.gca().set_yticklabels(pclddums[::2])
+    # plt.xlabel(r'$\tau$')
+    # plt.ylabel(r'CTP (hPa)')
+    # cbar = plt.colorbar()
+    # cbar.set_label(r'$Wm^{-2}\%^{-1}$', rotation=270,labelpad=20)
+    
+    plt.figure(1)
+    
+    plt.subplot(121)
+    plt.title('Tropics')
+    plt.imshow(crktgs[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
     plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
     plt.gca().set_xticklabels(tau_tots[::2])
     plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
@@ -988,11 +1032,11 @@ if(plot_switch==2):
     plt.xlabel(r'$\tau$')
     plt.ylabel(r'CTP (hPa)')
     cbar = plt.colorbar()
-    cbar.set_label(r'$Wm^{-2}\%^{-1}$', rotation=270,labelpad=20)
-    
-    plt.subplot(312)
-    plt.title('SW')
-    plt.imshow(crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    cbar.set_label(r'$K\%^{-1}$', rotation=270,labelpad=20)
+
+    plt.subplot(122)
+    plt.title('Extratropics')
+    plt.imshow(crktgs[1,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
     plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
     plt.gca().set_xticklabels(tau_tots[::2])
     plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
@@ -1000,21 +1044,9 @@ if(plot_switch==2):
     plt.xlabel(r'$\tau$')
     plt.ylabel(r'CTP (hPa)')
     cbar = plt.colorbar()
-    cbar.set_label(r'$Wm^{-2}\%^{-1}$', rotation=270,labelpad=20)
+    cbar.set_label(r'$K\%^{-1}$', rotation=270,labelpad=20)
     
-    plt.subplot(313)
-    plt.title('Net')
-    plt.imshow(crklw[0,:,::-1].T+crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
-    plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
-    plt.gca().set_xticklabels(tau_tots[::2])
-    plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
-    plt.gca().set_yticklabels(pclddums[::2])
-    plt.xlabel(r'$\tau$')
-    plt.ylabel(r'CTP (hPa)')
-    cbar = plt.colorbar()
-    cbar.set_label(r'$Wm^{-2}\%^{-1}$', rotation=270,labelpad=20)
-    
-    plt.gcf().suptitle(r'Cloud radiative kernels at 0$\degree$ N',ha='center',y=1.0,x=0.69, va='center')
+    # plt.gcf().suptitle(r'Cloud radiative kernels at 0$\degree$ N',ha='center',y=1.0,x=0.69, va='center')
 
 # plt.subplot(131)
 # plt.imshow(crklw[0,:,::-1].T,vmin=-2.5,vmax=2.5,cmap='bwr')

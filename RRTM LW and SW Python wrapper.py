@@ -548,12 +548,12 @@ def createlatdistbn(filename):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=2 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=1 # number of latitude columns
+nlatcols=2 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=2 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6, lat=0'
+prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=2, nl=60, nzoncols=2, master_input=6'
 lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0
 
@@ -564,7 +564,7 @@ albedo_source=0
 # xgridbounds=np.sin(np.deg2rad(latgridbounds))
 
 # create latgrid evenly spaced in cos(lat)
-xgridbounds=np.linspace(-1.,1.,nlatcols+1)
+xgridbounds=np.linspace(0,1.,nlatcols+1)
 # xgridbounds=[0.95,1.0]
 latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
 
@@ -641,9 +641,9 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[4.] #meridional transport coefficient
+c_merids=[8.] #meridional transport coefficient
 
-extra_forcings=[-60.] # add an extra TOA forcing to any box
+extra_forcings=[0.] # add an extra TOA forcing to any box
 
 
 
@@ -683,15 +683,20 @@ cldlats = np.arange(nlatcols)
 
 # edge cases for CRKs
 cf_tots = [ 0.5, 0.6 ]
-tau_tots = [ 0.15, 220 ]
-pclddums = [ 800, 50 ]
+tau_tots = [ 0.15, 6.5 ]
+pclddums = [ 800, 440, 50 ]
+
+# no cloud
+# cf_tots = [ 0. ]
+# tau_tots = [ 0. ]
+# pclddums = [ 800 ]
 
 #################################################################### end of variable initialisation ##################################################################################
 
 # calculate total number of parameter combinations (number of model runs)
 i_loops=0
 totloops=np.float(len(pclddums) * len(cldlats) * len(cf_tots) * len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources)*len(tau_tots))
-looptime = 90
+looptime = 45
 print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(totloops), totloops*looptime/60.))
 print()
 
@@ -2531,7 +2536,7 @@ for cf_tot in cf_tots:
                                                                         # perturb surface temperature to reduce column energy imbalance
                                                                         if((input_source==0 and ts>100) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
-                                                                            dtbound=column_budgets_master[i_zon,i_lat]*0.1
+                                                                            dtbound=column_budgets_master[i_zon,i_lat]*0.1*0.5
                                                                             if(input_source==2):
                                                                                 # dtbound=0.
                                                                                 dtbound*=1.
