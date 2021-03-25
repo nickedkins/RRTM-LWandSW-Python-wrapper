@@ -14,7 +14,7 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts
+plot_switch=3 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
@@ -884,7 +884,7 @@ for directory in directories:
         
         
         # print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
-        print('{: 6.4f}, {: 6.4f}, {: 6.4f}, {: 6.4f} '.format(ztrop, ptrop, ttrop, tsurf))
+        # print('{: 6.4f}, {: 6.4f}, {: 6.4f}, {: 6.4f} '.format(ztrop, ptrop, ttrop, tsurf))
          
         argefold = np.argmin(abs(wkl_master[0,0,0,0]/wkl_master[:,0,0,0]-2.718))
         Hh2o = altz_master[argefold,0,0]/1000.
@@ -893,23 +893,23 @@ for directory in directories:
         # print('{: 4.2f}'.format(Hh2o))
         # plt.xlabel('Water vapour scale height (km)')
         # plt.ylabel('Surface temperature (K)')
-        plt.figure(1)
-        plt.subplot(221)
-        plt.plot(Hh2o,tsurf,'o',c='b')
-        plt.xlabel('H$_2$O scale height (km)')
-        plt.ylabel('$T_{surf}$')
-        plt.subplot(222)
-        plt.plot(Hh2o,ttrop,'o',c='b')
-        plt.xlabel('H$_2$O scale height (km)')
-        plt.ylabel('$T_{trop}$')
-        plt.subplot(223)
-        plt.plot(Hh2o,ztrop,'o',c='b')
-        plt.xlabel('H$_2$O scale height (km)')
-        plt.ylabel('$z_{trop}$')
-        plt.subplot(224)
-        plt.plot(Hh2o,ptrop,'o',c='b')
-        plt.xlabel('H$_2$O scale height (km)')
-        plt.ylabel('$p_{trop}$')
+        # plt.figure(1)
+        # plt.subplot(221)
+        # plt.plot(Hh2o,tsurf,'o',c='b')
+        # plt.xlabel('H$_2$O scale height (km)')
+        # plt.ylabel('$T_{surf}$')
+        # plt.subplot(222)
+        # plt.plot(Hh2o,ttrop,'o',c='b')
+        # plt.xlabel('H$_2$O scale height (km)')
+        # plt.ylabel('$T_{trop}$')
+        # plt.subplot(223)
+        # plt.plot(Hh2o,ztrop,'o',c='b')
+        # plt.xlabel('H$_2$O scale height (km)')
+        # plt.ylabel('$z_{trop}$')
+        # plt.subplot(224)
+        # plt.plot(Hh2o,ptrop,'o',c='b')
+        # plt.xlabel('H$_2$O scale height (km)')
+        # plt.ylabel('$p_{trop}$')
         
 
             
@@ -1050,15 +1050,15 @@ if(plot_switch==2):
 # plt.colorbar()
 
 if(plot_switch==3):
-    pert_pwidth = 100.
-    pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
+    pert_pwidth = 50.
+    pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
     
     plt.figure(1)
     plt.title('Absolute perturbation of 0.001 g/kg')
     # plt.title('Relative perturbation of 7%')
-    plt.plot(tz_all_dirfil[0,0,1:,0,0]-tz_all_dirfil[0,0,0,0,0],pert_pbottoms[1:]-pert_pwidth/2,'-o')
+    plt.plot((tz_all_dirfil[0,0,1:,0,0]-tz_all_dirfil[0,0,0,0,0])*1e3,pert_pbottoms[1:]-pert_pwidth/2,'-o')
     plt.ylim(1000,-50)
-    plt.xlabel('Temperature change (K)')
+    plt.xlabel('Temperature change (mK)')
     plt.ylabel('Pressure at centre of {: 4.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
     
 print('Total T change: {: 6.4f} K'.format(np.sum(tz_all_dirfil[0,0,1:,0,0]-tz_all_dirfil[0,0,0,0,0])))

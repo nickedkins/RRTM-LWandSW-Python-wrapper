@@ -551,7 +551,7 @@ nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
+master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6'
 lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
@@ -617,7 +617,7 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
+eqb_col_budgs=0.005 # max equilibrium value of total column energy budget at TOA
 timesteps=2000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
@@ -663,12 +663,12 @@ pertzons=[0]
 pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
-perts=[1.0]
-pert_type=0 # 0: relative, 1: absolute
+perts=[1e-6]
+pert_type=1 # 0: relative, 1: absolute
 
-pert_pwidth = 1000.
-# pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
-pert_pbottoms = [1000.]
+pert_pwidth = 50.
+pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
+# pert_pbottoms = [1000.]
 
 
 pert_zon_h2o=1.0
@@ -679,8 +679,8 @@ ncloudcols=1
 # tbound_adds=[0.] # add a constant to tbound 
 tbound_add=0
 
-b_rdwvs = np.logspace(start=np.log10(1), stop=np.log10(8), num=10, base=10.)
-# b_rdwvs = [4.]
+# b_rdwvs = np.logspace(start=np.log10(1), stop=np.log10(8), num=10, base=10.)
+b_rdwvs = [4.]
 
 cldlats = np.arange(nlatcols)
 # cf_tots = [ 0.5, 0.6 ]
