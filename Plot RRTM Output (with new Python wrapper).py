@@ -14,7 +14,7 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=-0 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts
+plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts
 cti_type=1 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
@@ -935,6 +935,13 @@ for directory in directories:
 
 
 ########################################################################## end read files #################################################################################################################
+
+pclddums = np.linspace(1050,50,10)
+
+plt.figure(1)
+plt.semilogy(tbound_all_dirfil[0,:,0,0],pclddums, '-o' )
+plt.ylim(1000,10)
+
 
 if(plot_switch==2):
 
