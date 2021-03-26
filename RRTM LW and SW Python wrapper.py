@@ -551,10 +551,10 @@ nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
+master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6'
-lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
+lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
@@ -583,8 +583,9 @@ latweights_area/=np.mean(latweights_area)
 
 # if there's only one lat column, pick its lat and set some nearby boundaries to enable interpolation over short interval
 if(nlatcols==1):
-    latgrid=np.array([45.])
-    latgridbounds=[latgrid[0]-5.,latgrid[0]+5.]
+    latgrid=np.array([0.])
+    # latgridbounds=[latgrid[0]-5.,latgrid[0]+5.]
+    latgridbounds=[-90,90]
 
 nmol=7 # number of gas molecule species
 # nclouds=10
@@ -643,7 +644,7 @@ lapseloops=[6]
 c_zonals=[0.] #zonal transport coefficient
 c_merids=[4.] #meridional transport coefficient
 
-extra_forcings=[0.] # add an extra TOA forcing to any box
+extra_forcings=[50.] # add an extra TOA forcing to any box
 
 
 
@@ -656,7 +657,7 @@ pertzons=[0]
 pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
-perts=[0.001]
+perts=[0., 0.001]
 pert_type=1 # 0: relative, 1: absolute
 
 pert_pwidth = 1000.
@@ -673,17 +674,21 @@ ncloudcols=1
 tbound_add=0
 
 # b_rdwvs=np.arange(1,8)
-b_rdwv = 4.
+b_rdwv = 8.
 
 cldlats = np.arange(nlatcols)
 # cf_tots = [ 0.5, 0.6 ]
 # tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ] #isccp numbers
 # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ] #isccp numbers
 
-cf_tots = [ 0.99 ]
-tau_tots = [ 1e-2, 1e-1, 1e0, 1e1]
-pclddums = np.linspace(1050,50,10)
+# cf_tots = [ 0.99 ]
+# tau_tots = [ 1e-2, 1e-1, 1e0, 1e1]
+# pclddums = np.linspace(1050,50,10)
 
+
+cf_tots = [ 0.0 ]
+tau_tots = [ 0.]
+pclddums = [ 1050. ]
 
 
 #################################################################### end of variable initialisation ##################################################################################
@@ -718,7 +723,7 @@ for cf_tot in cf_tots:
               
                                                             lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             if(lapse_source==0):
-                                                                lapse_master=np.ones((nzoncols,nlatcols)) * 6.5
+                                                                lapse_master=np.ones((nzoncols,nlatcols)) * 5.7
                                                             elif(lapse_source==1):
                                                                 for i_zon in range(nzoncols):
                                                                     lapse_master[i_zon,:]=np.array(createlatdistbn('Doug Mason Lapse Rate vs Latitude'))
