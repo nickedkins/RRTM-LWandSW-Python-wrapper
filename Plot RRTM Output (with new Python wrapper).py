@@ -262,10 +262,6 @@ if('.DS_Store' in a):
     a.remove('.DS_Store')
 nfiles=len(a)
 
-
-
-
-
 nmol=7
 nclouds=nlayers
 
@@ -463,6 +459,7 @@ cti_td_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 cti_cp_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 cti_wmo_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 lapse_td_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
+wkl_all_dirfil=np.zeros((8,nlayers_dirfil+1,nzoncols_dirfil,nfiles,ndirs,nlatcols))
 
 pertzons=[0]
 pertlats=[0,1,2,3,4]
@@ -732,7 +729,27 @@ for directory in directories:
                         cti_wmo[i_zon,i_lat]=i
                         break
                 # cti_wmo[i_zon,i_lat]=np.argmin(tz_master[:,i_zon,i_lat])
+                
+        
+        tc = tavel_master - 273.15
 
+        ps_wv = (0.61078 * np.exp( 17.22 * tc / ( tc + 237.3 ) )) * 10. # tetens in hPa
+        ps_ice = (0.61078 * np.exp( 21.875 * tc / ( tc + 265.5 ) )) * 10.
+        
+        rh_wv = wkl_master[:,:,0,:] * pavel_master / ps_wv * 100.
+        rh_ice = wkl_master[:,:,0,:] * pavel_master / ps_ice * 100.
+    
+        
+        plt.figure(1)
+        plt.semilogy(rh_wv[:,0,0],pavel_master[:,0,0],'-',label='RH water vapour')
+        plt.semilogy(rh_ice[:,0,0],pavel_master[:,0,0],'-',label='RH ice')
+        # rh = np.where(tc[:,0,0] < -20., 0, 50)
+        # plt.semilogy(rh,pavel_master[:,0,0],'--',label='RH max')
+        rh = np.where(tc[:,0,0] > -15., rh_wv[:,0,0], rh_ice[:,0,0])
+        plt.semilogy(rh,pavel_master[:,0,0],'--',label='RH max')
+        plt.axvline(100.)
+        plt.ylim(1000,10)
+        plt.legend()
 
 
         # latgridbounds=np.linspace(30,60.,nlatcols+1)
@@ -930,6 +947,8 @@ for directory in directories:
         cti_td_all_dirfil[:,i_file,i_dir,:]=cti_td
         cti_cp_all_dirfil[:,i_file,i_dir,:]=cti_cp
         cti_wmo_all_dirfil[:,i_file,i_dir,:]=cti_wmo
+
+
         # lapse_td_all_dirfil[:,i_file,i_dir,:]=cti_td
         
         
@@ -957,62 +976,7 @@ for directory in directories:
 
 ########################################################################## end read files #################################################################################################################
 
-if(plot_switch==2):
 
-    cf_tots = [0.5,0.6]
-    clr_tots = np.ones(len(cf_tots))-cf_tots
-    cldlats = np.arange(nlatcols)
-    tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
-    pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
-    # tau_tots = [ 0.15, 6.5, 220 ]
-    # pclddums = [ 1000, 560, 50 ]
-    
-    toalws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
-    dtoalws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
-    toasws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
-    dtoasws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
-    
-    i=0
-    for icf in range(len(cf_tots)):
-        for icl in range(len(cldlats)):
-            for itt in range(len(tau_tots)):
-                for ipc in range(len(pclddums)):
-                    toalws[icf, icl, itt, ipc] = fnet_lw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_lw_dirfil[-1,1,i,0,0]*clr_tots[icf]
-                    toasws[icf, icl, itt, ipc] = fnet_sw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_sw_dirfil[-1,1,i,0,0]*clr_tots[icf]
-                    i+=1
-    
-    dtoalws = toalws[0,:,:,:] - toalws[1,:,:,:]
-    crklw = dtoalws / 10.
-    # crklw = np.amax(crklw) - crklw
-    dtoasws = toasws[0,:,:,:] - toasws[1,:,:,:]
-    crksw = -dtoasws / 10.
-    # crksw = np.amin(crksw) - crksw
-    
-    vmax=2
-    vmin=-1.*vmax
-    
-    plt.figure(1)
-    
-    plt.subplot(311)
-    plt.title('LW')
-    plt.imshow(crklw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax)
-    plt.xlabel('cloud tau')
-    plt.ylabel('cloud p')
-    plt.colorbar()
-    
-    plt.subplot(312)
-    plt.title('SW')
-    plt.imshow(crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax)
-    plt.xlabel('cloud tau')
-    plt.ylabel('cloud p')
-    plt.colorbar()
-    
-    plt.subplot(313)
-    plt.title('Net')
-    plt.imshow(crklw[0,:,::-1].T+crksw[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax)
-    plt.xlabel('cloud tau')
-    plt.ylabel('cloud p')
-    plt.colorbar()    
 
 # plt.subplot(131)
 # plt.imshow(crklw[0,:,::-1].T,vmin=-2.5,vmax=2.5,cmap='bwr')
