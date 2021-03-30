@@ -546,20 +546,21 @@ def createlatdistbn(filename):
 
 #################functions###########################################################
 
+
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
+master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6'
 lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
-plot_eqb_approach = 0
+plot_eqb_approach = 1
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
@@ -600,6 +601,7 @@ if(master_input==7):
     fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
 if(sw_on==0):
     fixed_sw_on=1
+    
 gravity=9.79764 # RCEMIP value
 avogadro=6.022e23 # avogadro's constant
 iatm=0 #0 for layer values, 1 for level values
@@ -620,17 +622,10 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
 eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
-timesteps=500 # number of timesteps until model exits
+timesteps=2000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
-
-# master switches for the basic type of input
-master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
-input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file=project_dir+'_Useful Data/baselines/nl=590,ncol=5 [NH only]'
-lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
-albedo_source=2
 
 # adv_locs=[0] # 0: heating everywhere, 1: heating only in tropopause
 adv_loc=0
@@ -652,14 +647,12 @@ lapseloops=[6]
 c_zonals=[0.] #zonal transport coefficient
 c_merids=[4.] #meridional transport coefficient
 
-extra_forcings=[0.] # add an extra TOA forcing to any box
-if(master_input==7):
-    fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
-fixed_sw_on=1
 
 tbounds=np.array([300.]) # initalise lower boundary temperature
 wklfacs=[1.0] # multiply number of molecules of a gas species by this factor in a given lat and layer range defined later
 wklfac_co2s=[1.] # ditto for co2 specifically
+
+extra_forcings = [0.]
 
 # location of perturbations to number of gas molecules
 pertzons=[0]
@@ -667,13 +660,12 @@ pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
 
-perts=[1e-6]
+perts=[0.]
 pert_type=1 # 0: relative, 1: absolute
 
 pert_pwidth = 50.
-pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
-# pert_pbottoms = [1000.]
-
+# pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
+pert_pbottoms = [1000. + pert_pwidth]
 
 pert_zon_h2o=1.0
 
@@ -684,7 +676,7 @@ ncloudcols=1
 tbound_add=0
 
 # b_rdwvs = np.logspace(start=np.log10(1), stop=np.log10(8), num=10, base=10.)
-b_rdwvs = [4.]
+b_rdwvs = np.linspace(1.,4.,10)
 
 
 cldlats = np.arange(nlatcols)
@@ -697,6 +689,7 @@ cldlats = np.arange(nlatcols)
 # pclddums = np.linspace(1050,50,10)
 
 cf_tots = [ 0.0 ]
+cf_tot = 0.
 tau_tots = [ 0.]
 pclddums = [ 1050. ]
 
@@ -2894,7 +2887,7 @@ for b_rdwv in b_rdwvs:
                                                                 
     
                                                                 # print eqbseek
-                                                                if(ts%20==0 and plot_eqb_approach==1 ):
+                                                                if(ts%100==0 and plot_eqb_approach==1 ):
                                                                     print( '{: 4d}|'.format(ts))
                                                                     ts_rec.append(ts)
                                                                     maxdfnet_rec.append(np.max(maxdfnet_lat))
