@@ -558,7 +558,7 @@ lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: S
 albedo_source=0
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
-plot_eqb_approach = 0
+plot_eqb_approach = 1
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
@@ -618,7 +618,7 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
+eqb_col_budgs=0.005 # max equilibrium value of total column energy budget at TOA
 timesteps=500 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
@@ -644,7 +644,7 @@ lapseloops=[6]
 c_zonals=[0.] #zonal transport coefficient
 c_merids=[4.] #meridional transport coefficient
 
-extra_forcings=[50.] # add an extra TOA forcing to any box
+extra_forcings=[0.] # add an extra TOA forcing to any box
 
 
 
@@ -657,12 +657,12 @@ pertzons=[0]
 pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
-perts=[0., 0.001]
+perts=[0.]
 pert_type=1 # 0: relative, 1: absolute
 
 pert_pwidth = 1000.
 # pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
-pert_pbottoms = [1000.]
+pert_pbottoms = [1000. + pert_pwidth]
 
 
 pert_zon_h2o=1.0
@@ -681,14 +681,14 @@ cldlats = np.arange(nlatcols)
 # tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ] #isccp numbers
 # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ] #isccp numbers
 
-# cf_tots = [ 0.99 ]
-# tau_tots = [ 1e-2, 1e-1, 1e0, 1e1]
-# pclddums = np.linspace(1050,50,10)
+cf_tots = [ 0.99 ]
+tau_tots = [ 1e-2, 1e-1, 1e0, 1e1]
+pclddums = np.linspace(1050,50,10)
 
 
-cf_tots = [ 0.0 ]
-tau_tots = [ 0.]
-pclddums = [ 1050. ]
+# cf_tots = [ 0.0 ]
+# tau_tots = [ 0.]
+# pclddums = [ 1050. ]
 
 
 #################################################################### end of variable initialisation ##################################################################################
