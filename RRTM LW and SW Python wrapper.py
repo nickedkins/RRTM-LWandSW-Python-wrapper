@@ -543,7 +543,7 @@ def createlatdistbn(filename):
     varinterp = list(varinterp / cossums)
     return varinterp
 
-#################functions###########################################################
+#################functions############################################################################functions###########################################################
 
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
@@ -556,6 +556,8 @@ input_source=2 # 0: set inputs here, 1: use inputs from output file of previous 
 prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=2, nl=60, nzoncols=2, master_input=6'
 lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0
+dtbound_switch = 1
+dTlay_switch = 1
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
@@ -641,7 +643,7 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[8.] #meridional transport coefficient
+c_merids=[4.,8.] #meridional transport coefficient
 
 extra_forcings=[0.] # add an extra TOA forcing to any box
 
@@ -2537,9 +2539,8 @@ for cf_tot in cf_tots:
                                                                         if((input_source==0 and ts>100) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
                                                                             dtbound=column_budgets_master[i_zon,i_lat]*0.1*0.5
-                                                                            if(input_source==2):
-                                                                                # dtbound=0.
-                                                                                dtbound*=1.
+                                                                            if( dtbound_switch == 0 ):
+                                                                                dtbound=0.
                                                                             dtbound=np.clip(dtbound,-dmax,dmax)
                                                                             tbound+=dtbound
                                                                         tbound=np.clip(tbound,tmin,tmax)
@@ -2789,9 +2790,8 @@ for cf_tot in cf_tots:
                                                                                 else:
                                                                                     dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]*1.0 
                                                                                 dT=np.clip(dT,-maxdT[i_lat],maxdT[i_lat])
-                                                                                if(input_source==2):
-                                                                                    # dT=0.
-                                                                                    dT*=1.
+                                                                                if(dTlay_switch == 0 ):
+                                                                                    dT=0.
                                                                                 tavel_master[i,i_zon,i_lat]+=dT
                                                                         tavel_master=np.clip(tavel_master,tmin,tmax)
     
@@ -2859,7 +2859,7 @@ for cf_tot in cf_tots:
                                                                 
     
                                                                 # print eqbseek
-                                                                if(ts%20==0):
+                                                                if(ts%1000==0):
                                                                     print( '{: 4d}|'.format(ts))
                                                                     ts_rec.append(ts)
                                                                     maxdfnet_rec.append(np.max(maxdfnet_lat))
@@ -2884,7 +2884,13 @@ for cf_tot in cf_tots:
                                                                         plotrrtmoutput()
                                                                         plotted=1
                                                                     print('Equilibrium reached!')
-                                                                    os.system('say "Equilibrium reached"')
+                                                                    for i_lat in range(nlatcols):
+                                                                        if(i_lat<nlatcols-1):
+                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                        else:
+                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                            print('-------------------------------------------------------------------')
+                                                                    # os.system('say "Equilibrium reached"')
                                                                     # writeoutputfile()
                                                                     writeoutputfile_masters()
                                                                     filewritten=1
