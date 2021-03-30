@@ -14,11 +14,14 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts
+plot_switch=4 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: thin cloud heights
 cti_type=1 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/tau=1e-2/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/tau=1e-1/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/tau=1e+0/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/tau=1e+1/',
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -741,16 +744,16 @@ for directory in directories:
         rh_ice = wkl_master[:,:,0,:] * pavel_master / ps_ice * 100.
     
         
-        plt.figure(1)
-        plt.semilogy(rh_wv[:,0,0],pavel_master[:,0,0],'-',label='RH water vapour')
-        plt.semilogy(rh_ice[:,0,0],pavel_master[:,0,0],'-',label='RH ice')
-        # rh = np.where(tc[:,0,0] < -20., 0, 50)
+        # plt.figure(1)
+        # plt.semilogy(rh_wv[:,0,0],pavel_master[:,0,0],'-',label='RH water vapour')
+        # plt.semilogy(rh_ice[:,0,0],pavel_master[:,0,0],'-',label='RH ice')
+        # # rh = np.where(tc[:,0,0] < -20., 0, 50)
+        # # plt.semilogy(rh,pavel_master[:,0,0],'--',label='RH max')
+        # rh = np.where(tc[:,0,0] > -15., rh_wv[:,0,0], rh_ice[:,0,0])
         # plt.semilogy(rh,pavel_master[:,0,0],'--',label='RH max')
-        rh = np.where(tc[:,0,0] > -15., rh_wv[:,0,0], rh_ice[:,0,0])
-        plt.semilogy(rh,pavel_master[:,0,0],'--',label='RH max')
-        plt.axvline(100.)
-        plt.ylim(1000,10)
-        plt.legend()
+        # plt.axvline(100.)
+        # plt.ylim(1000,10)
+        # plt.legend()
 
 
         # latgridbounds=np.linspace(30,60.,nlatcols+1)
@@ -960,6 +963,18 @@ for directory in directories:
 ########################################################################## end read files #################################################################################################################
 
 
+if(plot_switch==4):
+    for i_dir in range(len(directories)):
+        pclddums = np.linspace(1050,50,10)
+        dTs = tbound_all_dirfil[0,:,i_dir,0] - tbound_all_dirfil[0,0,i_dir,0]
+        
+        plt.figure(1)
+        plt.plot(dTs[1:], pclddums[1:],'-o',label=dir_labels[i_dir] )
+        plt.xlabel('Change in surface temperature relative to no cloud (K)')
+        plt.ylabel('Cloud top pressure (hPa)')
+        plt.ylim(1000,10)
+
+plt.legend()
 
 # plt.subplot(131)
 # plt.imshow(crklw[0,:,::-1].T,vmin=-2.5,vmax=2.5,cmap='bwr')
