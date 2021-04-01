@@ -14,11 +14,13 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=3 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts
+plot_switch=3 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/absolute/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/relative/',
 ]
 
 
@@ -26,7 +28,7 @@ directories = [
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficient
 
-nlayers=590
+nlayers=60
 nlatcols=1
 nzoncols=2
 
@@ -207,7 +209,8 @@ def plotrrtmoutput_masters():
             # plt.xlabel('fnet sw')
             # plt.legend()
             
-            # # plt.subplot(335)
+            # plt.subplot(335)
+            # plt.figure(1)
             # plt.loglog(wkl_master[:,i_zon,0,i_lat],pavel_master[:,i_zon,i_lat],label=fn)
             # plt.ylim(np.max(pz_master[:,i_zon,i_lat]),np.min(pz_master[:,i_zon,i_lat]))
             # plt.xlabel('wkl1')
@@ -226,17 +229,17 @@ def plotrrtmoutput_masters():
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wbrodl')
 
-            plt.subplot(122)
-            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
-            plt.axvline(-eqb_maxdfnet,linestyle='--')
-            plt.axvline(eqb_maxdfnet,linestyle='--')
-            plt.ylim(1000,10)
-            # plt.ylim(1000,600)
-            plt.xlim(-5,5)
-            plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
-            plt.ylabel('Pressure (hPa)')
-            plt.grid(True,which='both')
-            # plt.legend()
+            # plt.subplot(122)
+            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
+            # plt.axvline(-eqb_maxdfnet,linestyle='--')
+            # plt.axvline(eqb_maxdfnet,linestyle='--')
+            # plt.ylim(1000,10)
+            # # plt.ylim(1000,600)
+            # plt.xlim(-5,5)
+            # plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
+            # plt.ylabel('Pressure (hPa)')
+            # plt.grid(True,which='both')
+            # # plt.legend()
             
             # plt.subplot(133)
             # lapsedum=np.zeros(nlayers)
@@ -730,26 +733,47 @@ for directory in directories:
                         break
                 # cti_wmo[i_zon,i_lat]=np.argmin(tz_master[:,i_zon,i_lat])
                 
-        
-        tc = tavel_master - 273.15
 
-        ps_wv = (0.61078 * np.exp( 17.22 * tc / ( tc + 237.3 ) )) * 10. # tetens in hPa
-        ps_ice = (0.61078 * np.exp( 21.875 * tc / ( tc + 265.5 ) )) * 10.
+        if(plot_switch==4):
+            
+            perts = perts=[0, 1e-6, 1e-5, 1e-4, 1e-3, 4e-4, 3e-4, 2.5e-4, 2.74e-4]
         
-        rh_wv = wkl_master[:,:,0,:] * pavel_master / ps_wv * 100.
-        rh_ice = wkl_master[:,:,0,:] * pavel_master / ps_ice * 100.
+            tc = tavel_master - 273.15
     
-        
-        plt.figure(1)
-        plt.semilogy(rh_wv[:,0,0],pavel_master[:,0,0],'-',label='RH water vapour')
-        plt.semilogy(rh_ice[:,0,0],pavel_master[:,0,0],'-',label='RH ice')
-        # rh = np.where(tc[:,0,0] < -20., 0, 50)
-        # plt.semilogy(rh,pavel_master[:,0,0],'--',label='RH max')
-        rh = np.where(tc[:,0,0] > -15., rh_wv[:,0,0], rh_ice[:,0,0])
-        plt.semilogy(rh,pavel_master[:,0,0],'--',label='RH max')
-        plt.axvline(100.)
-        plt.ylim(1000,10)
-        plt.legend()
+            ps_wv = (0.61078 * np.exp( 17.27 * tc / ( tc + 237.3 ) )) * 10. # tetens in hPa
+            ps_ice = (0.61078 * np.exp( 21.875 * tc / ( tc + 265.5 ) )) * 10.
+            
+            q = wkl_master[:,:,0,:] * 0.6
+            
+            rh_wv = q * pavel_master / (ps_wv * (q + 0.622)) * 100.
+            rh_ice = q * pavel_master / (ps_ice * (q + 0.622)) * 100.
+            
+            argefold = np.argmin(abs(wkl_master[0,0,0,0]/wkl_master[:,0,0,0]-2.718))
+            Hh2o = altz_master[argefold,0,0]/1000.
+            
+            # print(Hh2o)
+    
+            print('Total H2O molecs: {: 8.6e}'.format( np.sum( wkl_master[:,0,0,0] )/ 2.307722e-1 ) )
+            plt.plot(perts[i_file], np.sum( wkl_master[:,0,0,0] ) / 2.307722e-1, 'o' )
+            plt.axhline(1.07)
+            plt.xlim(0.0002, 0.00041)
+            plt.ylim(1.05, 1.10)
+    
+            # perts = [0, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2]
+            # plt.figure(1)
+            # plt.title('RH profiles with different absolute additions to specific humidity ($g/g$)', y=1.02)
+            # # plt.semilogy(rh_wv[:,0,0],pavel_master[:,0,0],'-',label='RH water vapour')
+            # # plt.semilogy(rh_ice[:,0,0],pavel_master[:,0,0],'-',label='RH ice')
+            # # rh = np.where(tc[:,0,0] < -20., 0, 50)
+            # # plt.semilogy(rh,pavel_master[:,0,0],'--',label='RH max')
+            # rh = np.where(tc[:,0,0] > -15., rh_wv[:,0,0], rh_ice[:,0,0])
+            # plt.semilogy(rh,pavel_master[:,0,0],'-',label=perts[i_file])
+            # plt.xlabel('RH (%)')
+            # plt.ylabel('Pressure (hPa)')
+            # # plt.axvline(100.)
+            # plt.ylim(1000,10)
+            # # plt.xlim(0,200)
+            # plt.legend()
 
 
         # latgridbounds=np.linspace(30,60.,nlatcols+1)
@@ -903,8 +927,6 @@ for directory in directories:
         # print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
         # print('{: 6.4f}, {: 6.4f}, {: 6.4f}, {: 6.4f} '.format(ztrop, ptrop, ttrop, tsurf))
          
-        argefold = np.argmin(abs(wkl_master[0,0,0,0]/wkl_master[:,0,0,0]-2.718))
-        Hh2o = altz_master[argefold,0,0]/1000.
         # b_rdwvs=np.arange(1,8)
         
         # print('{: 4.2f}'.format(Hh2o))
@@ -971,6 +993,21 @@ for directory in directories:
         
         # plt.legend()
         
+    if(plot_switch==3):
+        pert_pwidth = 50.
+        pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
+        
+        plt.figure(1)
+        plt.title('Total increase in column vapour of 7%')
+        # plt.title('Relative perturbation of 7%')
+        plt.plot((tz_all_dirfil[0,0,1:,i_dir,0]-tz_all_dirfil[0,0,0,i_dir,0])*1e3,pert_pbottoms[1:]-pert_pwidth/2,'-o',label=dir_labels[i_dir])
+        plt.ylim(1000,-50)
+        plt.xlabel('Temperature change (mK)')
+        plt.ylabel('Pressure at centre of {: 4.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
+        plt.legend()
+        
+        print('Total T change: {: 6.4f} K'.format(np.sum(tz_all_dirfil[0,0,1:,i_dir,0]-tz_all_dirfil[0,0,0,i_dir,0])))
+        
     i_dir+=1    
 
 
@@ -1013,19 +1050,9 @@ for directory in directories:
 # plt.ylim(900,500)
 # plt.colorbar()
 
-if(plot_switch==3):
-    pert_pwidth = 50.
-    pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
+
     
-    plt.figure(1)
-    plt.title('Absolute perturbation of 0.001 g/kg')
-    # plt.title('Relative perturbation of 7%')
-    plt.plot((tz_all_dirfil[0,0,1:,0,0]-tz_all_dirfil[0,0,0,0,0])*1e3,pert_pbottoms[1:]-pert_pwidth/2,'-o')
-    plt.ylim(1000,-50)
-    plt.xlabel('Temperature change (mK)')
-    plt.ylabel('Pressure at centre of {: 4.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
-    
-print('Total T change: {: 6.4f} K'.format(np.sum(tz_all_dirfil[0,0,1:,0,0]-tz_all_dirfil[0,0,0,0,0])))
+
 
 # for i_dir in range(len(directories)):
 #     for i_file in range(len(a)):
