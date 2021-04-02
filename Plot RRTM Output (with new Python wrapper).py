@@ -14,13 +14,14 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=3 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum
+plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/absolute/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/relative/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/conv thresholds/nl=590/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/absolute/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/relative/',
 ]
 
 
@@ -28,7 +29,7 @@ directories = [
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficient
 
-nlayers=60
+nlayers=100
 nlatcols=1
 nzoncols=2
 
@@ -229,16 +230,16 @@ def plotrrtmoutput_masters():
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wbrodl')
 
-            # plt.subplot(122)
-            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
-            # plt.axvline(-eqb_maxdfnet,linestyle='--')
-            # plt.axvline(eqb_maxdfnet,linestyle='--')
-            # plt.ylim(1000,10)
-            # # plt.ylim(1000,600)
+            plt.subplot(122)
+            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
+            plt.axvline(-eqb_maxdfnet,linestyle='--')
+            plt.axvline(eqb_maxdfnet,linestyle='--')
+            plt.ylim(1000,10)
+            # plt.ylim(1000,600)
             # plt.xlim(-5,5)
-            # plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
-            # plt.ylabel('Pressure (hPa)')
-            # plt.grid(True,which='both')
+            plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
+            plt.ylabel('Pressure (hPa)')
+            plt.grid(True,which='both')
             # # plt.legend()
             
             # plt.subplot(133)
@@ -922,7 +923,12 @@ for directory in directories:
             ttrop=tz_master[cti,0,0]
         tsurf=tz_master[0,0,0]
         
+        tau_tots = np.logspace(-2,-1,num=10,base=10)
         
+        plt.figure(1)
+        plt.semilogx(tau_tots[i_file], ptrop,'o')
+        plt.xlabel(r'Cloud $\tau$')
+        plt.ylabel('Tropopause pressure (hPa)')
         
         # print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
         # print('{: 6.4f}, {: 6.4f}, {: 6.4f}, {: 6.4f} '.format(ztrop, ptrop, ttrop, tsurf))

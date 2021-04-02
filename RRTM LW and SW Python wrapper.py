@@ -548,12 +548,12 @@ def createlatdistbn(filename):
 
 
 # set overall dimensions for model
-nlayers=60 # number of vertical layers
+nlayers=100 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
+master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6'
 lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
@@ -665,15 +665,15 @@ pertmols=[1] #don't do zero!
 pertlays=[0]
 
 # perts=[2.75e-4]
-perts = [1.07]
+perts = [1.0]
 pert_type=0 # 0: relative, 1: absolute
 
-pert_pwidth = 50.
-pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
+# pert_pwidth = 50.
+# pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
 # pert_pbottoms = [1000. + pert_pwidth]
 
-# pert_pbottoms = [1000.]
-# pert_pwidth = 1000.
+pert_pbottoms = [1000.]
+pert_pwidth = 1000.
 
 pert_zon_h2o=1.0
 
@@ -698,16 +698,15 @@ cldlats = np.arange(nlatcols)
 # tau_tots = [ 1e-2, 1e-1, 1e0, 1e1]
 # pclddums = np.linspace(1050,50,10)
 
-cf_tots = [ 0.0 ]
-cf_tot = 0.
-tau_tots = [ 0.]
-pclddums = [ 1050. ]
+cf_tot = 0.5
+tau_tots = np.logspace(-2,-1,num=10,base=10)
+pclddums = [ 150 ]
 
 #################################################################### end of variable initialisation ##################################################################################
 
 # calculate total number of parameter combinations (number of model runs)
 i_loops=0
-totloops=np.float(len(pclddums) * len(cldlats) * len(cf_tots) * len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources)*len(tau_tots))
+totloops=np.float(len(pclddums) * len(cldlats)  * len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources)*len(tau_tots))
 looptime = 15 * (nlayers/60.)
 print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(totloops), totloops*looptime/60.))
 print()
@@ -2423,11 +2422,6 @@ for b_rdwv in b_rdwvs:
                                                                         # cld_fracs_master[i_zon,:,:],altbins,tauclds_master[0,:,:]=read_misr_3()
                                                                         
                                                                         # manual cloud properties
-                                                                        
-
-                                                                        cf_tot = 0.5
-                                                                        tau_tot = 3.
-                                                                        ssa_tot = 0.5
 
 
                                                                         # cf_tot = 0.6
