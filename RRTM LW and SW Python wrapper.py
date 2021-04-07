@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (10,10)
@@ -546,14 +546,14 @@ def createlatdistbn(filename):
 #################functions############################################################################functions###########################################################
 
 # set overall dimensions for model
-nlayers=590 # number of vertical layers
+nlayers=60 # number of vertical layers
 nzoncols=2 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=2 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=2 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=2, nl=590, nzoncols=2, master_input=6'
+prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=2, nl=60, nzoncols=2, master_input=6'
 lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0
 dtbound_switch = 1
@@ -617,8 +617,8 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 
 
 eqb_maxdfnet=0.01*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.005 # max equilibrium value of total column energy budget at TOA
-timesteps=2000 # number of timesteps until model exits
+eqb_col_budgs=0.001 # max equilibrium value of total column energy budget at TOA
+timesteps=500 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
 
@@ -678,15 +678,15 @@ b_rdwv = 4.
 cldlats = np.arange(nlatcols)
 
 # full CRKs
-# cf_tots = [ 0.5, 0.6 ]
-# tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
-# pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
+cf_tots = [ 0.5, 0.6 ]
+tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
+pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
 
 
 # edge cases for CRKs
-cf_tots = [ 0.5, 0.6 ]
-tau_tots = [ 0.15, 6.5 ]
-pclddums = [ 800, 440, 50 ]
+# cf_tots = [ 0.5, 0.6 ]
+# tau_tots = [ 0.15, 6.5 ]
+# pclddums = [ 800, 600, 400 ]
 
 # no cloud
 # cf_tots = [ 0. ]

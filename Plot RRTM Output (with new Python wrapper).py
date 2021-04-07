@@ -14,16 +14,17 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK
+plot_switch=2 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/transport on/v2/c_merid=8/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/transport on/nl=590/the big boy/cm=4/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/transport on/nl=590/the big boy/cm=8/'
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
-c_merids=[2.0] #meridional transport coefficient
+c_merids=[2.0] #meridional transport coefficientnlayers=
 
 nzoncols=2
 
@@ -259,7 +260,7 @@ if('.DS_Store' in a):
     a.remove('.DS_Store')
 nfiles=len(a)
 
-nlayers=60
+nlayers=590
 nlatcols=2
 
 
@@ -939,47 +940,53 @@ for directory in directories:
 if(plot_switch==2):
 
     cf_tots = [0.5,0.6]
-    clr_tots = np.ones(len(cf_tots))-cf_tots
-    cldlats = np.arange(nlatcols)
 
-    # tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
-    # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
+
+    cf_tots = [ 0.5, 0.6 ]
+    tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
+    pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
 
     # edge cases for CRKs
-    cf_tots = [ 0.5, 0.6 ]
-    tau_tots = [ 0.15, 6.5 ]
-    pclddums = [ 800, 440, 50 ]
+    # cf_tots = [ 0.5, 0.6 ]
+    # tau_tots = [ 0.15, 6.5 ]
+    # pclddums = [ 800, 600, 400 ]
+    
+    clr_tots = np.ones(len(cf_tots))-cf_tots
+    cldlats = np.arange(nlatcols)
     
     toalws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
     dtoalws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
     toasws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
     dtoasws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
-    tgs = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
-    dtgs = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
+    tgs = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums), len(directories) ) )
+    dtgs = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums), len(directories) ) )
     
-    i=0
-    for icf in range(len(cf_tots)):
-        for icl in range(len(cldlats)):
-            for itt in range(len(tau_tots)):
-                for ipc in range(len(pclddums)):
-                    toalws[icf, icl, itt, ipc] = fnet_lw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_lw_dirfil[-1,1,i,0,0]*clr_tots[icf]
-                    toasws[icf, icl, itt, ipc] = fnet_sw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_sw_dirfil[-1,1,i,0,0]*clr_tots[icf]
-                    tgs[icf, icl, itt, ipc] = tbound_all_dirfil[0,i,0,0]*cf_tots[icf] + tbound_all_dirfil[1,i,0,0]*clr_tots[icf]
-                    i+=1
+    for i_dir in range(len(directories)):
+        i=0
+        for icf in range(len(cf_tots)):
+            for icl in range(len(cldlats)):
+                for itt in range(len(tau_tots)):
+                    for ipc in range(len(pclddums)):
+                        # toalws[icf, icl, itt, ipc,i_dir] = fnet_lw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_lw_dirfil[-1,1,i,0,0]*clr_tots[icf]
+                        # toasws[icf, icl, itt, ipc, i_dir] = fnet_sw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_sw_dirfil[-1,1,i,0,0]*clr_tots[icf]
+                        # tgs[icf, icl, itt, ipc] = tbound_all_dirfil[0,i,0,0]*cf_tots[icf] + tbound_all_dirfil[1,i,0,0]*clr_tots[icf]
+                        tgs[icf, icl, itt, ipc, i_dir] = tz_all_dirfil[-1,0,i,i_dir,0]*cf_tots[icf] + tz_all_dirfil[-1,1,i,i_dir,0]*clr_tots[icf]
+                        i+=1
     
     xticks= tau_tots
     yticks = pclddums
     
-    dtoalws = toalws[0,:,:,:] - toalws[1,:,:,:]
-    crklw = dtoalws / 10.
-    # crklw = np.amax(crklw) - crklw
-    dtoasws = toasws[0,:,:,:] - toasws[1,:,:,:]
-    crksw = -dtoasws / 10.
+    # dtoalws = toalws[0,:,:,:] - toalws[1,:,:,:]
+    # crklw = dtoalws / 10.
+    # # crklw = np.amax(crklw) - crklw
+    # dtoasws = toasws[0,:,:,:] - toasws[1,:,:,:]
+    # crksw = -dtoasws / 10.
     # crksw = np.amin(crksw) - crksw
     dtgs = tgs[0,:,:,:] - tgs[1,:,:,:]
     crktgs = dtgs / 10.
     
     vmax=np.amax(np.abs(crktgs))
+    vmax=0.0005
     vmin=-1.*vmax
     
     plt.figure(1)
@@ -1024,7 +1031,7 @@ if(plot_switch==2):
     
     plt.subplot(121)
     plt.title('Tropics')
-    plt.imshow(crktgs[0,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    plt.imshow(crktgs[0,:,::-1,1].T-crktgs[0,:,::-1,0].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
     plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
     plt.gca().set_xticklabels(tau_tots[::2])
     plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
@@ -1036,7 +1043,7 @@ if(plot_switch==2):
 
     plt.subplot(122)
     plt.title('Extratropics')
-    plt.imshow(crktgs[1,:,::-1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    plt.imshow(crktgs[1,:,::-1,1].T-crktgs[1,:,::-1,0].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
     plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
     plt.gca().set_xticklabels(tau_tots[::2])
     plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
