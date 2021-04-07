@@ -19,14 +19,16 @@ cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/transport on/nl=590/the big boy/cm=4/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/transport on/nl=590/the big boy/cm=8/'
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/transport on/nl=60, tighter eqb/cm=4/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/transport on/nl=60, tighter eqb/cm=8/',
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficientnlayers=
 
 nzoncols=2
+nlayers=60
+nlatcols=2
 
 def colors(n):
   ret = []
@@ -260,8 +262,7 @@ if('.DS_Store' in a):
     a.remove('.DS_Store')
 nfiles=len(a)
 
-nlayers=590
-nlatcols=2
+
 
 
 
@@ -986,7 +987,7 @@ if(plot_switch==2):
     crktgs = dtgs / 10.
     
     vmax=np.amax(np.abs(crktgs))
-    vmax=0.0005
+    vmax=0.02
     vmin=-1.*vmax
     
     plt.figure(1)
@@ -1031,6 +1032,7 @@ if(plot_switch==2):
     
     plt.subplot(121)
     plt.title('Tropics')
+    # plt.imshow(crktgs[0,:,::-1,1].T.T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
     plt.imshow(crktgs[0,:,::-1,1].T-crktgs[0,:,::-1,0].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
     plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
     plt.gca().set_xticklabels(tau_tots[::2])
@@ -1043,6 +1045,7 @@ if(plot_switch==2):
 
     plt.subplot(122)
     plt.title('Extratropics')
+    # plt.imshow(crktgs[1,:,::-1,1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
     plt.imshow(crktgs[1,:,::-1,1].T-crktgs[1,:,::-1,0].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
     plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
     plt.gca().set_xticklabels(tau_tots[::2])
