@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (10,10)
@@ -548,15 +548,15 @@ def createlatdistbn(filename):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=2 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=2 # number of latitude columns
+nlatcols=1 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=2 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=2, nl=60, nzoncols=2, master_input=6'
+prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6, lat=45, tg=288'
 lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0
-dtbound_switch = 1
+dtbound_switch = 0
 dTlay_switch = 1
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
@@ -582,7 +582,7 @@ latweights_area/=np.mean(latweights_area)
 
 # if there's only one lat column, pick its lat and set some nearby boundaries to enable interpolation over short interval
 if(nlatcols==1):
-    latgrid=np.array([0.])
+    latgrid=np.array([45.])
     latgridbounds=[latgrid[0]-5.,latgrid[0]+5.]
 
 nmol=7 # number of gas molecule species
@@ -591,12 +591,13 @@ nclouds=nlayers # number of cloud layers
 
 lw_on=1 # 0: don't call rrtm_lw, 1: do
 sw_on=1 # 0: don't call rrtm_sw, 1: do
-fixed_sw_on=0
+fixed_sw_on=1
 if(master_input==7):
     fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
 if(sw_on==0):
     fixed_sw_on=1
-fixed_sw=240.
+# fixed_sw=240.
+fixed_sw = [330, 150]
 gravity=9.79764 # RCEMIP value
 avogadro=6.022e23 # avogadro's constant
 iatm=0 #0 for layer values, 1 for level values
@@ -618,7 +619,9 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 
 eqb_maxdfnet=0.01*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
 eqb_col_budgs=0.001 # max equilibrium value of total column energy budget at TOA
-timesteps=500 # number of timesteps until model exits
+if(dtbound_switch==0):
+    eqb_col_budgs *= 1e12
+timesteps=1000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
 
@@ -643,7 +646,7 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[4.,8.] #meridional transport coefficient
+c_merids=[4.] #meridional transport coefficient
 
 extra_forcings=[0.] # add an extra TOA forcing to any box
 
@@ -678,15 +681,15 @@ b_rdwv = 4.
 cldlats = np.arange(nlatcols)
 
 # full CRKs
-cf_tots = [ 0.5, 0.6 ]
-tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
-pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
+# cf_tots = [ 0.5, 0.6 ]
+# tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
+# pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
 
 
 # edge cases for CRKs
-# cf_tots = [ 0.5, 0.6 ]
-# tau_tots = [ 0.15, 6.5 ]
-# pclddums = [ 800, 600, 400 ]
+cf_tots = [ 0.5, 0.6 ]
+tau_tots = [ 2.5 ]
+pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
 
 # no cloud
 # cf_tots = [ 0. ]
@@ -698,7 +701,7 @@ pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
 # calculate total number of parameter combinations (number of model runs)
 i_loops=0
 totloops=np.float(len(pclddums) * len(cldlats) * len(cf_tots) * len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources)*len(tau_tots))
-looptime = 45
+looptime = 49
 print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(totloops), totloops*looptime/60.))
 print()
 
@@ -782,6 +785,7 @@ for cf_tot in cf_tots:
                                                             tg_obs=data[:,1]
                                                             f=interp1d(lat_obs,tg_obs)
                                                             tbound_inits=f(latgrid)
+                                                            tbound_inits = [288.]* nlatcols
                                                             undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*2. #for nl=60
                                                             # undrelax_lats=np.ones(nlatcols)*0.5 #for nl=590
                                                             iemiss=2 #surface emissivity. Keep this fixed for now.
@@ -2192,7 +2196,7 @@ for cf_tot in cf_tots:
                                                                    
                                                                     conv_on=conv_on_lats[i_lat]
     
-                                                                    if(ts==1):
+                                                                    if(ts==0):
                                                                         tbound = tbound_inits[i_lat]
                                                                         tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
                                                                         tz=np.clip(tz,200,tmax)
@@ -2400,7 +2404,7 @@ for cf_tot in cf_tots:
                                                                         
                                                                         # cf_tot = 0.6
                                                                         # tau_tot = 3.0
-                                                                        ssa_tot = 0.5
+                                                                        ssa_tot = 0.99
                                                                         # cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
                                                                         # cldlay_dums=[np.int(nlayers/2)]
                                                                         # cldlay_dum = np.int(np.linspace(1,np.int(nlayers/2),nzoncols)[i_zon])
@@ -2541,8 +2545,9 @@ for cf_tot in cf_tots:
                                                                             dtbound=column_budgets_master[i_zon,i_lat]*0.1*0.5
                                                                             if( dtbound_switch == 0 ):
                                                                                 dtbound=0.
-                                                                            dtbound=np.clip(dtbound,-dmax,dmax)
-                                                                            tbound+=dtbound
+                                                                            else:
+                                                                                dtbound=np.clip(dtbound,-dmax,dmax)
+                                                                                tbound+=dtbound
                                                                         tbound=np.clip(tbound,tmin,tmax)
     
                                                                         # if(input_source==0 and master_input==5)
@@ -2616,7 +2621,8 @@ for cf_tot in cf_tots:
                                                                         # toa_fnet=totdflux[nlayers]-totuflux[nlayers] #net total downward flux at TOA
                                                                         toa_fnet=fnet_sw[nlayers]-fnet_lw[nlayers]
                                                                         if(fixed_sw_on==1):
-                                                                            toa_fnet=fixed_sw-fnet_lw[nlayers]
+                                                                            # toa_fnet=fixed_sw-fnet_lw[nlayers]
+                                                                            toa_fnet=fixed_sw[i_lat]-fnet_lw[nlayers]
                                                                         # toa_fnet=totdflux[nlayers]-totuflux[nlayers]+zonal_transps[i_zon] #net total downward flux at TOA  NJE now accounting for zonal transport
     
                                                                         prev_maxhtr=maxhtr*1.0
@@ -2859,7 +2865,7 @@ for cf_tot in cf_tots:
                                                                 
     
                                                                 # print eqbseek
-                                                                if(ts%100==0):
+                                                                if(ts%10==0):
                                                                     print( '{: 4d}|'.format(ts))
                                                                     ts_rec.append(ts)
                                                                     maxdfnet_rec.append(np.max(maxdfnet_lat))
@@ -2890,7 +2896,7 @@ for cf_tot in cf_tots:
                                                                         else:
                                                                             print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
                                                                             print('-------------------------------------------------------------------')
-                                                                    # os.system('say "Equilibrium reached"')
+                                                                    os.system('say "Equilibrium reached"')
                                                                     # writeoutputfile()
                                                                     writeoutputfile_masters()
                                                                     filewritten=1

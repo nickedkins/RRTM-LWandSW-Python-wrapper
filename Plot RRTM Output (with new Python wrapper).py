@@ -18,9 +18,9 @@ plot_switch=2 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/transport on/nl=60, tighter eqb/cm=4/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/transport on/nl=60, tighter eqb/cm=8/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/building understanding/vary pcld/cm=4/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/building understanding/vary pcld/cm=8/',
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -227,7 +227,7 @@ def plotrrtmoutput_masters():
             # plt.xlabel('wbrodl')
             
             plt.subplot(122)
-            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
+            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-',label=fn)
             plt.axvline(-eqb_maxdfnet,linestyle='--')
             plt.axvline(eqb_maxdfnet,linestyle='--')
             plt.ylim(1000,10)
@@ -940,25 +940,31 @@ for directory in directories:
 
 if(plot_switch==2):
 
-    cf_tots = [0.5,0.6]
+    # full crks
+    # cf_tots = [ 0.5, 0.6 ]
+    # tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
+    # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
 
-
-    cf_tots = [ 0.5, 0.6 ]
-    tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
-    pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
+    # cf_tots = [ 0.5, 0.6 ]
+    # tau_tots = [ 6.5 ]
+    # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
 
     # edge cases for CRKs
     # cf_tots = [ 0.5, 0.6 ]
     # tau_tots = [ 0.15, 6.5 ]
     # pclddums = [ 800, 600, 400 ]
     
+    cf_tots = [ 0.5, 0.6 ]
+    tau_tots = [ 2.5 ]
+    pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
+    
     clr_tots = np.ones(len(cf_tots))-cf_tots
     cldlats = np.arange(nlatcols)
     
-    toalws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
-    dtoalws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
-    toasws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums) ) )
-    dtoasws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums) ) )
+    toalws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums), len(directories) ) )
+    dtoalws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums), len(directories) ) )
+    toasws = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums), len(directories) ) )
+    dtoasws = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums), len(directories) ) )
     tgs = np.zeros( ( len(cf_tots), len(cldlats), len(tau_tots), len(pclddums), len(directories) ) )
     dtgs = np.zeros( ( 1, len(cldlats), len(tau_tots), len(pclddums), len(directories) ) )
     
@@ -968,29 +974,50 @@ if(plot_switch==2):
             for icl in range(len(cldlats)):
                 for itt in range(len(tau_tots)):
                     for ipc in range(len(pclddums)):
-                        # toalws[icf, icl, itt, ipc,i_dir] = fnet_lw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_lw_dirfil[-1,1,i,0,0]*clr_tots[icf]
-                        # toasws[icf, icl, itt, ipc, i_dir] = fnet_sw_dirfil[-1,0,i,0,0]*cf_tots[icf] + fnet_sw_dirfil[-1,1,i,0,0]*clr_tots[icf]
-                        # tgs[icf, icl, itt, ipc] = tbound_all_dirfil[0,i,0,0]*cf_tots[icf] + tbound_all_dirfil[1,i,0,0]*clr_tots[icf]
-                        tgs[icf, icl, itt, ipc, i_dir] = tz_all_dirfil[-1,0,i,i_dir,0]*cf_tots[icf] + tz_all_dirfil[-1,1,i,i_dir,0]*clr_tots[icf]
+                        print(icf, icl, itt, ipc)
+                        toalws[icf, icl, itt, ipc,i_dir] = fnet_lw_dirfil[-1,0,i,0,i_dir]*cf_tots[icf] + fnet_lw_dirfil[-1,1,i,0,i_dir]*clr_tots[icf]
+                        toasws[icf, icl, itt, ipc, i_dir] = fnet_sw_dirfil[-1,0,i,0,i_dir]*cf_tots[icf] + fnet_sw_dirfil[-1,1,i,0,i_dir]*clr_tots[icf]
+                        tgs[icf, icl, itt, ipc,i_dir] = tbound_all_dirfil[0,i,0,i_dir]*cf_tots[icf] + tbound_all_dirfil[1,i,0,i_dir]*clr_tots[icf]
+                        # tgs[icf, icl, itt, ipc, i_dir] = tz_all_dirfil[0,0,i,i_dir,0]*cf_tots[icf] + tz_all_dirfil[0,1,i,i_dir,0]*clr_tots[icf]
+                        print(i, toasws[icf, icl, itt, ipc,i_dir], cf_tots[icf], pclddums[ipc], cldlats[icl])
                         i+=1
+                        
     
     xticks= tau_tots
     yticks = pclddums
     
-    # dtoalws = toalws[0,:,:,:] - toalws[1,:,:,:]
-    # crklw = dtoalws / 10.
-    # # crklw = np.amax(crklw) - crklw
-    # dtoasws = toasws[0,:,:,:] - toasws[1,:,:,:]
-    # crksw = -dtoasws / 10.
+    dtoalws = toalws[1,:,:,:] - toalws[0,:,:,:]
+    crklw = dtoalws / 10.
+    # crklw = np.amax(crklw) - crklw
+    dtoasws = toasws[1,:,:,:] - toasws[0,:,:,:]
+    crksw = -dtoasws / 10.
     # crksw = np.amin(crksw) - crksw
-    dtgs = tgs[0,:,:,:] - tgs[1,:,:,:]
+    dtgs = tgs[1,:,:,:,:] - tgs[0,:,:,:,:]
     crktgs = dtgs / 10.
     
+    plt.figure(1)
+    plt.plot(dtoalws[0,0,:,0], pclddums, '-o',label='lw')
+    plt.plot(dtoasws[0,0,:,0], pclddums, '-o',label='sw')
+    plt.plot(dtoasws[0,0,:,0]-dtoalws[0,0,:,0],pclddums, '-o',label='net')
+    plt.axvline(0)
+    plt.ylim(1000,10)
+    plt.legend()
+    
     vmax=np.amax(np.abs(crktgs))
-    vmax=0.02
+    # vmax=np.amax(np.abs(crktgs[0,:,::-1,1].T-crktgs[0,:,::-1,0].T))
+    # # vmax=0.2
     vmin=-1.*vmax
     
-    plt.figure(1)
+    # plt.figure(1)
+    # plt.plot(dtoalws[0,0,:,0],pclddums,'-o',label='LW')
+    # plt.plot(dtoasws[0,0,:,0],pclddums,'-o',label='SW')
+    # plt.plot(dtoasws[0,0,:,0]-dtoalws[0,0,:,0],pclddums,'-o')
+    # plt.plot(dtgs[0,0,:,0],pclddums,'-o')
+    # plt.plot(dtgs[1,0,:,0],pclddums,'-o')
+    # plt.plot(dtgs[0,0,:,1],pclddums,'--o')
+    # plt.plot(dtgs[1,0,:,1],pclddums,'--o')
+    # plt.ylim(1000,10)
+    # plt.legend()
     
     # plt.subplot(311)
     # plt.title('LW')
@@ -1028,33 +1055,33 @@ if(plot_switch==2):
     # cbar = plt.colorbar()
     # cbar.set_label(r'$Wm^{-2}\%^{-1}$', rotation=270,labelpad=20)
     
-    plt.figure(1)
+    # plt.figure(1)
     
-    plt.subplot(121)
-    plt.title('Tropics')
-    # plt.imshow(crktgs[0,:,::-1,1].T.T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
-    plt.imshow(crktgs[0,:,::-1,1].T-crktgs[0,:,::-1,0].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
-    plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
-    plt.gca().set_xticklabels(tau_tots[::2])
-    plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
-    plt.gca().set_yticklabels(pclddums[::2])
-    plt.xlabel(r'$\tau$')
-    plt.ylabel(r'CTP (hPa)')
-    cbar = plt.colorbar()
-    cbar.set_label(r'$K\%^{-1}$', rotation=270,labelpad=20)
+    # plt.subplot(121)
+    # plt.title('Tropics')
+    # plt.imshow(crktgs[0,:,::-1,0].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    # # plt.imshow(crktgs[0,:,::-1,1].T-crktgs[0,:,::-1,0].T,vmin=vmin,vmax=vmax,cmap='bwr',extent=[-1,1,-1,1])
+    # plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
+    # plt.gca().set_xticklabels(tau_tots[::2])
+    # plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
+    # plt.gca().set_yticklabels(pclddums[::2])
+    # plt.xlabel(r'$\tau$')
+    # plt.ylabel(r'CTP (hPa)')
+    # cbar = plt.colorbar()
+    # cbar.set_label(r'$K\%^{-1}$', rotation=270,labelpad=20)
 
-    plt.subplot(122)
-    plt.title('Extratropics')
-    # plt.imshow(crktgs[1,:,::-1,1].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
-    plt.imshow(crktgs[1,:,::-1,1].T-crktgs[1,:,::-1,0].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
-    plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
-    plt.gca().set_xticklabels(tau_tots[::2])
-    plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
-    plt.gca().set_yticklabels(pclddums[::2])
-    plt.xlabel(r'$\tau$')
-    plt.ylabel(r'CTP (hPa)')
-    cbar = plt.colorbar()
-    cbar.set_label(r'$K\%^{-1}$', rotation=270,labelpad=20)
+    # plt.subplot(122)
+    # plt.title('Extratropics')
+    # plt.imshow(crktgs[1,:,::-1,0].T,cmap='bwr',vmin=vmin,vmax=vmax,extent=[-1,1,-1,1])
+    # # plt.imshow(crktgs[1,:,::-1,1].T-crktgs[1,:,::-1,0].T,vmin=vmin,vmax=vmax,cmap='bwr',extent=[-1,1,-1,1])
+    # plt.gca().set_xticks(np.linspace(-1,1,len(tau_tots ) )[::2] )
+    # plt.gca().set_xticklabels(tau_tots[::2])
+    # plt.gca().set_yticks(np.linspace(-1,1,len( pclddums ) )[::2] )
+    # plt.gca().set_yticklabels(pclddums[::2])
+    # plt.xlabel(r'$\tau$')
+    # plt.ylabel(r'CTP (hPa)')
+    # cbar = plt.colorbar()
+    # cbar.set_label(r'$K\%^{-1}$', rotation=270,labelpad=20)
     
     # plt.gcf().suptitle(r'Cloud radiative kernels at 0$\degree$ N',ha='center',y=1.0,x=0.69, va='center')
 
