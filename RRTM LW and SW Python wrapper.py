@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (10,10)
@@ -553,10 +553,10 @@ nlatcols=1 # number of latitude columns
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=2 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6, lat=45, tg=288'
+prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6, lat=45'
 lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0
-dtbound_switch = 0
+dtbound_switch = 1
 dTlay_switch = 1
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
@@ -591,7 +591,7 @@ nclouds=nlayers # number of cloud layers
 
 lw_on=1 # 0: don't call rrtm_lw, 1: do
 sw_on=1 # 0: don't call rrtm_sw, 1: do
-fixed_sw_on=1
+fixed_sw_on=0
 if(master_input==7):
     fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
 if(sw_on==0):
@@ -617,11 +617,11 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 
-eqb_maxdfnet=0.01*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.001 # max equilibrium value of total column energy budget at TOA
+eqb_maxdfnet=0.0001*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
+eqb_col_budgs=0.0001 # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs *= 1e12
-timesteps=1000 # number of timesteps until model exits
+timesteps=5000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
 
@@ -646,7 +646,7 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[4.] #meridional transport coefficient
+c_merids=[4.,8.] #meridional transport coefficient
 
 extra_forcings=[0.] # add an extra TOA forcing to any box
 
@@ -679,17 +679,22 @@ tbound_add=0
 b_rdwv = 4.
 
 cldlats = np.arange(nlatcols)
+# cldlats = [0]
 
 # full CRKs
-# cf_tots = [ 0.5, 0.6 ]
-# tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
-# pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
+cf_tots = [ 0.1, 0.9 ]
+tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ]
+pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
 
 
 # edge cases for CRKs
-cf_tots = [ 0.5, 0.6 ]
-tau_tots = [ 2.5 ]
-pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
+# cf_tots = [ 0.5, 0.6 ]
+# tau_tots = [ 0.15, 220 ]
+# pclddums = [ 800, 50 ]
+
+# cf_tots = [ 0.1, 0.9]
+# tau_tots = [ 2.45, 6.45]
+# pclddums = [ 800, 680, 560, 440, 310, 180, 50 ]
 
 # no cloud
 # cf_tots = [ 0. ]
@@ -721,7 +726,7 @@ for cf_tot in cf_tots:
                                                 for pertlat in pertlats:
                                                     for pertzon in pertzons:
                                                         for pert_pbottom in pert_pbottoms:
-                                                            print('loop {} of {}, {} percent done '.format(i_loops,totloops,i_loops/totloops*100.))
+                                                            print('loop {: 3.0f} of {: 3.0f}, {: 4.2f} percent done, {: 4.1f} mins to go'.format(i_loops, totloops, i_loops/totloops*100., (totloops - i_loops)*looptime/60. )  )
                                                             i_loops+=1
     
                 #########################################################################################################################################################
@@ -943,7 +948,7 @@ for cf_tot in cf_tots:
                                                             vol_mixh2o_min = 1e-6
                                                             vol_mixh2o_max = 1e6
     
-                                                            dmax=1.
+                                                            dmax=0.1
     
                                                             radice=90.
                                                             radliq=7.
@@ -1133,7 +1138,8 @@ for cf_tot in cf_tots:
                                                                 lw_on=int   (   f.readline().rstrip('\n')   )
                                                                 # sw_on=int   (   f.readline().rstrip('\n')   )
                                                                 f.readline()
-                                                                eqb_maxdfnet=float  (   f.readline().rstrip('\n')   )
+                                                                # eqb_maxdfnet=float  (   f.readline().rstrip('\n')   )
+                                                                f.readline()
                                                                 toa_fnet_eqb=float  (   f.readline().rstrip('\n')   )
                                                                 nlatcols=int    (   f.readline().rstrip('\n')   )
     
@@ -2532,17 +2538,13 @@ for cf_tot in cf_tots:
     
                                                                             # if(i_zon==1 and ts==1):
                                                                             #   wkl[1,:]=wkl_master[:,i_zon,0]*wklfac
-    
-                                                                        # if(input_source==0):
-                                                                        #   dtbound=toa_fnet*0.1*0.5
-                                                                        #   dtbound=np.clip(dtbound,-dmax,dmax)
-                                                                        #   tbound+=dtbound
+   
     
     
                                                                         # perturb surface temperature to reduce column energy imbalance
                                                                         if((input_source==0 and ts>100) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
-                                                                            dtbound=column_budgets_master[i_zon,i_lat]*0.1*0.5
+                                                                            dtbound=column_budgets_master[i_zon,i_lat]*0.1*0.5 * 0.4
                                                                             if( dtbound_switch == 0 ):
                                                                                 dtbound=0.
                                                                             else:
@@ -2588,7 +2590,7 @@ for cf_tot in cf_tots:
                                                                         #   if(maxhtr<eqb_maxhtr):
                                                                             writeformattedinputfile_sw()
                                                                             callrrtmsw()
-                                                                            print('RRTM SW Called')
+                                                                            # print('RRTM SW Called')
                                                                             stepssinceswcalled=0
                                                                             totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
                                                                         stepssinceswcalled+=1
@@ -2865,48 +2867,48 @@ for cf_tot in cf_tots:
                                                                 
     
                                                                 # print eqbseek
-                                                                if(ts%10==0):
-                                                                    print( '{: 4d}|'.format(ts))
+                                                                if(ts%1000==0):
+                                                                    # print( '{: 4d}|'.format(ts))
                                                                     ts_rec.append(ts)
                                                                     maxdfnet_rec.append(np.max(maxdfnet_lat))
-                                                                    plt.figure(1)
-                                                                    plt.plot(ts_rec,maxdfnet_rec,'-o')
-                                                                    plt.ylim(0.,np.max(maxdfnet_rec[-10:])*1.1)
-                                                                    plt.axhline(-eqb_maxdfnet,linestyle='--')
-                                                                    plt.axhline(eqb_maxdfnet,linestyle='--')
-                                                                    # plt.ylim(-abs(np.array(maxdfnet_rec[:-10])), abs(np.array(maxdfnet_rec[:-10])))
-                                                                    show()
-                                                                    for i_lat in range(nlatcols):
-                                                                        if(i_lat<nlatcols-1):
-                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
-                                                                        else:
-                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
-                                                                            print('-------------------------------------------------------------------')
+                                                                    # plt.figure(1)
+                                                                    # plt.plot(ts_rec,maxdfnet_rec,'-o')
+                                                                    # plt.ylim(0.,np.max(maxdfnet_rec[-10:])*1.1)
+                                                                    # plt.axhline(-eqb_maxdfnet,linestyle='--')
+                                                                    # plt.axhline(eqb_maxdfnet,linestyle='--')
+                                                                    # # plt.ylim(-abs(np.array(maxdfnet_rec[:-10])), abs(np.array(maxdfnet_rec[:-10])))
+                                                                    # show()
+                                                                    # for i_lat in range(nlatcols):
+                                                                    #     if(i_lat<nlatcols-1):
+                                                                    #         print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                    #     else:
+                                                                    #         print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                    #         print('-------------------------------------------------------------------')
     
                                                                 if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>200 or (input_source==2 and ts > 200)) and np.max(abs(column_budgets_master))<eqb_col_budgs and np.min(lapse_eqb)==1):
                                                                 # if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>100 or (input_source==2 and ts > 10)) and np.max(abs(column_budgets_master))<eqb_col_budgs):
                                                                 # if(np.max(abs(column_budgets_master))<eqb_col_budgs): # NJE temp fix for perts, remember to reset!
-                                                                    if(plotted!=1):
-                                                                        plotrrtmoutput()
-                                                                        plotted=1
-                                                                    print('Equilibrium reached!')
-                                                                    for i_lat in range(nlatcols):
-                                                                        if(i_lat<nlatcols-1):
-                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
-                                                                        else:
-                                                                            print( '{: 3.0f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 5.3f} {: 3d} {} {: 5.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
-                                                                            print('-------------------------------------------------------------------')
-                                                                    os.system('say "Equilibrium reached"')
+                                                                    # if(plotted!=1):
+                                                                        # plotrrtmoutput()
+                                                                        # plotted=1
+                                                                    print('Equilibrium reached! in {: 4d} steps'.format(ts))
+                                                                    # for i_lat in range(nlatcols):
+                                                                    #     if(i_lat<nlatcols-1):
+                                                                    #         print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                    #     else:
+                                                                    #         print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                    #         print('-------------------------------------------------------------------')
+                                                                    # os.system('say "Equilibrium reached"')
                                                                     # writeoutputfile()
                                                                     writeoutputfile_masters()
                                                                     filewritten=1
                                                                     break
                                                                 elif(ts==timesteps-1):
-                                                                    print('Max timesteps')
-                                                                    os.system('say "Max timesteps"')
-                                                                    if(plotted!=1):
-                                                                        plotrrtmoutput()
-                                                                        plotted=1
+                                                                    # print('Max timesteps')
+                                                                    # os.system('say "Max timesteps"')
+                                                                    # if(plotted!=1):
+                                                                        # plotrrtmoutput()
+                                                                        # plotted=1
                                                                     # writeoutputfile()
                                                                     writeoutputfile_masters()
                                                                     filewritten=1
@@ -2916,8 +2918,8 @@ for cf_tot in cf_tots:
                                                             if(filewritten!=1):
                                                                 writeoutputfile_masters()
     
-                                                            if(plotted==0):
-                                                                plotrrtmoutput()
+                                                            # if(plotted==0):
+                                                            #     plotrrtmoutput()
 
 ########################################################################################end loops########################################################################################
 
@@ -2926,6 +2928,6 @@ ttotal = tend-tstart
 print(ttotal)
 
 print('Done')
-os.system('say "Done"')
+# os.system('say "Done"')
 # plt.tight_layout()
 # show()
