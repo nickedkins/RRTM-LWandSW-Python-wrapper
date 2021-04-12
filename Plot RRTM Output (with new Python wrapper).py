@@ -14,13 +14,12 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=3 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum
+plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/absolute/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/relative/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/as=2/'
 ]
 
 
@@ -29,8 +28,8 @@ c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficient
 
 nlayers=60
-nlatcols=1
-nzoncols=2
+nlatcols=5
+nzoncols=1
 
 def colors(n):
   ret = []
@@ -229,17 +228,17 @@ def plotrrtmoutput_masters():
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wbrodl')
 
-            # plt.subplot(122)
-            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
-            # plt.axvline(-eqb_maxdfnet,linestyle='--')
-            # plt.axvline(eqb_maxdfnet,linestyle='--')
-            # plt.ylim(1000,10)
-            # # plt.ylim(1000,600)
-            # plt.xlim(-5,5)
-            # plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
-            # plt.ylabel('Pressure (hPa)')
-            # plt.grid(True,which='both')
-            # # plt.legend()
+            plt.subplot(122)
+            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
+            plt.axvline(-eqb_maxdfnet,linestyle='--')
+            plt.axvline(eqb_maxdfnet,linestyle='--')
+            plt.ylim(1000,10)
+            # plt.ylim(1000,600)
+            plt.xlim(-5,5)
+            plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
+            plt.ylabel('Pressure (hPa)')
+            plt.grid(True,which='both')
+            # plt.legend()
             
             # plt.subplot(133)
             # lapsedum=np.zeros(nlayers)
@@ -912,15 +911,15 @@ for directory in directories:
             plt.legend()
            
             
-        if(nlatcols>1):
-            ztrop=np.diagonal(altz_master[cti,0,:]/1000.)
-            ptrop=np.diagonal(pz_master[cti,0,:])
-            ttrop=np.diagonal(tz_master[cti,0,:])
-        else:
-            ztrop=altz_master[cti,0,0]/1000.
-            ptrop=pz_master[cti,0,0]
-            ttrop=tz_master[cti,0,0]
-        tsurf=tz_master[0,0,0]
+        # if(nlatcols>1):
+        #     ztrop=np.diagonal(altz_master[cti,0,:]/1000.)
+        #     ptrop=np.diagonal(pz_master[cti,0,:])
+        #     ttrop=np.diagonal(tz_master[cti,0,:])
+        # else:
+        #     ztrop=altz_master[cti,0,0]/1000.
+        #     ptrop=pz_master[cti,0,0]
+        #     ttrop=tz_master[cti,0,0]
+        # tsurf=tz_master[0,0,0]
         
         
         
@@ -1013,7 +1012,31 @@ for directory in directories:
 
 ########################################################################## end read files #################################################################################################################
 
+print(merid_transps_all_dirfil[0,0,0,:])
 
+sens = (tbound_all_dirfil[0,2,0,:]-tbound_all_dirfil[0,0,0,:])/10
+globmeansens = np.mean((tbound_all_dirfil[0,2,0,:]-tbound_all_dirfil[0,0,0,:])/10)
+dtransp = (merid_transps_all_dirfil[0,1,0,:]-merid_transps_all_dirfil[0,0,0,:])/10.
+
+
+plt.figure(1)
+plt.subplot(221)
+# plt.plot(latgrid,tbound_all_dirfil[0,0,0,:],'-o')
+plt.plot(latgrid,sens-globmeansens,'-o')
+plt.axhline(0.)
+plt.xlabel('Latitude (deg)')
+plt.ylabel('dTg (K)')
+plt.subplot(222)
+# plt.plot(latgrid,merid_transps_all_dirfil[0,0,0,:],'-o')
+plt.plot(latgrid,dtransp,'-o')
+plt.axhline(0.)
+plt.xlabel('Latitude (deg)')
+plt.ylabel('dNet merid transport (Wm^-2)')
+plt.subplot(223)
+plt.plot(latgrid,(sens-globmeansens)*dtransp,'-o')
+plt.axhline(0.)
+plt.xlabel('Latitude')
+plt.ylabel('dT change due to transport')
 
 # plt.subplot(131)
 # plt.imshow(crklw[0,:,::-1].T,vmin=-2.5,vmax=2.5,cmap='bwr')

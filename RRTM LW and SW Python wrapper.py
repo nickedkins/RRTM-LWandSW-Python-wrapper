@@ -549,14 +549,14 @@ def createlatdistbn(filename):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=1 # number of latitude columns
+nlatcols=5 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
-input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6'
+master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
+input_source=2 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
+prev_output_file=project_dir+'_Useful Data/baselines/nl=60, nlats=5, nzons=1, minput=6, albsrc=2'
 lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
-albedo_source=0
+albedo_source=2 #0: manual, 2: EBM style
 dT_switch=1
 dtbound_switch=1
 
@@ -570,7 +570,7 @@ plot_eqb_approach = 1
 # xgridbounds=np.sin(np.deg2rad(latgridbounds))
 
 # create latgrid evenly spaced in cos(lat)
-xgridbounds=np.linspace(-1.,1.,nlatcols+1)
+xgridbounds=np.linspace(-0.,1.,nlatcols+1)
 # xgridbounds=[0.95,1.0]
 latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
 
@@ -596,7 +596,7 @@ nclouds=nlayers # number of cloud layers
 
 lw_on=1 # 0: don't call rrtm_lw, 1: do
 sw_on=1 # 0: don't call rrtm_sw, 1: do
-fixed_sw_on=1
+fixed_sw_on=0
 fixed_sw=240.
 if(master_input==7):
     fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
@@ -622,10 +622,10 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
+eqb_col_budgs=0.1*(60./nlayers) # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
-timesteps=2000 # number of timesteps until model exits
+timesteps=500 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
@@ -655,7 +655,7 @@ tbounds=np.array([300.]) # initalise lower boundary temperature
 wklfacs=[1.0] # multiply number of molecules of a gas species by this factor in a given lat and layer range defined later
 wklfac_co2s=[1.] # ditto for co2 specifically
 
-extra_forcings = [45.]
+extra_forcings = [10.]
 
 # location of perturbations to number of gas molecules
 pertzons=[0]
@@ -664,15 +664,15 @@ pertmols=[1] #don't do zero!
 pertlays=[0]
 
 # perts=[2.75e-4]
-perts = [1.07]
+perts = [1.00]
 pert_type=0 # 0: relative, 1: absolute
 
-pert_pwidth = 50.
-pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
-# pert_pbottoms = [1000. + pert_pwidth]
+# pert_pwidth = 50.
+# pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
+# # pert_pbottoms = [1000. + pert_pwidth]
 
-# pert_pbottoms = [1000.]
-# pert_pwidth = 1000.
+pert_pbottoms = [1000.]
+pert_pwidth = 1000.
 
 pert_zon_h2o=1.0
 
@@ -689,6 +689,7 @@ b_rdwvs = 8. / Hh2os
 
 
 cldlats = np.arange(nlatcols)
+cldlats = [0]
 # cf_tots = [ 0.5, 0.6 ]
 # tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ] #isccp numbers
 # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ] #isccp numbers
@@ -793,7 +794,7 @@ for b_rdwv in b_rdwvs:
                                                             tg_obs=data[:,1]
                                                             f=interp1d(lat_obs,tg_obs)
                                                             tbound_inits=f(latgrid)
-                                                            tbound_inits = [295.]
+                                                            # tbound_inits = [295.]
                                                             if(nlayers==60):
                                                                 undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1. #for nl=60
                                                             elif(nlayers==100):
@@ -972,7 +973,7 @@ for b_rdwv in b_rdwvs:
                                                             if(input_source != 2):
                                                                 lapse_eqb=np.ones(nlatcols)
                                                             else:
-                                                                lapse_eqb=np.zeros(nlatcols)
+                                                                lapse_eqb=np.ones(nlatcols)
     
                                                             # initialise arrays
                                                             tz_master=np.zeros((nlayers+1,nzoncols,nlatcols))
@@ -2571,12 +2572,13 @@ for b_rdwv in b_rdwvs:
                                                                         # perturb surface temperature to reduce column energy imbalance
                                                                         if((input_source==0 and ts>100) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
-                                                                            dtbound=column_budgets_master[i_zon,i_lat]*undrelax_lats[0]*0.05
+                                                                            dtbound=column_budgets_master[i_zon,i_lat]*undrelax_lats[0]*0.01
                                                                             if(dtbound_switch==0):
                                                                                 dtbound=0.
                                                                             dtbound=np.clip(dtbound,-dmax,dmax)
                                                                             tbound+=dtbound
                                                                         tbound=np.clip(tbound,tmin,tmax)
+                                                                        
     
                                                                         # if(input_source==0 and master_input==5)
     
@@ -2727,6 +2729,9 @@ for b_rdwv in b_rdwvs:
                                                                             elif(i_lat==nlatcols-1):
                                                                                 # merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[0,i_zon,i_lat-1]-tz_master[0,i_zon,i_lat]))*latweights_area[i_lat]
                                                                                 merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
+                                                                                
+                                                                            # nje mtransp manual
+                                                                            merid_transps_master[0,:] = [-19.3148253,  -35.38515553, -33.79527035,  35.69882938,  52.79497028]
     
                                                                         
                                                                         column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+zonal_transps_master[i_zon,i_lat]+extra_forcing  #nje forcing
@@ -2896,7 +2901,7 @@ for b_rdwv in b_rdwvs:
                                                                 
     
                                                                 # print eqbseek
-                                                                if(ts%20==0 and plot_eqb_approach==1 ):
+                                                                if(ts%23==0 and plot_eqb_approach==1 ):
                                                                     print( '{: 4d}|'.format(ts))
                                                                     ts_rec.append(ts)
                                                                     maxdfnet_rec.append(np.max(maxdfnet_lat))
