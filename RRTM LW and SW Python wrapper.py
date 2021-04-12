@@ -617,8 +617,8 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 
-eqb_maxdfnet=0.0001*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.0001 # max equilibrium value of total column energy budget at TOA
+eqb_maxdfnet=0.01*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
+eqb_col_budgs=0.01*(60./nlayers) # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs *= 1e12
 timesteps=5000 # number of timesteps until model exits
@@ -2551,7 +2551,7 @@ for c_zonal in c_zonals:
                                                                         # perturb surface temperature to reduce column energy imbalance
                                                                         if((input_source==0 and ts>100) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
-                                                                            dtbound=column_budgets_master[i_zon,i_lat]*0.1*0.5 * 0.4
+                                                                            dtbound=column_budgets_master[i_zon,i_lat]*0.1*0.5
                                                                             if( dtbound_switch == 0 ):
                                                                                 dtbound=0.
                                                                             else:
@@ -2874,49 +2874,47 @@ for c_zonal in c_zonals:
                                                                 
         
                                                                 # print eqbseek
-                                                                if(ts%1000==0):
-                                                                    # print( '{: 4d}|'.format(ts))
+                                                                if(ts%50==0):
+                                                                    print( '{: 4d}|'.format(ts))
                                                                     ts_rec.append(ts)
                                                                     maxdfnet_rec.append(np.max(maxdfnet_lat))
-                                                                    # plt.figure(1)
-                                                                    # plt.plot(ts_rec,maxdfnet_rec,'-o')
-                                                                    # plt.ylim(0.,np.max(maxdfnet_rec[-10:])*1.1)
-                                                                    # plt.axhline(-eqb_maxdfnet,linestyle='--')
-                                                                    # plt.axhline(eqb_maxdfnet,linestyle='--')
-                                                                    # # plt.ylim(-abs(np.array(maxdfnet_rec[:-10])), abs(np.array(maxdfnet_rec[:-10])))
-                                                                    # show()
-                                                                    # for i_lat in range(nlatcols):
-                                                                    #     if(i_lat<nlatcols-1):
-                                                                    #         print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
-                                                                    #     else:
-                                                                    #         print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
-                                                                    #         print('-------------------------------------------------------------------')
+                                                                    plt.figure(1)
+                                                                    plt.plot(ts_rec,maxdfnet_rec,'-o')
+                                                                    plt.ylim(0.,np.max(maxdfnet_rec[-10:])*1.1)
+                                                                    plt.axhline(-eqb_maxdfnet,linestyle='--')
+                                                                    plt.axhline(eqb_maxdfnet,linestyle='--')
+                                                                    # plt.ylim(-abs(np.array(maxdfnet_rec[:-10])), abs(np.array(maxdfnet_rec[:-10])))
+                                                                    show()
+                                                                    for i_lat in range(nlatcols):
+                                                                        if(i_lat<nlatcols-1):
+                                                                            print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                        else:
+                                                                            print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                            print('-------------------------------------------------------------------')
         
                                                                 if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>200 or (input_source==2 and ts > 200)) and np.max(abs(column_budgets_master))<eqb_col_budgs and np.min(lapse_eqb)==1):
                                                                 # if(abs(maxdfnet_tot) < eqb_maxdfnet and (ts>100 or (input_source==2 and ts > 10)) and np.max(abs(column_budgets_master))<eqb_col_budgs):
                                                                 # if(np.max(abs(column_budgets_master))<eqb_col_budgs): # NJE temp fix for perts, remember to reset!
-                                                                    # if(plotted!=1):
-                                                                        # plotrrtmoutput()
-                                                                        # plotted=1
+                                                                    if(plotted!=1):
+                                                                        plotrrtmoutput()
+                                                                        plotted=1
                                                                     print('Equilibrium reached! in {: 4d} steps'.format(ts))
-                                                                    # for i_lat in range(nlatcols):
-                                                                    #     if(i_lat<nlatcols-1):
-                                                                    #         print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
-                                                                    #     else:
-                                                                    #         print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
-                                                                    #         print('-------------------------------------------------------------------')
-                                                                    # os.system('say "Equilibrium reached"')
-                                                                    # writeoutputfile()
+                                                                    for i_lat in range(nlatcols):
+                                                                        if(i_lat<nlatcols-1):
+                                                                            print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                        else:
+                                                                            print( '{: 3.0f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 7.5f} {: 3d} {} {: 7.5f} {: 8.3f} {: 8.3f} {: 8.3f} {: 8.3f} {: 1.0f} {: 1.0f} {: 1.0f}|'.format(latgrid[i_lat],maxdfnet_lat[i_lat],np.mean(tbound_master[:,i_lat],axis=0),np.mean(column_budgets_master[:,i_lat],axis=0),np.mean(fnet_sw_master[nlayers,:,i_lat],axis=0),np.mean(fnet_lw_master[nlayers,:,i_lat],axis=0),np.mean(merid_transps_master[:,i_lat],axis=0), np.int(cti_master[0,i_lat]), maxdfnet_ind, altz_master[np.int(cti_master[0,i_lat]),0,i_lat]/1000., dmid[i_lat], dtrop[i_lat], lapse_master[0,i_lat], np.mean(altz_master[np.int(np.mean(cti_master[:,i_lat])),:,i_lat])/1000., rad_eqb[i_lat],colbudg_eqb[i_lat],lapse_eqb[i_lat] ))
+                                                                            print('-------------------------------------------------------------------')
+                                                                    os.system('say "Equilibrium reached"')
                                                                     writeoutputfile_masters()
                                                                     filewritten=1
                                                                     break
                                                                 elif(ts==timesteps-1):
-                                                                    # print('Max timesteps')
-                                                                    # os.system('say "Max timesteps"')
-                                                                    # if(plotted!=1):
-                                                                        # plotrrtmoutput()
-                                                                        # plotted=1
-                                                                    # writeoutputfile()
+                                                                    print('Max timesteps')
+                                                                    os.system('say "Max timesteps"')
+                                                                    if(plotted!=1):
+                                                                        plotrrtmoutput()
+                                                                        plotted=1
                                                                     writeoutputfile_masters()
                                                                     filewritten=1
         
@@ -2925,8 +2923,8 @@ for c_zonal in c_zonals:
                                                             if(filewritten!=1):
                                                                 writeoutputfile_masters()
         
-                                                            # if(plotted==0):
-                                                            #     plotrrtmoutput()
+                                                            if(plotted==0):
+                                                                plotrrtmoutput()
 
 ########################################################################################end loops########################################################################################
 

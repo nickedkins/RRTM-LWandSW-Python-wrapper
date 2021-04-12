@@ -23,15 +23,17 @@ directories = [
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/building understanding/minimal cloud sets/ssa=0.99/cm=8/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/building understanding/minimal cloud sets/ssa=0.01/cm=4/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/building understanding/minimal cloud sets/ssa=0.01/cm=8/'
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/building understanding/minimal cloud sets/ssa=0.5/cm=4/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/building understanding/minimal cloud sets/ssa=0.5/cm=8/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/building understanding/minimal cloud sets/ssa=0.5/cm=4/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/building understanding/minimal cloud sets/ssa=0.5/cm=8/'
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/building understanding/minimal cloud sets/ssa=0.01/nl=590/cm=4/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/building understanding/minimal cloud sets/ssa=0.01/nl=590/cm=8/',
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficientnlayers=
 
 nzoncols=2
-nlayers=60
+nlayers=590
 nlatcols=2
 
 def blank_pending_files(a):
