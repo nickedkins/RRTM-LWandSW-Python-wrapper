@@ -14,12 +14,13 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum
+plot_switch=5 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/as=2/'
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/baseline - gases, alb, lapse, clouds constant/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/alb varies/'
 ]
 
 
@@ -1012,31 +1013,42 @@ for directory in directories:
 
 ########################################################################## end read files #################################################################################################################
 
-print(merid_transps_all_dirfil[0,0,0,:])
+if(plot_switch==5):
 
-sens = (tbound_all_dirfil[0,2,0,:]-tbound_all_dirfil[0,0,0,:])/10
-globmeansens = np.mean((tbound_all_dirfil[0,2,0,:]-tbound_all_dirfil[0,0,0,:])/10)
-dtransp = (merid_transps_all_dirfil[0,1,0,:]-merid_transps_all_dirfil[0,0,0,:])/10.
+    for i_dir in range(len(directories)):
 
+        print(merid_transps_all_dirfil[0,0,i_dir,:])
 
-plt.figure(1)
-plt.subplot(221)
-# plt.plot(latgrid,tbound_all_dirfil[0,0,0,:],'-o')
-plt.plot(latgrid,sens-globmeansens,'-o')
-plt.axhline(0.)
-plt.xlabel('Latitude (deg)')
-plt.ylabel('dTg (K)')
-plt.subplot(222)
-# plt.plot(latgrid,merid_transps_all_dirfil[0,0,0,:],'-o')
-plt.plot(latgrid,dtransp,'-o')
-plt.axhline(0.)
-plt.xlabel('Latitude (deg)')
-plt.ylabel('dNet merid transport (Wm^-2)')
-plt.subplot(223)
-plt.plot(latgrid,(sens-globmeansens)*dtransp,'-o')
-plt.axhline(0.)
-plt.xlabel('Latitude')
-plt.ylabel('dT change due to transport')
+        sens = (tbound_all_dirfil[0,2,i_dir,:]-tbound_all_dirfil[0,0,i_dir,:])/10
+        globmeansens = np.mean((tbound_all_dirfil[0,2,i_dir,:]-tbound_all_dirfil[0,0,i_dir,:])/10)
+        dtransp = (merid_transps_all_dirfil[0,1,i_dir,:]-merid_transps_all_dirfil[0,0,i_dir,:])/10.
+        dynfb = (sens-globmeansens)*dtransp
+
+        # plt.figure(i_dir)
+        plt.figure(1)
+        plt.title(fn)
+        plt.subplot(221)
+        # plt.plot(latgrid,tbound_all_dirfil[0,0,0,:],'-o')
+        plt.plot(latgrid,sens-globmeansens,'-o')
+        plt.axhline(0.)
+        plt.xlabel('Latitude (deg)')
+        plt.ylabel('Anomaly from glob mean sens')
+        plt.subplot(222)
+        # plt.plot(latgrid,merid_transps_all_dirfil[0,0,0,:],'-o')
+        plt.plot(latgrid,dtransp,'-o')
+        plt.axhline(0.)
+        plt.xlabel('Latitude (deg)')
+        plt.ylabel('dmtransp/dF')
+        plt.subplot(223)
+        plt.plot(latgrid,dynfb,'-o')
+        plt.axhline(0.)
+        plt.xlabel('Latitude')
+        plt.ylabel('dsens due to dmtransp (K)')
+
+        # plt.subplot(224)
+
+        plt.gcf().text(0.6,0.4,'Total dT: {: 6.2f}'.format(globmeansens*10. ) )
+        plt.gcf().text(0.6,0.3,'dT from dyn fb: {: 6.2f} or {: 6.2f} %'.format( np.sum(dynfb) * 10., np.sum(dynfb) / (globmeansens) * 100. ) )
 
 # plt.subplot(131)
 # plt.imshow(crklw[0,:,::-1].T,vmin=-2.5,vmax=2.5,cmap='bwr')
