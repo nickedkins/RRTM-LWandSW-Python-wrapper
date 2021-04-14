@@ -664,10 +664,13 @@ pertmols=[1] #don't do zero!
 pertlays=[0]
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 # perts=[2.75e-4]
 perts = [1.07]
 pert_type=0 # 0: relative, 1: absolute
 =======
+=======
+>>>>>>> Stashed changes
 perts=[0.]
 # perts = [1.00,1.07]
 pert_type=1 # 0: relative, 1: absolute
