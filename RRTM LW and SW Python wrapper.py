@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 
 def init_plotting():
@@ -547,7 +547,7 @@ def createlatdistbn(filename):
 
 
 # set overall dimensions for model
-nlayers=60 # number of vertical layers
+nlayers=590 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
@@ -663,16 +663,16 @@ pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
 
-# perts=[2.75e-4]
-perts = [1.07]
-pert_type=0 # 0: relative, 1: absolute
+perts=[0, 2.75e-4]
+# perts = [1.00,1.07]
+pert_type=1 # 0: relative, 1: absolute
 
-pert_pwidth = 50.
-pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
+# pert_pwidth = 50.
+# pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
 # pert_pbottoms = [1000. + pert_pwidth]
 
-# pert_pbottoms = [1000.]
-# pert_pwidth = 1000.
+pert_pbottoms = [1000.]
+pert_pwidth = 1000.
 
 pert_zon_h2o=1.0
 
