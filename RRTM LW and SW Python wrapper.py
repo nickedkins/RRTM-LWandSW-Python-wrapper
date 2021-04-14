@@ -663,9 +663,15 @@ pertlats=[0]
 pertmols=[1] #don't do zero!
 pertlays=[0]
 
+<<<<<<< Updated upstream
 # perts=[2.75e-4]
 perts = [1.07]
 pert_type=0 # 0: relative, 1: absolute
+=======
+perts=[0.]
+# perts = [1.00,1.07]
+pert_type=1 # 0: relative, 1: absolute
+>>>>>>> Stashed changes
 
 pert_pwidth = 50.
 pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
@@ -684,7 +690,7 @@ tbound_add=0
 
 # b_rdwvs = np.logspace(start=np.log10(1), stop=np.log10(8), num=10, base=10.)
 # b_rdwvs = np.linspace(1.,4.,5)
-Hh2os = np.array([2.0])
+Hh2os = np.array([2.0, 1.5, 2.5])
 b_rdwvs = 8. / Hh2os
 
 
@@ -2171,6 +2177,7 @@ for b_rdwv in b_rdwvs:
                                                                         wkl[7,i]=0.209 # o2
 
                                                                     # wkl[1,:] *= 8.123297816734589e+26 / np.sum(wkl[1,:]*mperlayr) * 0.5 * 0.5 #normalising q
+                                                                    # wkl[1,:] *= 2.307722e-1 / np.sum(wkl[1,:])
 
                                                                 elif(master_input==5):
                                                                     surf_rh=0.8

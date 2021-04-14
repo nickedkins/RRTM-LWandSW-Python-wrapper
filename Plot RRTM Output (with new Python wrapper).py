@@ -18,9 +18,15 @@ plot_switch=3 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
+<<<<<<< Updated upstream
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
 '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/absolute/',
 '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/relative/',
+=======
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/every layer/relative/'
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o scale heights/rd email request, +- 0.5km/normed/'
+>>>>>>> Stashed changes
 ]
 
 
@@ -760,6 +766,7 @@ for directory in directories:
             plt.ylim(1.05, 1.10)
     
             # perts = [0, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2]
+<<<<<<< Updated upstream
             # plt.figure(1)
             # plt.title('RH profiles with different absolute additions to specific humidity ($g/g$)', y=1.02)
             # # plt.semilogy(rh_wv[:,0,0],pavel_master[:,0,0],'-',label='RH water vapour')
@@ -774,6 +781,26 @@ for directory in directories:
             # plt.ylim(1000,10)
             # # plt.xlim(0,200)
             # plt.legend()
+=======
+            plt.figure(1)
+            # plt.title('RH profiles with relative increases in \n specific humidity in 50 hPa blocks', y=1.02)
+            # plt.title('RH profiles with a 7% relative increase \n in specific humidity in all layers', y=1.02)            
+            # plt.title('RH profiles with a 275 ppmV increase \n in specific humidity in all layers', y=1.02)            
+            plt.title('RH profiles with different H$_2$O scale heights (normalised)', y=1.02)
+            # plt.semilogy(rh_wv[:,0,0],pavel_master[:,0,0],'-',label='RH water vapour')
+            # plt.semilogy(rh_ice[:,0,0],pavel_master[:,0,0],'-',label='RH ice')
+            # rh = np.where(tc[:,0,0] < -20., 0, 50)
+            # plt.semilogy(rh,pavel_master[:,0,0],'--',label='RH max')
+            rh = np.where(tc[:,0,0] > -15., rh_wv[:,0,0], rh_ice[:,0,0])
+            plt.semilogy(rh,pavel_master[:,0,0],'-',label=fn)
+            plt.xlabel('RH (%)')
+            plt.ylabel('Pressure (hPa)')
+            plt.axvline(100.,linestyle='--')
+            plt.ylim(1000,10)
+            # plt.xlim(0,200)
+            # plt.xlim(0,100)
+            plt.legend()
+>>>>>>> Stashed changes
 
 
         # latgridbounds=np.linspace(30,60.,nlatcols+1)
