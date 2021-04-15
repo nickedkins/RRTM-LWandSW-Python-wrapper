@@ -19,8 +19,7 @@ cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/baseline - gases, alb, lapse, clouds constant/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/alb varies/'
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/dco2/era-i q/'
 ]
 
 
@@ -144,10 +143,10 @@ def plotrrtmoutput():
 
 def plotrrtmoutput_masters():
     plt.figure(1)
-    for i_lat in range(0,nlatcols):
-    # for i_lat in [0]:
-        for i_zon in range(nzoncols):
-        # for i_zon in [0]:
+    # for i_lat in range(0,nlatcols):
+    for i_lat in [0]:
+        # for i_zon in range(nzoncols):
+        for i_zon in [0]:
             
             plt.figure(1)
             plt.subplot(121)
@@ -162,7 +161,8 @@ def plotrrtmoutput_masters():
                 cti=np.int(cti_cp[i_zon,i_lat])
             elif(cti_type==3):
                 cti=np.int(cti_wmo[i_zon,i_lat])
-            plt.plot(tz_master[cti,i_zon,i_lat], pz_master[ cti, i_zon, i_lat ],'o' )
+            # plt.plot(tz_master[cti,i_zon,i_lat], pz_master[ cti, i_zon, i_lat ],'o' )
+            plt.plot(tavel_master[cti,i_zon,i_lat], pavel_master[ cti, i_zon, i_lat ],'o' )
             # plt.plot(tz_master[np.int(cti_td[i_zon,i_lat]),i_zon,i_lat], pz_master[np.int(cti_td[i_zon,i_lat]),i_zon,i_lat], '*' )
             # plt.plot(tz_master[cti,i_zon,i_lat], altz_master[ cti, i_zon, i_lat ],'o' )
             # plt.ylim(4000,12000)
@@ -462,7 +462,7 @@ cti_td_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 cti_cp_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 cti_wmo_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 lapse_td_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
-wkl_all_dirfil=np.zeros((8,nlayers_dirfil+1,nzoncols_dirfil,nfiles,ndirs,nlatcols))
+wkl_all_dirfil=np.zeros((8,nlayers_dirfil,nzoncols_dirfil,nfiles,ndirs,nlatcols))
 
 pertzons=[0]
 pertlats=[0,1,2,3,4]
@@ -969,6 +969,9 @@ for directory in directories:
         cti_td_all_dirfil[:,i_file,i_dir,:]=cti_td
         cti_cp_all_dirfil[:,i_file,i_dir,:]=cti_cp
         cti_wmo_all_dirfil[:,i_file,i_dir,:]=cti_wmo
+        for imol in range(nmol):
+            wkl_all_dirfil[imol, :, :,i_file, i_dir, : ] = wkl_master[:, :, imol, :]
+        
 
 
         # lapse_td_all_dirfil[:,i_file,i_dir,:]=cti_td
@@ -1015,17 +1018,72 @@ for directory in directories:
 
 if(plot_switch==5):
 
+
     for i_dir in range(len(directories)):
+
+        # for i in range(len(a)-1):
+
+        #     print(tbound_all_dirfil[0, i+1, 0, 0] - tbound_all_dirfil[0, i, 0, 0])
+
+        # print(wkl_all_dirfil[1,:,:,:,:,:])
+
+        # wkl_all_dirfil=np.zeros((8,nlayers_dirfil,nzoncols_dirfil,nfiles,ndirs,nlatcols))
+
+        # print (tbound_all_dirfil[0,0,i_dir,:])
+        # print (tbound_all_dirfil[0,3,i_dir,:])
+
+        # print( wkl_all_dirfil[2,:,:,1,:,:] / wkl_all_dirfil[2,:,:,0,:,:] )
+
+
+        
 
         print(merid_transps_all_dirfil[0,0,i_dir,:])
 
-        sens = (tbound_all_dirfil[0,2,i_dir,:]-tbound_all_dirfil[0,0,i_dir,:])/10
-        globmeansens = np.mean((tbound_all_dirfil[0,2,i_dir,:]-tbound_all_dirfil[0,0,i_dir,:])/10)
-        dtransp = (merid_transps_all_dirfil[0,1,i_dir,:]-merid_transps_all_dirfil[0,0,i_dir,:])/10.
+        plt.figure(1)
+        plt.plot(latgrid, tbound_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Baseline' )
+        plt.plot(latgrid, tbound_all_dirfil[ 0, 1, i_dir, : ], '-o', label = '4xco2, free mtransp' )
+        plt.plot(latgrid, tbound_all_dirfil[ 0, 2, i_dir, : ], '-o', label = '4xco2, baseline mtransp' )
+        plt.xlabel('Latitude (deg)')
+        plt.ylabel('Tg (K)')
+        plt.legend()
+
+        plt.figure(2)
+        plt.title('dT from baseline')
+        plt.plot(latgrid, tbound_all_dirfil[ 0, 1, i_dir, : ] - tbound_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'mtransp recalculated' )
+        plt.plot(latgrid, tbound_all_dirfil[ 0, 2, i_dir, : ] - tbound_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'mtransp baseline' )
+        plt.xlabel('Latitude (deg)')
+        plt.ylabel('dTg (K)')
+        plt.legend()
+
+        plt.figure(3)
+        plt.title('Meridional transport (divergence)')
+        plt.plot( latgrid, merid_transps_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Baseline' )
+        plt.plot( latgrid, merid_transps_all_dirfil[ 0, 1, i_dir, : ], '-o', label = '4 x CO2' )
+        plt.axhline(0, linestyle = '--')
+        plt.xlabel('Latitude (deg)')
+        plt.ylabel('mtransp (Wm$^{-2}$)')
+        plt.legend()        
+
+        plt.figure(4)
+        plt.title('Change in meridional transport')
+        plt.plot( latgrid, merid_transps_all_dirfil[ 0, 1, i_dir, : ] - merid_transps_all_dirfil[ 0, 0, i_dir, : ], '-o', label = '4 x CO2' )
+        plt.axhline(0, linestyle = '--')
+        plt.xlabel('Latitude (deg)')
+        plt.ylabel('dmtransp (Wm$^{-2}$)')
+        plt.legend()        
+
+        # dF = (fnet_sw_dirfil[-1,0,3,i_dir,:] - fnet_lw_dirfil[-1,0,3,i_dir,:]) - (fnet_sw_dirfil[-1,0,0,i_dir,:] - fnet_lw_dirfil[-1,0,0,i_dir,:])
+        # print(dF)
+
+        dF = 10.
+
+        sens = ( tbound_all_dirfil[ 0, 3, i_dir, : ] - tbound_all_dirfil[ 0, 0, i_dir, : ] ) / dF
+
+        globmeansens = np.mean((tbound_all_dirfil[0,3,i_dir,:]-tbound_all_dirfil[0,0,i_dir,:])/dF)
+        dtransp = (merid_transps_all_dirfil[0,1,i_dir,:]-merid_transps_all_dirfil[0,0,i_dir,:])/dF
         dynfb = (sens-globmeansens)*dtransp
 
-        # plt.figure(i_dir)
-        plt.figure(1)
+        plt.figure(5)
         plt.title(fn)
         plt.subplot(221)
         # plt.plot(latgrid,tbound_all_dirfil[0,0,0,:],'-o')
@@ -1044,11 +1102,14 @@ if(plot_switch==5):
         plt.axhline(0.)
         plt.xlabel('Latitude')
         plt.ylabel('dsens due to dmtransp (K)')
+        
+        dT_mtransp_diff = np.mean(tbound_all_dirfil[0,1,i_dir,:] - tbound_all_dirfil[0,2,i_dir,:])
+        
+        print(dT_mtransp_diff)
 
-        # plt.subplot(224)
-
-        plt.gcf().text(0.6,0.4,'Total dT: {: 6.2f}'.format(globmeansens*10. ) )
-        plt.gcf().text(0.6,0.3,'dT from dyn fb: {: 6.2f} or {: 6.2f} %'.format( np.sum(dynfb) * 10., np.sum(dynfb) / (globmeansens) * 100. ) )
+        plt.gcf().text(0.6,0.4,'Total dT: {: 6.2f}'.format(np.mean(sens * dF )) )
+        # redo the dyn feedback calc
+        plt.gcf().text(0.6,0.3,'dT from dyn fb: {: 6.2f} or {: 6.2f} %'.format( np.sum(dynfb*dF), np.sum(dynfb) / (globmeansens) * 100. ) )
 
 # plt.subplot(131)
 # plt.imshow(crklw[0,:,::-1].T,vmin=-2.5,vmax=2.5,cmap='bwr')
@@ -1645,6 +1706,6 @@ baseline_tbound = 267.29358913282624-0.3
 # ax=plt.gca()
 # ax.text(0.5, 0.5, ". Axes: (0.5, 0.1)", transform=ax.transAxes)
 fig=plt.gcf()
-# fig.suptitle(str(datetime.datetime.now()))
+fig.suptitle(str(datetime.datetime.now()))
 plt.tight_layout()
 show()

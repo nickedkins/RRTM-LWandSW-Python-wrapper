@@ -552,13 +552,14 @@ nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=5 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
-input_source=2 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
-prev_output_file=project_dir+'_Useful Data/baselines/nl=60, nlats=5, nzons=1, minput=6, albsrc=2'
+master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
+input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
+prev_output_file=project_dir+'_Useful Data/RF dT_dF and dmtransp/new/dco2/baseline/2021_04_15 19_41_47'
 lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
-albedo_source=2 #0: manual, 2: EBM style
+albedo_source=0 #0: manual, 2: EBM style
 dT_switch=1
 dtbound_switch=1
+erai_h2o_switch=0  # 0: specific humidity, 1: relative humidity
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
 plot_eqb_approach = 1
@@ -653,26 +654,26 @@ c_merids=[4.] #meridional transport coefficient
 
 tbounds=np.array([300.]) # initalise lower boundary temperature
 wklfacs=[1.0] # multiply number of molecules of a gas species by this factor in a given lat and layer range defined later
-wklfac_co2s=[1.] # ditto for co2 specifically
+wklfac_co2s=[1.] # ditto for co2 specifically, deprecated
 
 extra_forcings = [10.]
 
 # location of perturbations to number of gas molecules
 pertzons=[0]
 pertlats=[0]
-pertmols=[1] #don't do zero!
+pertmols=[2] #don't do zero!
 pertlays=[0]
 
 # perts=[2.75e-4]
-perts = [1.00]
+perts = [ 1. ]
 pert_type=0 # 0: relative, 1: absolute
 
 # pert_pwidth = 50.
 # pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
 # # pert_pbottoms = [1000. + pert_pwidth]
 
-pert_pbottoms = [1000.]
-pert_pwidth = 1000.
+pert_pbottoms = [2000.]
+pert_pwidth = 2000.
 
 pert_zon_h2o=1.0
 
@@ -709,7 +710,7 @@ pclddums = [ 1050. ]
 # calculate total number of parameter combinations (number of model runs)
 i_loops=0
 totloops=np.float(len(pclddums) * len(cldlats) * len(cf_tots) * len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources)*len(tau_tots))
-looptime = 15 * (nlayers/60.)
+looptime = 15 * (nlayers/60.) * nlatcols
 print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(totloops), totloops*looptime/60.))
 print()
 
@@ -999,6 +1000,7 @@ for b_rdwv in b_rdwvs:
                                                             conv_master=np.zeros((nlayers+1,nzoncols,nlatcols))
     
                                                             wkl_master=np.zeros((nlayers,nzoncols,nmol+1,nlatcols))
+                                                            wkl_master_rec=np.zeros((nlayers,nzoncols,nmol+1,nlatcols))                                                        
     
                                                             inflags_master=np.zeros((nzoncols,nlatcols))
                                                             iceflags_master=np.zeros((nzoncols,nlatcols))
@@ -1222,13 +1224,14 @@ for b_rdwv in b_rdwvs:
                                                                 conv_master=np.zeros((nlayers+1,nzoncols,nlatcols))
     
                                                                 wkl_master=np.zeros((nlayers,nzoncols,nmol+1,nlatcols))
+                                                                wkl_master_rec=np.zeros((nlayers,nzoncols,nmol+1,nlatcols))                                                                
     
                                                                 vars_0d=[gravity,avogadro,iatm,ixsect,iscat,numangs,iout,icld,tbound,iemiss,iemis,ireflect,iaer,istrm,idelm,icos,iform,nlayers,nmol,psurf,pmin,secntk,cinp,ipthak,ipthrk,juldat,sza,isolvar,lapse,tmin,tmax,rsp,gravity,pin2,pico2,pio2,piar,pich4,pih2o,pio3,mmwn2,mmwco2,mmwo2,mmwar,mmwch4,mmwh2o,mmwo3,piair,totmolec,surf_rh,vol_mixh2o_min,vol_mixh2o_max,ur_min,ur_max,eqb_maxhtr,timesteps,cti,maxhtr,cld_lay,nzoncols,master_input,conv_on,surf_lowlev_coupled,lay_intp,lw_on,sw_on,eqb_maxdfnet,toa_fnet_eqb,nlatcols]
                                                                 vars_master_lay_zon_lat=[tavel_master,pavel_master,altavel_master,wbrodl_master,dfnet_master,dfnet_master_rad,dfnet_master_adv,dpz_master]
                                                                 vars_master_lev_zon_lat=[tz_master,pz_master,altz_master,totuflux_master,totuflux_lw_master,totuflux_sw_master,totdflux_master,totdflux_lw_master,totdflux_sw_master,fnet_master,fnet_lw_master,fnet_sw_master,htr_master,htr_lw_master,htr_sw_master,conv_master]
                                                                 vars_misc_1d=[semis,semiss,solvar]
                                                                 vars_misc_1d_lens=[16,29,29]
-                                                                vars_master_lay_zon_nmol_lat=[wkl_master]
+                                                                vars_master_lay_zon_nmol_lat=[wkl_master_rec]
                                                                 vars_master_zon_lat=[inflags_master,iceflags_master,liqflags_master,tbound_master,toa_fnet_master,zonal_transps_master,merid_transps_master,cti_master,lapse_master]
                                                                 vars_master_zon_lat_cld=[cld_lays_master,cld_fracs_master,tauclds_master,ssaclds_master]
                                                                 vars_master_lat=[latgrid]
@@ -2245,9 +2248,38 @@ for b_rdwv in b_rdwvs:
                                                                         lapse=lapse_master[0,i_lat]
                                                                         # lapse=6.5
                                                                         # lapse=lapseloop
+                                                                        
                                                                     lapse_master[:,i_lat]=np.ones(nzoncols)*lapse
                                                                     # lapse_master[0,i_lat]=lapse
                                                                     # lapse_master[1,i_lat]=lapse
+                                                                    
+                                                                    if(master_input==7): # wkl RCEMIP mod RD
+                                                                        g1=3.6478
+                                                                        g2=0.83209
+                                                                        g3=11.3515
+    
+                                                                        for i in range(nlayers):
+                                                                            wbrodl[i] = mperlayr_air[i] * 1.0e-4
+                                                                            wkl[1,:]=12. * 1.6e-3 * ( pavel / pz[0] ) ** 4. + 1e-6
+                                                                            wkl[2,i]=348e-6*4. # co2
+    
+                                                                        a_rdwv=12.*1.6e-3
+                                                                        # b_rdwv=4.
+                                                                        # c_rdwv=1.e-6
+                                                                        c_rdwv=1.e-6
+                                                                        
+                                                                        for i in range(nlayers):
+                                                                            wbrodl[i] = mperlayr_air[i] * 1.0e-4
+                                                                            # wkl[1,:]=(12. * 1.6e-3 * ( pavel / pz[0] ) ** 4. + 1.e-6)
+                                                                            wkl[1,:]=( a_rdwv * ( pavel / pz[0] ) ** b_rdwv + c_rdwv)
+                                                                            wkl[2,i]=348e-6 # co2
+                                                                            wkl[3,i]=g1*pz[i]**(g2)*np.exp(-1.0*(pz[i]/g3))*1e-6 # o3
+                                                                            wkl[4,i]=306e-9 # n2o
+                                                                            wkl[5,i]=0.# co
+                                                                            wkl[6,i]=1650e-9 # ch4
+                                                                            wkl[7,i]=0.209 # o2
+    
+                                                                        # wkl[1,:] *= 8.123297816734589e+26 / 
                                                                     
                                                                     cld_fracs_master=np.zeros((nzoncols,nlatcols,nclouds))
                                                                     tauclds_master=np.zeros((nzoncols,nlatcols,nclouds))
@@ -2512,7 +2544,7 @@ for b_rdwv in b_rdwvs:
                                                                         vars_master_lev_zon_lat=[tz_master,pz_master,altz_master,totuflux_master,totuflux_lw_master,totuflux_sw_master,totdflux_master,totdflux_lw_master,totdflux_sw_master,fnet_master,fnet_lw_master,fnet_sw_master,htr_master,htr_lw_master,htr_sw_master,conv_master]
                                                                         vars_misc_1d=[semis,semiss,solvar]
                                                                         vars_misc_1d_lens=[16,29,29]
-                                                                        vars_master_lay_zon_nmol_lat=[wkl_master]
+                                                                        vars_master_lay_zon_nmol_lat=[wkl_master_rec]
                                                                         vars_master_zon_lat=[inflags_master,iceflags_master,liqflags_master,tbound_master,toa_fnet_master,zonal_transps_master,merid_transps_master,cti_master,lapse_master]
                                                                         vars_master_zon_lat_cld=[cld_lays_master,cld_fracs_master,tauclds_master,ssaclds_master]
                                                                         vars_master_lat=[latgrid]
@@ -2550,8 +2582,10 @@ for b_rdwv in b_rdwvs:
                                                                                         # if(input_source==0):
                                                                                         rel_hum[i]=r[i,i_lat]/100.
                                                                                         vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
-                                                                                        wkl[1,i] = vol_mixh2o[i] # ERA-I relative humidity
-                                                                                        # wkl[1,i]=q[i,i_lat] # ERA-I specific humidity
+                                                                                        if(erai_h2o_switch == 1):
+                                                                                            wkl[1,i] = vol_mixh2o[i] # ERA-I relative humidity
+                                                                                        elif(erai_h2o_switch == 0):
+                                                                                            wkl[1,i]=q[i,i_lat] # ERA-I specific humidity
                                                                                     if(i_zon==0):
                                                                                         # wkl[1,:]=wkl[1,:]*2.
                                                                                         wkl[1,:]=wkl[1,:]*(pert_zon_h2o**0.5)
@@ -2593,17 +2627,20 @@ for b_rdwv in b_rdwvs:
     
                                                                         writeformattedcloudfile()
     
-                                                                        if((input_source==1 or input_source==2 or master_input==7) and ts==1):
-                                                                            if(i_zon==pertzon and i_lat==pertlat):
-                                                                                for i_lay in range(nlayers):
-                                                                                    if(pz[i_lay] < pert_pbottom and pz[i_lay] > pert_pbottom - pert_pwidth ):
-                                                                                        if(pert_type==0):
-                                                                                            wkl[pertmol,i_lay]*=pert
-                                                                                        elif(pert_type==1):
-                                                                                            wkl[pertmol,i_lay]+=pert
+
+                                                                        # if(i_zon==pertzon and i_lat==pertlat):
+                                                                        for i_lay in range(nlayers):
+                                                                            if(pz[i_lay] < pert_pbottom and pz[i_lay] > pert_pbottom - pert_pwidth ):
+                                                                                if(pert_type==0):
+                                                                                    wkl[pertmol,i_lay]*=pert
+                                                                                    # wkl[:,i_lay]*=pert
+                                                                                elif(pert_type==1):
+                                                                                    wkl[pertmol,i_lay]+=pert
+                                                                                    # wkl[:,i_lay]+=pert
                                                                                  
                                                                                     
-                                                                                    
+                                                                        for i_mol in range(1,nmol):
+                                                                            wkl_master_rec[:,i_zon,i_mol-1,i_lat] = wkl[i_mol,:]
     
     
                                                                         # the actual meat! call the compiled RRTM executable for LW radiative transfer
@@ -2625,15 +2662,16 @@ for b_rdwv in b_rdwvs:
                                                                             totuflux_sw,totdflux_sw,fnet_sw,htr_sw = readrrtmoutput_sw()
                                                                         stepssinceswcalled+=1
     
-                                                                        # # perturb gas amounts in 6 layer blocks (should be 100 hPa, so will change)
-                                                                        # if(input_source==1 or input_source==2 or master_input==7):
-                                                                        #     if(i_zon==pertzon and i_lat==pertlat):
-                                                                        #         for i_lay in range(nlayers):
-                                                                        #             if(pz[i_lay] < pert_pbottom and pz[i_lay] > pert_pbottom - pert_pwidth ):
-                                                                        #                 if(pert_type==0):
-                                                                        #                     wkl[pertmol,i_lay]/=pert
-                                                                        #                 elif(pert_type==1):
-                                                                        #                     wkl[pertmol,i_lay]-=pert
+                                                                        # unperturb gas amounts in 6 layer blocks (should be 100 hPa, so will change)
+                                                                        # if(i_zon==pertzon and i_lat==pertlat):
+                                                                        for i_lay in range(nlayers):
+                                                                            if(pz[i_lay] < pert_pbottom and pz[i_lay] > pert_pbottom - pert_pwidth ):
+                                                                                if(pert_type==0):
+                                                                                    wkl[pertmol,i_lay]/=pert
+                                                                                    # wkl[:,i_lay]/=pert
+                                                                                elif(pert_type==1):
+                                                                                    wkl[pertmol,i_lay]-=pert
+                                                                                    # wkl[:,i_lay]-=pert
     
                                                                         prev_htr=htr
     
@@ -2731,7 +2769,7 @@ for b_rdwv in b_rdwvs:
                                                                                 merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
                                                                                 
                                                                             # nje mtransp manual
-                                                                            merid_transps_master[0,:] = [-19.3148253,  -35.38515553, -33.79527035,  35.69882938,  52.79497028]
+                                                                            merid_transps_master[0,:] = [-14.59991549, -24.80826541, -20.02555344, -13.66357249,  73.10046181]
     
                                                                         
                                                                         column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+zonal_transps_master[i_zon,i_lat]+extra_forcing  #nje forcing
