@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 
 def init_plotting():
@@ -549,10 +549,10 @@ def createlatdistbn(filename):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=5 # number of latitude columns
+nlatcols=11 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
+master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/RF dT_dF and dmtransp/new/dco2/baseline/2021_04_15 19_41_47'
 lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
@@ -626,7 +626,7 @@ eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of m
 eqb_col_budgs=0.1*(60./nlayers) # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
-timesteps=500 # number of timesteps until model exits
+timesteps=1000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
@@ -656,7 +656,7 @@ tbounds=np.array([300.]) # initalise lower boundary temperature
 wklfacs=[1.0] # multiply number of molecules of a gas species by this factor in a given lat and layer range defined later
 wklfac_co2s=[1.] # ditto for co2 specifically, deprecated
 
-extra_forcings = [10.]
+extra_forcings = [0.]
 
 # location of perturbations to number of gas molecules
 pertzons=[0]
@@ -664,8 +664,11 @@ pertlats=[0]
 pertmols=[2] #don't do zero!
 pertlays=[0]
 
+perts = [ 1., 4. ]
+# perts = [ 4. ]
+
 # perts=[2.75e-4]
-perts = [ 1. ]
+
 pert_type=0 # 0: relative, 1: absolute
 
 # pert_pwidth = 50.
@@ -2769,8 +2772,7 @@ for b_rdwv in b_rdwvs:
                                                                                 merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
                                                                                 
                                                                             # nje mtransp manual
-                                                                            merid_transps_master[0,:] = [-14.59991549, -24.80826541, -20.02555344, -13.66357249,  73.10046181]
-    
+                                                                            # merid_transps_master[0,:] = [5.314048415676098 ,-13.743352077616919 ,-6.61848296650305 ,-2.834971954760022 ,-4.675919021680785 ,-4.438497039578348 ,-8.389210574671553 ,-10.681115079722305 ,-8.728319841526629 ,-1.892014460520841 ,56.67315152175815]
                                                                         
                                                                         column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+zonal_transps_master[i_zon,i_lat]+extra_forcing  #nje forcing
     
