@@ -21,9 +21,13 @@ directories = [
 '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/tau=2.5, cf=0.4/',
 ]
 
+
+
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficient
 
+nlayers=590
+nlatcols=1
 nzoncols=2
 
 def colors(n):
@@ -43,7 +47,7 @@ def colors(n):
   return ret
 
 def init_plotting():
-    plt.rcParams['figure.figsize'] = (10,10)
+    plt.rcParams['figure.figsize'] = (20,10)
     plt.rcParams['font.size'] = 20
     plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
@@ -177,7 +181,7 @@ def plotrrtmoutput_masters():
             # plt.semilogy(totdflux_lw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat])
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('totdflux lw')
-            
+        
             # plt.subplot(333)
             # plt.semilogy(totuflux_sw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],label=fn)
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
@@ -203,7 +207,8 @@ def plotrrtmoutput_masters():
             # plt.xlabel('fnet sw')
             # plt.legend()
             
-            # # plt.subplot(335)
+            # plt.subplot(335)
+            # plt.figure(1)
             # plt.loglog(wkl_master[:,i_zon,0,i_lat],pavel_master[:,i_zon,i_lat],label=fn)
             # plt.ylim(np.max(pz_master[:,i_zon,i_lat]),np.min(pz_master[:,i_zon,i_lat]))
             # plt.xlabel('wkl1')
@@ -221,7 +226,7 @@ def plotrrtmoutput_masters():
             # plt.semilogy(wbrodl_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-o')
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wbrodl')
-            
+
             plt.subplot(122)
             plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
             plt.axvline(-eqb_maxdfnet,linestyle='--')
@@ -257,11 +262,6 @@ a = sorted(listdir(directories[0]))
 if('.DS_Store' in a):
     a.remove('.DS_Store')
 nfiles=len(a)
-
-nlayers=60
-nlatcols=1
-
-
 
 nmol=7
 nclouds=nlayers
@@ -461,6 +461,10 @@ cti_cp_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 cti_wmo_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 lapse_td_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 wkl_all_dirfil=np.zeros((8,nlayers_dirfil+1,nzoncols_dirfil,nfiles,ndirs,nlatcols))
+
+ttrops_dirfil = np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
+ptrops_dirfil = np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
+ztrops_dirfil = np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 
 pertzons=[0]
 pertlats=[0,1,2,3,4]
@@ -731,14 +735,14 @@ for directory in directories:
                         break
                 # cti_wmo[i_zon,i_lat]=np.argmin(tz_master[:,i_zon,i_lat])
                 
-        
-        tc = tavel_master - 273.15
 
-        ps_wv = (0.61078 * np.exp( 17.22 * tc / ( tc + 237.3 ) )) * 10. # tetens in hPa
-        ps_ice = (0.61078 * np.exp( 21.875 * tc / ( tc + 265.5 ) )) * 10.
+        if(plot_switch==4):
+            
+            # perts = perts=[0, 1e-6, 1e-5, 1e-4, 1e-3, 4e-4, 3e-4, 2.5e-4, 2.74e-4]
         
-        rh_wv = wkl_master[:,:,0,:] * pavel_master / ps_wv * 100.
-        rh_ice = wkl_master[:,:,0,:] * pavel_master / ps_ice * 100.
+            tc = tavel_master - 273.15
+            
+            print(tavel_master[0])
     
         
         # plt.figure(1)
@@ -856,6 +860,8 @@ for directory in directories:
             ztrop=np.diagonal(altz_master[cti,0,:]/1000.)
             ptrop=np.diagonal(pz_master[cti,0,:])
             ttrop=np.diagonal(tz_master[cti,0,:])
+
+
             # ztrop=np.diagonal(altz_master[cti_td,0,:]/1000.)
             # ptrop=np.diagonal(pz_master[cti_td,0,:])
             # ttrop=np.diagonal(tz_master[cti_td,0,:])
@@ -901,16 +907,32 @@ for directory in directories:
         
         
         
-        print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
+        # print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
+        print('{: 6.4f}, {: 6.4f}, {: 6.4f}, {: 6.4f} '.format(ztrop, ptrop, ttrop, tsurf))
+         
+        # b_rdwvs=np.arange(1,8)
         
-        # argefold = np.argmin(abs(wkl_master[0,0,0,0]/wkl_master[:,0,0,0]-2.718))
-        # Hh2o = altz_master[argefold,0,0]/1000.
-        
-        # print('h2o scale height = {: 4.2f}'.format(Hh2o))
+        # print('{: 4.2f}'.format(Hh2o))
         # plt.xlabel('Water vapour scale height (km)')
         # plt.ylabel('Surface temperature (K)')
         # plt.figure(1)
+        # plt.subplot(221)
         # plt.plot(Hh2o,tsurf,'o',c='b')
+        # plt.xlabel('H$_2$O scale height (km)')
+        # plt.ylabel('$T_{surf}$')
+        # plt.subplot(222)
+        # plt.plot(Hh2o,ttrop,'o',c='b')
+        # plt.xlabel('H$_2$O scale height (km)')
+        # plt.ylabel('$T_{trop}$')
+        # plt.subplot(223)
+        # plt.plot(Hh2o,ztrop,'o',c='b')
+        # plt.xlabel('H$_2$O scale height (km)')
+        # plt.ylabel('$z_{trop}$')
+        # plt.subplot(224)
+        # plt.plot(Hh2o,ptrop,'o',c='b')
+        # plt.xlabel('H$_2$O scale height (km)')
+        # plt.ylabel('$p_{trop}$')
+        
 
             
         
@@ -930,6 +952,10 @@ for directory in directories:
         cti_td_all_dirfil[:,i_file,i_dir,:]=cti_td
         cti_cp_all_dirfil[:,i_file,i_dir,:]=cti_cp
         cti_wmo_all_dirfil[:,i_file,i_dir,:]=cti_wmo
+
+        ttrops_dirfil[0,i_file,i_dir,:] = ttrop
+        ptrops_dirfil[0,i_file,i_dir,:] = ptrop
+        ztrops_dirfil[0,i_file,i_dir,:] = ztrop
 
 
         # lapse_td_all_dirfil[:,i_file,i_dir,:]=cti_td
@@ -954,6 +980,41 @@ for directory in directories:
         
         # plt.legend()
         
+    if(plot_switch==3):
+        pert_pwidth = 50.
+        pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
+        
+        plt.figure(1)
+
+        plt.subplot(121)
+        plt.title('Total increase in column vapour of 0.26 %')
+        # plt.title('Relative perturbation of 7%')
+        plt.plot((tz_all_dirfil[0,0,1:,i_dir,0]-tz_all_dirfil[0,0,0,i_dir,0])*1e3,pert_pbottoms[1:]-pert_pwidth/2,'-o',label=dir_labels[i_dir])
+        plt.ylim(1000,-50)
+        plt.xlim(0)
+        plt.xlabel('Temperature change (mK)')
+        plt.ylabel('Pressure at centre of {: 4.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
+        plt.legend()
+
+        plt.subplot(122)
+        plt.title('Zoomed in')
+        # plt.title('Relative perturbation of 7%')
+        plt.plot((tz_all_dirfil[0,0,1:,i_dir,0]-tz_all_dirfil[0,0,0,i_dir,0])*1e3,pert_pbottoms[1:]-pert_pwidth/2,'-o',label=dir_labels[i_dir])
+        plt.ylim(1000,-50)
+        plt.xlim(0,1.5)
+        plt.xlabel('Temperature change (mK)')
+        plt.ylabel('Pressure at centre of {: 4.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
+        plt.legend()
+        
+        print('Total T change: {: 6.4f} K'.format(np.sum(tz_all_dirfil[0,0,1:,i_dir,0]-tz_all_dirfil[0,0,0,i_dir,0])))
+
+        print(wkl_all_dirfil[1,1,0,:,i_dir,0])
+
+        # print('Total H2O molecs change: {: 6.4e}'.format(np.sum(wkl_all_dirfil[1,:,0,1:,i_dir,0]-wkl_all_dirfil[1,:,0,0,i_dir,0])))
+        
+        plt.figure(1)
+        
+        
     i_dir+=1    
 
 
@@ -976,6 +1037,7 @@ if(plot_switch==4):
         # plt.ylim(1000,10)
 
 plt.legend()
+
 
 # plt.subplot(131)
 # plt.imshow(crklw[0,:,::-1].T,vmin=-2.5,vmax=2.5,cmap='bwr')
@@ -1012,19 +1074,9 @@ plt.legend()
 # plt.ylim(900,500)
 # plt.colorbar()
 
-if(plot_switch==3):
-    pert_pwidth = 100.
-    pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
+
     
-    plt.figure(1)
-    plt.title('Absolute perturbation of 0.001 g/kg')
-    # plt.title('Relative perturbation of 7%')
-    plt.plot(tz_all_dirfil[0,0,1:,0,0]-tz_all_dirfil[0,0,0,0,0],pert_pbottoms[1:]-pert_pwidth/2,'-o')
-    plt.ylim(1000,-50)
-    plt.xlabel('Temperature change (K)')
-    plt.ylabel('Pressure at centre of {: 4.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
-    
-print('Total T change: {: 6.4f} K'.format(np.sum(tz_all_dirfil[0,0,1:,0,0]-tz_all_dirfil[0,0,0,0,0])))
+
 
 # for i_dir in range(len(directories)):
 #     for i_file in range(len(a)):
@@ -1584,4 +1636,4 @@ baseline_tbound = 267.29358913282624-0.3
 fig=plt.gcf()
 # fig.suptitle(str(datetime.datetime.now()))
 plt.tight_layout()
-show()
+# show()
