@@ -11,17 +11,14 @@ from scipy import interpolate
 import datetime
 
 datetime.datetime.now()
-# print(datetime.datetime.now())
-# print('Started')
 
 plot_switch=4 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: thin cloud heights
 cti_type=1 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/tau=1e-2/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/tau=1e-1/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/tau=1e+0/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/tau=1e+1/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/tau=0.5, cf=0.2/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/tau=0.25, cf=0.4/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/tau=2.5, cf=0.4/',
 ]
 
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -965,14 +962,18 @@ for directory in directories:
 
 if(plot_switch==4):
     for i_dir in range(len(directories)):
-        pclddums = np.linspace(1050,50,10)
+        pclddums = np.linspace(1050,200,5)
+        zclddums = np.zeros( len( pclddums ) )
+        for izc in range(len(zclddums)):
+            cldlay_dum = np.argmin( abs(pclddums[ izc ] - pz_all_dirfil[ :, 0, 0, i_dir, 0 ]) )
+            zclddums[izc] =  altz_all_dirfil[ cldlay_dum, 0, 0, i_dir, 0 ]
         dTs = tbound_all_dirfil[0,:,i_dir,0] - tbound_all_dirfil[0,0,i_dir,0]
         
         plt.figure(1)
-        plt.plot(dTs[1:], pclddums[1:],'-o',label=dir_labels[i_dir] )
-        plt.xlabel('Change in surface temperature relative to no cloud (K)')
-        plt.ylabel('Cloud top pressure (hPa)')
-        plt.ylim(1000,10)
+        plt.plot(zclddums[1:]/1000.,dTs[1:], '-o',label=dir_labels[i_dir] )
+        plt.ylabel('Change in surface temperature relative to no cloud (K)')
+        plt.xlabel('Cloud height (km)')
+        # plt.ylim(1000,10)
 
 plt.legend()
 
