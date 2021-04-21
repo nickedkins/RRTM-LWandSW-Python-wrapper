@@ -622,7 +622,7 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
+eqb_col_budgs=0.01 # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
 timesteps=2000 # number of timesteps until model exits
@@ -660,19 +660,25 @@ extra_forcings = [45.]
 # location of perturbations to number of gas molecules
 pertzons=[0]
 pertlats=[0]
-pertmols=[1] #don't do zero!
+pertmols=[1] #don't do zero! 1: h2o, 2: co2, 3: o3
 pertlays=[0]
 
-perts=[0, 2.75e-4]
-# perts = [1.00,1.07]
-pert_type=1 # 0: relative, 1: absolute
+# perts = [1.1]
+# pert_type=0 # 0: relative, 1: absolute
+
+# perts=[3.862e-4]
+# pert_type=1 # 0: relative, 1: absolute
+
+# no perts
+perts = [0.]
+pert_type = 1
+
 
 # pert_pwidth = 50.
 # pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
-# pert_pbottoms = [1000. + pert_pwidth]
 
-pert_pbottoms = [1000.]
-pert_pwidth = 1000.
+pert_pbottoms = [2000.]
+pert_pwidth = 2000.
 
 pert_zon_h2o=1.0
 
@@ -684,7 +690,7 @@ tbound_add=0
 
 # b_rdwvs = np.logspace(start=np.log10(1), stop=np.log10(8), num=10, base=10.)
 # b_rdwvs = np.linspace(1.,4.,5)
-Hh2os = np.array([2.0])
+Hh2os = np.array([2.0, 1.5, 2.5]) # h2o scale heights
 b_rdwvs = 8. / Hh2os
 
 
@@ -2171,6 +2177,8 @@ for b_rdwv in b_rdwvs:
                                                                         wkl[7,i]=0.209 # o2
 
                                                                     # wkl[1,:] *= 8.123297816734589e+26 / np.sum(wkl[1,:]*mperlayr) * 0.5 * 0.5 #normalising q
+                                                                    # wkl[1,:] *= 2.32879222408797e+00 / np.sum(wkl[1,:])
+                                                                    wkl[1,:] *= 8.125152690419507e+26 / np.sum(wkl[1,:]*mperlayr)
 
                                                                 elif(master_input==5):
                                                                     surf_rh=0.8
@@ -2600,7 +2608,6 @@ for b_rdwv in b_rdwvs:
                                                                                         elif(pert_type==1):
                                                                                             wkl[pertmol,i_lay]+=pert
                                                                                  
-                                                                                    
                                                                                     
     
     
