@@ -14,7 +14,7 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum
+plot_switch=3 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
@@ -30,9 +30,9 @@ directories = [
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/Every layer simultaneously/Absolute 3.86e-4 mol per mol/',
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/Every layer simultaneously/Absolute 2.83e-4 mol per mol/',
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/Every layer simultaneously/Relative 0.26 %/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/One layer at a time/Absolute 1e-5 mol per mol/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/One layer at a time/Relative 0.26 %/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o scale heights/renormalised/v2/'
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/One layer at a time/Absolute 1e-5 mol per mol/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/One layer at a time/Relative 0.26 %/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o scale heights/renormalised/v2/'
 ]
 
 
@@ -62,8 +62,8 @@ def colors(n):
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (20,10)
-    plt.rcParams['font.size'] = 20
-    plt.rcParams['font.family'] = 'Times New Roman'
+    plt.rcParams['font.size'] = 12
+    plt.rcParams['font.family'] = 'Arial'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['axes.titlesize'] = 1.2*plt.rcParams['font.size']
     plt.rcParams['legend.fontsize'] = plt.rcParams['font.size']
@@ -490,13 +490,14 @@ totuflux_all_prp=np.zeros((len(perts), len(pertmols), len(pertlats),len(pertzons
 tbound_all_prp=np.zeros((len(perts), len(pertmols), len(pertlats),len(pertzons), len(pertlays) ))
 
 dir_labels = []
+dir_labels = ['absolute, $10^{-5}$ mol/mol', 'relative, 0.26 %']
 
 i_dir=0
 for directory in directories:
 
     filenames = []
     dir_label = directory.split('/')[-2]
-    dir_labels.append(dir_label)
+    # dir_labels.append(dir_label)
     # print
     # print(dir_label)
     # print
@@ -1031,24 +1032,26 @@ for directory in directories:
         plt.figure(1)
 
         plt.subplot(121)
-        plt.title('Total increase in column vapour of 0.26 %')
+        # plt.title('Total increase in column vapour of 0.26 %')
         # plt.title('Relative perturbation of 7%')
         plt.plot((tz_all_dirfil[0,0,1:,i_dir,0]-tz_all_dirfil[0,0,0,i_dir,0])*1e3,pert_pbottoms[1:]-pert_pwidth/2,'-o',label=dir_labels[i_dir])
         plt.ylim(1000,-50)
         plt.xlim(0)
-        plt.xlabel('Temperature change (mK)')
-        plt.ylabel('Pressure at centre of {: 4.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
-        plt.legend()
+        plt.xlabel('temperature change (mK)')
+        plt.ylabel('pressure at centre of {: 2.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
+        if(i_dir==1):
+            plt.legend(loc='upper center')
 
         plt.subplot(122)
-        plt.title('Zoomed in')
+        # plt.title('Zoomed in')
         # plt.title('Relative perturbation of 7%')
         plt.plot((tz_all_dirfil[0,0,1:,i_dir,0]-tz_all_dirfil[0,0,0,i_dir,0])*1e3,pert_pbottoms[1:]-pert_pwidth/2,'-o',label=dir_labels[i_dir])
         plt.ylim(1000,-50)
         plt.xlim(0,1.5)
-        plt.xlabel('Temperature change (mK)')
-        plt.ylabel('Pressure at centre of {: 4.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
-        plt.legend()
+        plt.xlabel('temperature change (mK)')
+        plt.ylabel('pressure at centre of {: 2.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
+        if(i_dir==1):
+            plt.legend(loc='upper center')
         
         print('Total T change: {: 6.4f} K'.format(np.sum(tz_all_dirfil[0,0,1:,i_dir,0]-tz_all_dirfil[0,0,0,i_dir,0])))
 
@@ -1664,4 +1667,4 @@ baseline_tbound = 267.29358913282624-0.3
 fig=plt.gcf()
 # fig.suptitle(str(datetime.datetime.now()))
 plt.tight_layout()
-# show()
+show()
