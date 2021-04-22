@@ -228,7 +228,7 @@ def convection(T,z,conv_log):
     for i in range(1,len(T)):
         dT = (T[i]-T[i-1])
         dz = (z[i]-z[i-1])/1000.
-        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 0.0) and z[i]/1000. < 1000. ):
+        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 0.0 or pz[i] > pclddum) and z[i]/1000. < 1000. ):
             if(conv_log==1):
                 conv[i]=1.
             T[i] = T[i-1] - lapse * dz
@@ -698,9 +698,10 @@ cldlats = np.arange(nlatcols)
 # tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ] #isccp numbers
 # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ] #isccp numbers
 
-cf_tots = [ 0.4 ]
-tau_tots = [ 0.25 ]
+cf_tots = [ 0.25 ]
+tau_tots = [ 0.4 ]
 pclddums = np.linspace(1050,200,10)
+# pclddums = [ 100. ]
 
 
 # cf_tots = [ 0.0 ]
@@ -2440,7 +2441,8 @@ for cf_tot in cf_tots:
 
                                                                         # cf_tot = 0.6
                                                                         # tau_tot = 3.0
-                                                                        ssa_tot = 0.5
+                                                                        # ssa_tot = 0.5
+                                                                        ssa_tot = 0.01
 
                                                                         # cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
                                                                         # cldlay_dums=[np.int(nlayers/2)]

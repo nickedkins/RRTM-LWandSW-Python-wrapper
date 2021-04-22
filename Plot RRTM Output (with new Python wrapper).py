@@ -16,12 +16,14 @@ plot_switch=4 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor
 cti_type=1 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=2.5, cf=0.4/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=590/tau=3.0, cf=0.5/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=590/tau=0.25, cf=0.4/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=0.1, cf=1.0/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=1.0, cf=0.1/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=0.25, cf=0.4/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=590/tau=3, cf=0.5/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=590/tau=0.25, cf=0.4,/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=0.1, cf=1.0/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=1.0, cf=0.1/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=0.25, cf=0.4/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=0.25, cf=0.4, conv/',
 ]
 
 
@@ -51,7 +53,7 @@ def colors(n):
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (10,10)
-    plt.rcParams['font.size'] = 20
+    plt.rcParams['font.size'] = 12
     # plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['font.family'] = 'Arial'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
@@ -1031,8 +1033,8 @@ if(plot_switch==4):
         plt.plot(zclddums[1:]/1000.,dTs[1:], '-o',label='dTsurf' )
         # plt.plot(zclddums[1:]/1000.,dttrops[1:], '-o',label='dTtrop' )
         # plt.plot(zclddums[1:]/1000.,dztrops[1:], '-o',label='dztrop (km)' )
-        plt.ylabel('Change in surface temperature relative to no cloud (K)')
-        plt.xlabel('Cloud height (km)')
+        plt.ylabel('change in surface temperature (K)')
+        plt.xlabel('height of additional thin cloud (km)')
         # plt.ylim(1000,10)
 
 # plt.legend()
