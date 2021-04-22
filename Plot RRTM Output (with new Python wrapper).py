@@ -16,9 +16,12 @@ plot_switch=4 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor
 cti_type=1 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/tau=0.5, cf=0.2/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/tau=0.25, cf=0.4/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/tau=2.5, cf=0.4/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=2.5, cf=0.4/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=590/tau=3.0, cf=0.5/',
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=590/tau=0.25, cf=0.4/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=0.1, cf=1.0/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=1.0, cf=0.1/',
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=0.25, cf=0.4/',
 ]
 
 
@@ -26,9 +29,9 @@ directories = [
 c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficient
 
-nlayers=590
+nlayers=60
 nlatcols=1
-nzoncols=2
+nzoncols=1
 
 def colors(n):
   ret = []
@@ -47,9 +50,10 @@ def colors(n):
   return ret
 
 def init_plotting():
-    plt.rcParams['figure.figsize'] = (20,10)
+    plt.rcParams['figure.figsize'] = (10,10)
     plt.rcParams['font.size'] = 20
-    plt.rcParams['font.family'] = 'Times New Roman'
+    # plt.rcParams['font.family'] = 'Times New Roman'
+    plt.rcParams['font.family'] = 'Arial'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['axes.titlesize'] = 1.2*plt.rcParams['font.size']
     plt.rcParams['legend.fontsize'] = plt.rcParams['font.size']
@@ -734,15 +738,6 @@ for directory in directories:
                         cti_wmo[i_zon,i_lat]=i
                         break
                 # cti_wmo[i_zon,i_lat]=np.argmin(tz_master[:,i_zon,i_lat])
-                
-
-        if(plot_switch==4):
-            
-            # perts = perts=[0, 1e-6, 1e-5, 1e-4, 1e-3, 4e-4, 3e-4, 2.5e-4, 2.74e-4]
-        
-            tc = tavel_master - 273.15
-            
-            print(tavel_master[0])
     
         
         # plt.figure(1)
@@ -1023,20 +1018,24 @@ for directory in directories:
 
 if(plot_switch==4):
     for i_dir in range(len(directories)):
-        pclddums = np.linspace(1050,200,5)
+        pclddums = np.linspace(1050,200,10)
         zclddums = np.zeros( len( pclddums ) )
         for izc in range(len(zclddums)):
             cldlay_dum = np.argmin( abs(pclddums[ izc ] - pz_all_dirfil[ :, 0, 0, i_dir, 0 ]) )
             zclddums[izc] =  altz_all_dirfil[ cldlay_dum, 0, 0, i_dir, 0 ]
         dTs = tbound_all_dirfil[0,:,i_dir,0] - tbound_all_dirfil[0,0,i_dir,0]
+        dttrops = ttrops_dirfil[0,:,i_dir,0] - ttrops_dirfil[0,0,i_dir,0]
+        dztrops = ztrops_dirfil[0,:,i_dir,0] - ztrops_dirfil[0,0,i_dir,0]
         
         plt.figure(1)
-        plt.plot(zclddums[1:]/1000.,dTs[1:], '-o',label=dir_labels[i_dir] )
+        plt.plot(zclddums[1:]/1000.,dTs[1:], '-o',label='dTsurf' )
+        # plt.plot(zclddums[1:]/1000.,dttrops[1:], '-o',label='dTtrop' )
+        # plt.plot(zclddums[1:]/1000.,dztrops[1:], '-o',label='dztrop (km)' )
         plt.ylabel('Change in surface temperature relative to no cloud (K)')
         plt.xlabel('Cloud height (km)')
         # plt.ylim(1000,10)
 
-plt.legend()
+# plt.legend()
 
 
 # plt.subplot(131)
@@ -1636,4 +1635,4 @@ baseline_tbound = 267.29358913282624-0.3
 fig=plt.gcf()
 # fig.suptitle(str(datetime.datetime.now()))
 plt.tight_layout()
-# show()
+show()

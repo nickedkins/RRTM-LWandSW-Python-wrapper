@@ -547,7 +547,7 @@ def createlatdistbn(filename):
 
 
 # set overall dimensions for model
-nlayers=590 # number of vertical layers
+nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
@@ -622,7 +622,7 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.01 # max equilibrium value of total column energy budget at TOA
+eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
 timesteps=2000 # number of timesteps until model exits
@@ -667,9 +667,9 @@ pertlays=[0]
 perts=[0.]
 pert_type=1 # 0: relative, 1: absolute
 
-pert_pwidth = 1000.
-# pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
-pert_pbottoms = [1000. + pert_pwidth]
+# pert_pwidth = 1000.
+# # pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
+# pert_pbottoms = [1000. + pert_pwidth]
 
 
 
@@ -689,8 +689,8 @@ tbound_add=0
 
 # b_rdwvs = np.logspace(start=np.log10(1), stop=np.log10(8), num=10, base=10.)
 # b_rdwvs = np.linspace(1.,4.,5)
-Hh2os = np.array([2.0, 1.5, 2.5]) # h2o scale heights
-b_rdwvs = 8. / Hh2os
+Hh2os = np.array([2.0]) # h2o scale heights
+b_rdwv = 8. / Hh2os
 
 
 cldlats = np.arange(nlatcols)
@@ -699,8 +699,8 @@ cldlats = np.arange(nlatcols)
 # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ] #isccp numbers
 
 cf_tots = [ 0.4 ]
-tau_tots = [ 2.5 ]
-pclddums = np.linspace(1050,200,5)
+tau_tots = [ 0.25 ]
+pclddums = np.linspace(1050,200,10)
 
 
 # cf_tots = [ 0.0 ]
@@ -719,8 +719,8 @@ print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(tot
 print()
 
 
-# for cf_tot in cf_tots:
-for b_rdwv in b_rdwvs:
+for cf_tot in cf_tots:
+# for b_rdwv in b_rdwvs:
     for cldlat in cldlats:
         for tau_tot in tau_tots:
             for pclddum in pclddums:
@@ -1196,7 +1196,7 @@ for b_rdwv in b_rdwvs:
                                                                 cld_lays_master=np.zeros((nzoncols,nlatcols,nclouds))
                                                                 cld_fracs_master=np.zeros((nzoncols,nlatcols,nclouds))
                                                                 tauclds_master=np.ones((nzoncols,nlatcols,nclouds))*1e-3
-                                                                ssaclds_master=np.ones((nzoncols,nlatcols,nclouds))*0.5/nlayers
+                                                                ssaclds_master=np.ones((nzoncols,nlatcols,nclouds))*0.5
                                                                 # ssaclds_master[1,:,:]=np.ones((nlatcols,nclouds))*1e-3
     
                                                                 tbound_master=np.ones((nzoncols,nlatcols))
@@ -2433,9 +2433,9 @@ for b_rdwv in b_rdwvs:
                                                                         # manual cloud properties
                                                                         
 
-                                                                        cf_tot = 0.5
-                                                                        tau_tot = 3.
-                                                                        ssa_tot = 0.5
+                                                                        # cf_tot = 0.5
+                                                                        # tau_tot = 3.
+                                                                        # ssa_tot = 0.5
 
 
                                                                         # cf_tot = 0.6
