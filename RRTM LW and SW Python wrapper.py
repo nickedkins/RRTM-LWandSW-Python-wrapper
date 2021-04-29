@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 
 def init_plotting():
@@ -549,7 +549,7 @@ def createlatdistbn(filename):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=11 # number of latitude columns
+nlatcols=2 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
@@ -649,7 +649,7 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[4.] #meridional transport coefficient
+c_merids=[4., 8.] #meridional transport coefficient
 
 
 tbounds=np.array([300.]) # initalise lower boundary temperature
@@ -665,7 +665,6 @@ pertmols=[2] #don't do zero!
 pertlays=[0]
 
 perts = [ 1., 4. ]
-# perts = [ 4. ]
 
 # perts=[2.75e-4]
 
@@ -706,6 +705,10 @@ cf_tots = [ 0.0 ]
 cf_tot = 0.
 tau_tots = [ 0.]
 pclddums = [ 1050. ]
+
+ssa_tot = 0.01
+
+colfacs = [ 8.0, 0.125 ]
 
 
 #################################################################### end of variable initialisation ##################################################################################
@@ -766,7 +769,8 @@ for b_rdwv in b_rdwvs:
                                                                 insollats[i_lat] = np.sum(insol[i_lat,:,:]) / np.size(insol[i_lat,:,:])
                                                                 zenlats[i_lat] = np.sum(zen[i_lat,:,:]) / np.size(zen[i_lat,:,:])
                                                             # calculate annual average solar zenith angle for a given latitude required to give the calculated annual average insolation at that latitude
-                                                            szas = np.rad2deg(np.arccos(insollats/solar_constant))
+                                                            # szas = np.rad2deg(np.arccos(insollats/solar_constant))
+                                                            szas = np.ones(nlatcols) * 75.
                                                             
                                                             if(master_input==1):
                                                                 nlayers=51
@@ -797,8 +801,8 @@ for b_rdwv in b_rdwvs:
                                                             lat_obs=data[:,0]
                                                             tg_obs=data[:,1]
                                                             f=interp1d(lat_obs,tg_obs)
-                                                            tbound_inits=f(latgrid)
-                                                            # tbound_inits = [295.]
+                                                            # tbound_inits=f(latgrid)
+                                                            tbound_inits = np.ones(nlatcols) * 300.
                                                             if(nlayers==60):
                                                                 undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1. #for nl=60
                                                             elif(nlayers==100):
@@ -2461,14 +2465,14 @@ for b_rdwv in b_rdwvs:
                                                                         # manual cloud properties
                                                                         
 
-                                                                        cf_tot = 0.5
-                                                                        tau_tot = 3.
-                                                                        ssa_tot = 0.5
+                                                                        # cf_tot = 0.5
+                                                                        # tau_tot = 3.
+                                                                        # ssa_tot = 0.5
 
 
                                                                         # cf_tot = 0.6
                                                                         # tau_tot = 3.0
-                                                                        ssa_tot = 0.5
+
 
                                                                         # cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
                                                                         # cldlay_dums=[np.int(nlayers/2)]
@@ -2640,6 +2644,9 @@ for b_rdwv in b_rdwvs:
                                                                                 elif(pert_type==1):
                                                                                     wkl[pertmol,i_lay]+=pert
                                                                                     # wkl[:,i_lay]+=pert
+                                                                                    
+                                                                        if(ts==1):
+                                                                            wkl[1,:] *= colfacs[i_lat]
                                                                                  
                                                                                     
                                                                         for i_mol in range(1,nmol):

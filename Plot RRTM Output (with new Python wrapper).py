@@ -14,19 +14,13 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=5 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig
+plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/dco2/baseline/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/dco2/albedo varies/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/dco2/era-i q/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/dco2/era-i rh/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/dco2/era-i rh and as=2/'
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/dco2/era-i q and as=2/'
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/dco2/nlats = 11/baseline/'
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/RF dT_dF and dmtransp/new/dco2/nlats = 11/baseline/'
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/cm=4/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/cm=8/',
 ]
 
 
@@ -35,7 +29,7 @@ c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficient
 
 nlayers=60
-nlatcols=5
+nlatcols=2
 nzoncols=1
 
 def colors(n):
@@ -1023,92 +1017,104 @@ for directory in directories:
 
 ########################################################################## end read files #################################################################################################################
 
-if(plot_switch==5):
+dTs[0] = tbound_all_dirfil[0,:,0,1] - tbound_all_dirfil[0,:,0,0]
+dTs[1] = tbound_all_dirfil[0,:,1,1] - tbound_all_dirfil[0,:,1,0]
+
+print(dTs)
+
+for i_dir in range(len(directories)):
+    plt.figure(1)
+    plt.plot(tbound_all_dirfil[0,:,i_dir,0], '-o',label=dir_labels[i_dir])
+    plt.plot(tbound_all_dirfil[0,:,i_dir,1], '-o',label=dir_labels[i_dir])
+    plt.plot(np.mean(tbound_all_dirfil[0,:,i_dir,:],axis=1), '--', label=dir_labels[i_dir])
+plt.legend()
 
 
-    for i_dir in range(len(directories)):        
+# if(plot_switch==5):
 
-        print('[', end='')
-        for il in range(nlatcols-1):
-            print( merid_transps_all_dirfil[0,0,i_dir,il], ',', end='' )
-        print( merid_transps_all_dirfil[0,0,i_dir,nlatcols-1], end='' )
-        print(']')
+#     for i_dir in range(len(directories)):
 
-        # print( 'mtransp', merid_transps_all_dirfil[0,0,i_dir,:] )
-        if( len(a) > 1 ):
-            d_mt = merid_transps_all_dirfil[ 0, 1, i_dir, : ] - merid_transps_all_dirfil[ 0, 0, i_dir, : ]
+#         print('[', end='')
+#         for il in range(nlatcols-1):
+#             print( merid_transps_all_dirfil[0,0,i_dir,il], ',', end='' )
+#         print( merid_transps_all_dirfil[0,0,i_dir,nlatcols-1], end='' )
+#         print(']')
 
-        # plt.figure(1)
-        # plt.plot(latgrid, tbound_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Baseline' )
-        # plt.plot(latgrid, tbound_all_dirfil[ 0, 1, i_dir, : ], '-o', label = '4xco2, free mtransp' )
-        # if(len(a)>2):
-        #     plt.plot(latgrid, tbound_all_dirfil[ 0, 2, i_dir, : ], '-o', label = '4xco2, baseline mtransp' )
-        # plt.xlabel('Latitude (deg)')
-        # plt.ylabel('Tg (K)')
-        # plt.legend()
+#         # print( 'mtransp', merid_transps_all_dirfil[0,0,i_dir,:] )
+#         if( len(a) > 1 ):
+#             d_mt = merid_transps_all_dirfil[ 0, 1, i_dir, : ] - merid_transps_all_dirfil[ 0, 0, i_dir, : ]
 
-        plt.figure(1)
-        plt.title('$ \Delta T_g$ for 4 x CO$_2$')
-        plt.plot(latgrid, tbound_all_dirfil[ 0, 1, i_dir, : ] - tbound_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Transport free to vary'+' '+dir_labels[i_dir])
-        if(len(a)>2):
-            plt.plot(latgrid, tbound_all_dirfil[ 0, 2, i_dir, : ]  - tbound_all_dirfil[ 0, 0, i_dir, : ] , '--o', label = 'Transport fixed at baseline'+' '+dir_labels[i_dir] )
-        plt.xlabel('Latitude (deg)')
-        plt.ylabel('$\Delta T_g$ (K)')
-        plt.legend()
+#         # plt.figure(1)
+#         # plt.plot(latgrid, tbound_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Baseline' )
+#         # plt.plot(latgrid, tbound_all_dirfil[ 0, 1, i_dir, : ], '-o', label = '4xco2, free mtransp' )
+#         # if(len(a)>2):
+#         #     plt.plot(latgrid, tbound_all_dirfil[ 0, 2, i_dir, : ], '-o', label = '4xco2, baseline mtransp' )
+#         # plt.xlabel('Latitude (deg)')
+#         # plt.ylabel('Tg (K)')
+#         # plt.legend()
 
-        # plt.figure(3)
-        # plt.title('Meridional transport (divergence)')
-        # plt.plot( latgrid, merid_transps_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Baseline' )
-        # plt.plot( latgrid, merid_transps_all_dirfil[ 0, 1, i_dir, : ], '-o', label = '4 x CO2' )
-        # plt.axhline(0, linestyle = '--')
-        # plt.xlabel('Latitude (deg)')
-        # plt.ylabel('mtransp (Wm$^{-2}$)')
-        # plt.legend()        
+#         plt.figure(1)
+#         plt.title('$ \Delta T_g$ for 4 x CO$_2$')
+#         plt.plot(latgrid, tbound_all_dirfil[ 0, 1, i_dir, : ] - tbound_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Transport free to vary'+' '+dir_labels[i_dir])
+#         if(len(a)>2):
+#             plt.plot(latgrid, tbound_all_dirfil[ 0, 2, i_dir, : ]  - tbound_all_dirfil[ 0, 0, i_dir, : ] , '--o', label = 'Transport fixed at baseline'+' '+dir_labels[i_dir] )
+#         plt.xlabel('Latitude (deg)')
+#         plt.ylabel('$\Delta T_g$ (K)')
+#         plt.legend()
 
-        plt.figure(2)
-        plt.title('$\Delta$ meridional transport for 4 x CO$_2$')
-        plt.plot( latgrid, d_mt, '-o', label = dir_labels[i_dir])
-        plt.axhline(0, linestyle = '--')
-        plt.xlabel('Latitude (deg)')
-        plt.ylabel('$\Delta$ transport (Wm$^{-2}$)')
-        plt.legend()        
+#         # plt.figure(3)
+#         # plt.title('Meridional transport (divergence)')
+#         # plt.plot( latgrid, merid_transps_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Baseline' )
+#         # plt.plot( latgrid, merid_transps_all_dirfil[ 0, 1, i_dir, : ], '-o', label = '4 x CO2' )
+#         # plt.axhline(0, linestyle = '--')
+#         # plt.xlabel('Latitude (deg)')
+#         # plt.ylabel('mtransp (Wm$^{-2}$)')
+#         # plt.legend()        
+
+#         plt.figure(2)
+#         plt.title('$\Delta$ meridional transport for 4 x CO$_2$')
+#         plt.plot( latgrid, d_mt, '-o', label = dir_labels[i_dir])
+#         plt.axhline(0, linestyle = '--')
+#         plt.xlabel('Latitude (deg)')
+#         plt.ylabel('$\Delta$ transport (Wm$^{-2}$)')
+#         plt.legend()        
 
         
 
-        if(len(a)>2):
-            dT_dyn = tbound_all_dirfil[ 0, 1, i_dir, : ]  - tbound_all_dirfil[ 0, 2, i_dir, : ] 
-            dT_tot = tbound_all_dirfil[ 0, 1, i_dir, : ]  - tbound_all_dirfil[ 0, 0, i_dir, : ] 
+#         if(len(a)>2):
+#             dT_dyn = tbound_all_dirfil[ 0, 1, i_dir, : ]  - tbound_all_dirfil[ 0, 2, i_dir, : ] 
+#             dT_tot = tbound_all_dirfil[ 0, 1, i_dir, : ]  - tbound_all_dirfil[ 0, 0, i_dir, : ] 
 
-            sens_dyn = dT_dyn / d_mt
-            sens_dyn_anom = sens_dyn - np.mean( sens_dyn )
-            print( np.sum(sens_dyn_anom * d_mt)/11. )
-            dyn_fb = np.mean( sens_dyn_anom * d_mt )
-            dT_tot_glob = np.mean( dT_tot )
+#             sens_dyn = dT_dyn / d_mt
+#             sens_dyn_anom = sens_dyn - np.mean( sens_dyn )
+#             print( np.sum(sens_dyn_anom * d_mt)/11. )
+#             dyn_fb = np.mean( sens_dyn_anom * d_mt )
+#             dT_tot_glob = np.mean( dT_tot )
 
-            print( 'dT_dyn',  dT_dyn )
-            print( 'd_mt', d_mt )
-            print( 'sens_dyn', sens_dyn )
-            print( 'dT_dyn tot', np.mean(dT_dyn) )
-            print( 'dT_dyn_est', np.mean( sens_dyn_anom * d_mt ) )
-            print( 'dT glob mean', dT_tot_glob )
-            print( 'dyn feedback %', dyn_fb / dT_tot_glob * 100.)
+#             print( 'dT_dyn',  dT_dyn )
+#             print( 'd_mt', d_mt )
+#             print( 'sens_dyn', sens_dyn )
+#             print( 'dT_dyn tot', np.mean(dT_dyn) )
+#             print( 'dT_dyn_est', np.mean( sens_dyn_anom * d_mt ) )
+#             print( 'dT glob mean', dT_tot_glob )
+#             print( 'dyn feedback %', dyn_fb / dT_tot_glob * 100.)
 
-            plt.figure(3)
-            plt.title('Sources of dynamical feedback \n Absolute: {: 4.2f} K, Relative: {: 4.2f} %'.format( dyn_fb, dyn_fb / dT_tot_glob * 100. ))
-            plt.subplot(131)
-            plt.plot( latgrid, sens_dyn_anom, '-o', label = 'Column sensitivity anomaly ( K / ( Wm$^{-2}$ ) )'+' '+dir_labels[i_dir] )
-            plt.legend()
-            plt.axhline( 0., linestyle = '--' )
-            plt.subplot(132)
-            plt.plot( latgrid, d_mt/10., '-o', label = '$\Delta$ transport / 10 ( Wm$^{-2}$ )'+' '+dir_labels[i_dir] )
-            plt.legend()
-            plt.axhline( 0., linestyle = '--' )
-            plt.subplot(133)
-            plt.plot( latgrid, sens_dyn_anom * d_mt, '-o', label = 'Part of $\Delta$T_g from dynamical feedback due to column ( K )'+' '+dir_labels[i_dir] )
-            plt.legend()
-            plt.axhline( 0., linestyle = '--' )
-            plt.xlabel( 'Latitude (deg)' )
-            plt.legend()
+#             plt.figure(3)
+#             plt.title('Sources of dynamical feedback \n Absolute: {: 4.2f} K, Relative: {: 4.2f} %'.format( dyn_fb, dyn_fb / dT_tot_glob * 100. ))
+#             plt.subplot(131)
+#             plt.plot( latgrid, sens_dyn_anom, '-o', label = 'Column sensitivity anomaly ( K / ( Wm$^{-2}$ ) )'+' '+dir_labels[i_dir] )
+#             plt.legend()
+#             plt.axhline( 0., linestyle = '--' )
+#             plt.subplot(132)
+#             plt.plot( latgrid, d_mt/10., '-o', label = '$\Delta$ transport / 10 ( Wm$^{-2}$ )'+' '+dir_labels[i_dir] )
+#             plt.legend()
+#             plt.axhline( 0., linestyle = '--' )
+#             plt.subplot(133)
+#             plt.plot( latgrid, sens_dyn_anom * d_mt, '-o', label = 'Part of $\Delta$T_g from dynamical feedback due to column ( K )'+' '+dir_labels[i_dir] )
+#             plt.legend()
+#             plt.axhline( 0., linestyle = '--' )
+#             plt.xlabel( 'Latitude (deg)' )
+#             plt.legend()
 
             
 
