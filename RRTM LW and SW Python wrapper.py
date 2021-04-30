@@ -567,7 +567,7 @@ def inhomogenise_2D(x, fac):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=1 # number of latitude columns
+nlatcols=2 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
@@ -627,7 +627,7 @@ gravity=9.79764 # RCEMIP value
 avogadro=6.022e23 # avogadro's constant
 iatm=0 #0 for layer values, 1 for level values
 ixsect=0 #could be 1, but why?
-iscat=0 #just absorption and emission
+iscat=0 #just absorption and emissionnlatcols=
 # numangs=0 #can be 0-4 for higher precision
 numangs=3 #can be 0-4 for higher precision 3 for SW, 0 for LW
 # iout=99 #for info in all spectral bands
@@ -729,9 +729,10 @@ tau_tots = [0.]
 pclddums = [2000.]
 
 ssa_tot = 0.01
+albedo_manual = 0.93
 
-# col_ratios = np.array([0.25, 0.5, 1., 2., 4.])
-col_ratios = np.linspace(0.01, 0.99, 5)
+col_ratios = np.array([0.25, 0.5, 1., 2., 4.])
+# col_ratios = np.linspace(0.01, 0.99, 5)
 # col_ratios = [1]
 
 #################################################################### end of variable initialisation ##################################################################################
@@ -769,7 +770,6 @@ for pert in perts:
               
                                                             # pclddum *= col_ratio
                                                             
-                                                            albedo_manual = col_ratio
 
                                                             lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             if(lapse_source==0):
