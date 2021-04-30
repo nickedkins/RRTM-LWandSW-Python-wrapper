@@ -543,13 +543,31 @@ def createlatdistbn(filename):
     varinterp = list(varinterp / cossums)
     return varinterp
 
-#################functions###########################################################
+def inhomogenise_1D(x, fac):
+    x_mean_orig = np.mean(x)
+    x[0] *= fac ** 0.5
+    x[1] *= fac ** - 0.5
+    x *= x_mean_orig / np.mean(x)
+    return(x)
+
+def inhomogenise_2D(x, fac):
+    x_mean_orig = np.mean(x,axis=1)
+    x[:,0] *= fac ** 0.5
+    x[:,1] *= fac ** - 0.5
+    norm = x_mean_orig / np.mean(x,axis=1)
+    x[:,0] *= norm
+    x[:,1] *= norm
+    return(x)
+    
+    
+
+#################end functions###########################################################
 
 
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=2 # number of latitude columns
+nlatcols=1 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
@@ -560,6 +578,7 @@ albedo_source=0 #0: manual, 2: EBM style
 dT_switch=1
 dtbound_switch=1
 erai_h2o_switch=0  # 0: specific humidity, 1: relative humidity
+transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
 plot_eqb_approach = 1
@@ -649,7 +668,7 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[4., 8.] #meridional transport coefficient
+c_merids=[8.] #meridional transport coefficient
 
 
 tbounds=np.array([300.]) # initalise lower boundary temperature
@@ -664,7 +683,7 @@ pertlats=[0]
 pertmols=[2] #don't do zero!
 pertlays=[0]
 
-perts = [ 1., 4. ]
+perts = [ 1., 2.]
 
 # perts=[2.75e-4]
 
@@ -689,6 +708,7 @@ tbound_add=0
 # b_rdwvs = np.linspace(1.,4.,5)
 Hh2os = np.array([2.0])
 b_rdwvs = 8. / Hh2os
+b_rdwv = b_rdwvs[0]
 
 
 cldlats = np.arange(nlatcols)
@@ -701,28 +721,33 @@ cldlats = [0]
 # tau_tots = [ 1e-2, 1e-1, 1e0, 1e1]
 # pclddums = np.linspace(1050,50,10)
 
+
+
 cf_tots = [ 0.0 ]
-cf_tot = 0.
-tau_tots = [ 0.]
-pclddums = [ 1050. ]
+cf_tot = 0.0
+tau_tots = [0.]
+pclddums = [2000.]
 
 ssa_tot = 0.01
 
-colfacs = [ 8.0, 0.125 ]
-
+# col_ratios = np.array([0.25, 0.5, 1., 2., 4.])
+col_ratios = np.linspace(0.01, 0.99, 5)
+# col_ratios = [1]
 
 #################################################################### end of variable initialisation ##################################################################################
 
 # calculate total number of parameter combinations (number of model runs)
 i_loops=0
-totloops=np.float(len(pclddums) * len(cldlats) * len(cf_tots) * len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources)*len(tau_tots))
+totloops=np.float(len(pclddums) * len(cldlats) * len(cf_tots) * len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources)*len(tau_tots)*len(col_ratios))
 looptime = 15 * (nlayers/60.) * nlatcols
 print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(totloops), totloops*looptime/60.))
 print()
 
 
+
+for pert in perts:
 # for cf_tot in cf_tots:
-for b_rdwv in b_rdwvs:
+# for b_rdwv in b_rdwvs:
     for cldlat in cldlats:
         for tau_tot in tau_tots:
             for pclddum in pclddums:
@@ -732,7 +757,7 @@ for b_rdwv in b_rdwvs:
                             for c_merid in c_merids:
                                 for extra_forcing in extra_forcings:
                                     for wklfac in wklfacs:
-                                        for pert in perts:
+                                        for col_ratio in col_ratios:                                        
                                             for pertmol in pertmols:
                                                 for pertlat in pertlats:
                                                     for pertzon in pertzons:
@@ -742,6 +767,10 @@ for b_rdwv in b_rdwvs:
     
                 #########################################################################################################################################################
               
+                                                            # pclddum *= col_ratio
+                                                            
+                                                            albedo_manual = col_ratio
+
                                                             lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             if(lapse_source==0):
                                                                 lapse_master=np.ones((nzoncols,nlatcols)) * 6.7 #actual lapse
@@ -855,7 +884,7 @@ for b_rdwv in b_rdwvs:
                                                                 0.64,
                                                                 ])
                                                             elif(master_input==3 or master_input==7):
-                                                                semiss=np.ones(29)*0.93
+                                                                semiss=np.ones(29)*(1.0 - albedo_manual)
                                                             iform=1
                                                             psurf=1000.
                                                             if(master_input==3 or master_input==7):
@@ -892,7 +921,7 @@ for b_rdwv in b_rdwvs:
                                                             elif(master_input==5):
                                                                 lapse=6.2
                                                             elif(master_input==7):
-                                                                lapse=5.8
+                                                                lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             tmin=150.
 
                                                             if(master_input==5):
@@ -2160,10 +2189,10 @@ for b_rdwv in b_rdwvs:
                                                                     g2=0.83209
                                                                     g3=11.3515
 
-                                                                    for i in range(nlayers):
-                                                                        wbrodl[i] = mperlayr_air[i] * 1.0e-4
-                                                                        wkl[1,:]=12. * 1.6e-3 * ( pavel / pz[0] ) ** 4. + 1e-6
-                                                                        wkl[2,i]=348e-6*4. # co2
+                                                                    # for i in range(nlayers):
+                                                                    #     wbrodl[i] = mperlayr_air[i] * 1.0e-4
+                                                                    #     wkl[1,:]=12. * 1.6e-3 * ( pavel / pz[0] ) ** 4. + 1e-6
+                                                                    #     wkl[2,i]=348e-6*4. # co2
 
                                                                     a_rdwv=12.*1.6e-3
                                                                     # b_rdwv=4.
@@ -2224,6 +2253,18 @@ for b_rdwv in b_rdwvs:
     
                                                             # main loop (timestepping)
                                                             for ts in range(timesteps):
+                                                                
+                                                                # print(np.mean(wkl_master[0,0,0,:]))
+                                                                # print(wkl_master[0,0,0,:])
+                                                                if(ts==2 and nlatcols==2):
+                                                                    wkl_master[:,i_zon,0,:] = inhomogenise_2D(wkl_master[:,i_zon,0,:], col_ratio)
+                                                                    # print(np.mean(wkl_master[0,0,0,:]))
+                                                                    # print(wkl_master[0,0,0,:])
+                                                                    
+                                                                # if(ts==2):
+                                                                    # wkl_master[:,i_zon,0,:] *= col_ratio
+                                                                    # wkl_master[:,i_zon,2,:] *= col_ratio
+                                                                   
     
                                                                 for i_lat in range(nlatcols):
                                                                    
@@ -2264,11 +2305,7 @@ for b_rdwv in b_rdwvs:
                                                                         g1=3.6478
                                                                         g2=0.83209
                                                                         g3=11.3515
-    
-                                                                        for i in range(nlayers):
-                                                                            wbrodl[i] = mperlayr_air[i] * 1.0e-4
-                                                                            wkl[1,:]=12. * 1.6e-3 * ( pavel / pz[0] ) ** 4. + 1e-6
-                                                                            wkl[2,i]=348e-6*4. # co2
+                                                                               
     
                                                                         a_rdwv=12.*1.6e-3
                                                                         # b_rdwv=4.
@@ -2278,7 +2315,8 @@ for b_rdwv in b_rdwvs:
                                                                         for i in range(nlayers):
                                                                             wbrodl[i] = mperlayr_air[i] * 1.0e-4
                                                                             # wkl[1,:]=(12. * 1.6e-3 * ( pavel / pz[0] ) ** 4. + 1.e-6)
-                                                                            wkl[1,:]=( a_rdwv * ( pavel / pz[0] ) ** b_rdwv + c_rdwv)
+                                                                            if(ts==1):
+                                                                                wkl[1,:]=( a_rdwv * ( pavel / pz[0] ) ** b_rdwv + c_rdwv)
                                                                             wkl[2,i]=348e-6 # co2
                                                                             wkl[3,i]=g1*pz[i]**(g2)*np.exp(-1.0*(pz[i]/g3))*1e-6 # o3
                                                                             wkl[4,i]=306e-9 # n2o
@@ -2645,8 +2683,8 @@ for b_rdwv in b_rdwvs:
                                                                                     wkl[pertmol,i_lay]+=pert
                                                                                     # wkl[:,i_lay]+=pert
                                                                                     
-                                                                        if(ts==1):
-                                                                            wkl[1,:] *= colfacs[i_lat]
+                                                                        # if(ts==1):
+                                                                        #     wkl[1,:] *= colfacs[i_lat]
                                                                                  
                                                                                     
                                                                         for i_mol in range(1,nmol):
@@ -2767,7 +2805,10 @@ for b_rdwv in b_rdwvs:
                                                                         # treat meridional transport as diffusion
                                                                         if(nlatcols>1):
                                                                             # mti=np.int(nlayers/2) # merid transp index
-                                                                            mti=1
+                                                                            if(transp_surf_atm_switch == 0):
+                                                                                mti=1
+                                                                            elif(transp_surf_atm_switch == 1):
+                                                                                mti=np.int(nlayers/2) # merid transp index
                                                                             if(i_lat>0 and i_lat<nlatcols-1):
                                                                                 # merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[0,i_zon,i_lat+1]-tz_master[0,i_zon,i_lat]) + c_merid*(tz_master[0,i_zon,i_lat-1]-tz_master[0,i_zon,i_lat]))*latweights_area[i_lat]
                                                                                 merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat+1]-tz_master[mti,i_zon,i_lat]) + c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
@@ -2981,7 +3022,7 @@ for b_rdwv in b_rdwvs:
                                                                     break
                                                                 elif(ts==timesteps-1):
                                                                     print('Max timesteps')
-                                                                    os.system('say "Max timesteps"')
+                                                                    # os.system('say "Max timesteps"')
                                                                     if(plotted!=1):
                                                                         plotrrtmoutput()
                                                                         plotted=1
