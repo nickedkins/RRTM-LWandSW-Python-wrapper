@@ -547,7 +547,9 @@ def inhomogenise_1D(x, fac):
     x_mean_orig = np.mean(x)
     x[0] *= fac ** 0.5
     x[1] *= fac ** - 0.5
-    x *= x_mean_orig / np.mean(x)
+    norm = x_mean_orig / np.mean(x,axis=0)
+    x[0] *= norm
+    x[1] *= norm
     return(x)
 
 def inhomogenise_2D(x, fac):
@@ -642,7 +644,7 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.1*(60./nlayers) # max equilibrium value of total column energy budget at TOA
+eqb_col_budgs=0.01*(60./nlayers) # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
 timesteps=1000 # number of timesteps until model exits
@@ -668,7 +670,7 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[8.] #meridional transport coefficient
+c_merids=[100.] #meridional transport coefficient
 
 
 tbounds=np.array([300.]) # initalise lower boundary temperature
@@ -683,7 +685,7 @@ pertlats=[0]
 pertmols=[2] #don't do zero!
 pertlays=[0]
 
-perts = [ 1., 2.]
+perts = [ 1., 4.]
 
 # perts=[2.75e-4]
 
@@ -725,15 +727,17 @@ cldlats = [0]
 
 cf_tots = [ 0.0 ]
 cf_tot = 0.0
-tau_tots = [0.]
+tau_tots = [0.0]
 pclddums = [2000.]
+tau_tots_lats = np.array([0.0, 0.0])
+lapse_lats = np.array([5.7, 5.7])
 
 ssa_tot = 0.01
-albedo_manual = 0.93
+albedo_manual = 0.07
 
-col_ratios = np.array([0.25, 0.5, 1., 2., 4.])
+# col_ratios = np.logspace(0, 4, base=2, num=5)
 # col_ratios = np.linspace(0.01, 0.99, 5)
-# col_ratios = [1]
+col_ratios = [2.]
 
 #################################################################### end of variable initialisation ##################################################################################
 
@@ -835,6 +839,8 @@ for pert in perts:
                                                             if(nlayers==60):
                                                                 undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1. #for nl=60
                                                             elif(nlayers==100):
+                                                                undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl=100
+                                                            elif(nlayers==200):
                                                                 undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl=100
                                                             elif(nlayers==590):
                                                                 undrelax_lats=np.ones(nlatcols)*0.5 #for nl=590
@@ -2257,7 +2263,9 @@ for pert in perts:
                                                                 # print(np.mean(wkl_master[0,0,0,:]))
                                                                 # print(wkl_master[0,0,0,:])
                                                                 if(ts==2 and nlatcols==2):
-                                                                    wkl_master[:,i_zon,0,:] = inhomogenise_2D(wkl_master[:,i_zon,0,:], col_ratio)
+                                                                    # wkl_master[:,i_zon,0,:] = inhomogenise_2D(wkl_master[:,i_zon,0,:], col_ratio)
+                                                                    # tau_tots_lats = inhomogenise_1D(tau_tots_lats, col_ratio)
+                                                                    lapse_master[0,:] = inhomogenise_1D(lapse_lats, col_ratio)
                                                                     # print(np.mean(wkl_master[0,0,0,:]))
                                                                     # print(wkl_master[0,0,0,:])
                                                                     
@@ -2269,6 +2277,9 @@ for pert in perts:
                                                                 for i_lat in range(nlatcols):
                                                                    
                                                                     conv_on=conv_on_lats[i_lat]
+                                                                    
+                                                                    # tau_tot = tau_tots_lats[i_lat]
+                                                                    # lapse = lapse_lats[i_lat]
     
                                                                     if(ts==1):
                                                                         tbound = tbound_inits[i_lat]
@@ -2528,6 +2539,7 @@ for pert in perts:
                                                                         #     # ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/ncloudcols
                                                                         
                                                                         # cldlay_dum=np.argmin(abs(altz/1000.-zclddum))
+                                                                        
                                                                         cldlay_dum=np.argmin(abs(pz-pclddum))
                                                                             
                                                                             
@@ -2651,7 +2663,10 @@ for pert in perts:
                                                                         # perturb surface temperature to reduce column energy imbalance
                                                                         if((input_source==0 and ts>100) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
-                                                                            dtbound=column_budgets_master[i_zon,i_lat]*undrelax_lats[0]*0.01
+                                                                            if(c_merid > 15.):
+                                                                                dtbound=column_budgets_master[i_zon,i_lat]*undrelax_lats[0]*0.01 * ( 16. / c_merid )
+                                                                            else:
+                                                                                dtbound=column_budgets_master[i_zon,i_lat]*undrelax_lats[0]*0.01
                                                                             if(dtbound_switch==0):
                                                                                 dtbound=0.
                                                                             dtbound=np.clip(dtbound,-dmax,dmax)

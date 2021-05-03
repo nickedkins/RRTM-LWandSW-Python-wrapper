@@ -14,23 +14,15 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig
+plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/h2o/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/h2o/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/o3/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/o3/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/lapse/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/lapse/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/pcld/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/pcld/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/2xco2/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/1xco2/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/2xco2/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/inhomogeneity/cm=0/h2o/1xco2/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/inhomogeneity/cm=0/h2o/2xco2/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/inhomogeneity/cm=8/h2o/1xco2/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/inhomogeneity/cm=8/h2o/2xco2/',
 ]
 
 # c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -1025,65 +1017,41 @@ for directory in directories:
 
 ########################################################################## end read files #################################################################################################################
 
-ecs = tbound_all_dirfil[0,:,1,0] - tbound_all_dirfil[0,:,0,0]
-
-# print('ECS:  K {}'.format(tbound_all_dirfil[0,:,1,0] - tbound_all_dirfil[0,:,0,0]) )
-print(tbound_all_dirfil)
-
-Ts = tbound_all_dirfil[0,:,0,0]
-dTs = Ts - Ts[2]
-col_ratios = np.array([0.25, 0.5, 1., 2., 4.])
-# col_ratios = np.linspace(0.5, 2.0, 5)
-albedo_manuals = np.linspace(0, 1, 5)
-# pclddums = np.linspace(900,300,10)
-
-plt.figure(1)
-# plt.plot(col_ratios, dTs, '-o')
-# plt.plot(col_ratios[0::4], dTs[0::4], '--')
-plt.plot(albedo_manuals, dTs, '-o')
-plt.plot(albedo_manuals[0::4], dTs[0::4], '--')
-plt.axhline(0,linestyle='--')
-# plt.xlabel(r'Factor multiplying cloud $\tau$')
-plt.xlabel(r'Surface albedo')
-plt.ylabel('Change in surface temperature (K)')
-
-# plt.figure(1)
-# plt.plot(pclddums, dTs, '-o')
-# plt.plot(pclddums[0::9], dTs[0::9], '--')
-# plt.xlim(900,300)
-# plt.axhline(0,linestyle='--')
-# plt.xlabel('Cloud top pressure (hPa)')
-# plt.ylabel('Change in surface temperature (K)')
-
-plt.figure(2)
-# plt.plot(col_ratios, ecs, '-o')
-plt.plot(albedo_manuals, ecs, '-o')
-# plt.xlabel(r'Factor multiplying cloud $\tau$'))
-plt.xlabel(r'Surface albedo')
-plt.ylabel('ECS (K)')
-
-
 # for i_dir in range(len(directories)):
 
 #     tfurns = tbound_all_dirfil[0,:,i_dir,0]
 #     tfins = tbound_all_dirfil[0,:,i_dir,1]
 #     tmeans = np.mean( tbound_all_dirfil[0,:,i_dir,:], axis=1 )
 
-# tfurns = tbound_all_dirfil[0,:,:,0]
-# tfins = tbound_all_dirfil[0,:,:,1]
+
+
+tfurns = tbound_all_dirfil[0,:,:,0]
+tfins = tbound_all_dirfil[0,:,:,1]
+tmeans = (tfurns + tfins) / 2.
+
+for i_file in range(0, len(a), 2):
+    print( 'ECS = {: 4.2f} K'.format(np.float(tmeans[i_file+1] - tmeans[i_file])) )
+
+# print(tmeans[1] - tmeans[0])
+
+# for i_file in range(4):
+
+#     print(tmeans[i_file], wkl_all_dirfil[1,1,:,i_file,:,:])
+
 # tmeans = np.mean( tbound_all_dirfil[0,:,:,:], axis=2 )
 
 # dtfurns = tfurns[:, 1] - tfurns[:, 0]
 # dtfins = tfins[:, 1] - tfins[:, 0]
 # dtmeans = tmeans[:, 1] - tmeans[:, 0]
 
-# print(dtmeans)
 
-# # olrfurns = totuflux_all_dirfil[-1,0,:,i_dir,0]
-# # olrfins = totuflux_all_dirfil[-1,0,:,i_dir,1]
-# # olrmeans = np.mean( totuflux_all_dirfil[-1,0,:,i_dir,:], axis=1 )
+
+# olrfurns = totuflux_all_dirfil[-1,0,:,i_dir,0]
+# olrfins = totuflux_all_dirfil[-1,0,:,i_dir,1]
+# olrmeans = np.mean( totuflux_all_dirfil[-1,0,:,i_dir,:], axis=1 )
 
 # col_ratios = np.array([1., 2., 4., 8., 16.])
+# col_ratios = np.logspace(0, 4, base=2, num=10)
 # inv_col_ratios = 1. / col_ratios
 
 # # print(wkl_all_dirfil[ 0, 0, :, :, :, : ] )
@@ -1095,28 +1063,67 @@ plt.ylabel('ECS (K)')
 # # plt.semilogx(col_ratios, tfurns-tfurns[0], '-o')
 # # plt.semilogx(inv_col_ratios, tfins-tfins[0], '--o')
 
+# plt.figure(1)
+# plt.xlabel('Ratio of furnace to fin column H$_2$O')
+# plt.plot(col_ratios, tfurns[:,0], '-o', c = 'r', label = 'Furnace')
+# plt.plot(col_ratios, tfins[:,0], '-o', c = 'b', label = 'Fin')
+# plt.plot(col_ratios, tmeans[:,0], '--o', c = 'black', label = 'Average')
+# plt.ylabel('Surface temperature (K)')
+# plt.legend()
+
+# plt.figure(2)
+# plt.xlabel('Ratio of furnace to fin column H$_2$O')
+# plt.plot(col_ratios, dtfurns, '-o', c = 'r', label = 'Furnace')
+# plt.plot(col_ratios, dtfins, '-o', c = 'b', label = 'Fin')
+# plt.plot(col_ratios, dtmeans, '--o', c = 'black', label = 'Average')
+# plt.ylabel('ECS (K)')
+# plt.legend()    
+
+
+# tfurns = tbound_all_dirfil[0,:,:,0]
+# tfins = tbound_all_dirfil[0,:,:,1]
+# tmeans = (tfurns + tfins) / 2.
+# # tmeans = np.mean( tbound_all_dirfil[0,:,:,:], axis=2 )
+
+# dtfurns = tfurns[:, 3] - tfurns[:, 2]
+# dtfins = tfins[:, 3] - tfins[:, 2]
+# dtmeans = tmeans[:, 3] - tmeans[:, 2]
+
+# print(dtmeans)
+
+# # olrfurns = totuflux_all_dirfil[-1,0,:,i_dir,0]
+# # olrfins = totuflux_all_dirfil[-1,0,:,i_dir,1]
+# # olrmeans = np.mean( totuflux_all_dirfil[-1,0,:,i_dir,:], axis=1 )
+
+# # col_ratios = np.array([1., 2., 4., 8., 16.])
+# col_ratios = np.logspace(0, 4, base=2, num=10)
+# inv_col_ratios = 1. / col_ratios
+
+# # print(wkl_all_dirfil[ 0, 0, :, :, :, : ] )
+# # print(wkl_all_dirfil[ 0, 0, :, :, :, 0 ] / wkl_all_dirfil[ 0, 0, :, :, :, 1 ] )
+
+# # print(np.mean(wkl_all_dirfil[ 0, 0, :, :, :, : ], axis=3) )
+
 # # plt.figure(1)
-# # plt.xlabel('Ratio of furnace to fin column H$_2$O')
-# # plt.semilogx(col_ratios, tfurns, '-o', c = 'r', label = 'Furnace')
-# # plt.semilogx(col_ratios, tfins, '-o', c = 'b', label = 'Fin')
-# # plt.semilogx(col_ratios, tmeans, '--o', c = 'black', label = 'Average')
-# # plt.ylabel('Surface temperature (K)')
-# # plt.legend()
+# # plt.semilogx(col_ratios, tfurns-tfurns[0], '-o')
+# # plt.semilogx(inv_col_ratios, tfins-tfins[0], '--o')
 
 # plt.figure(1)
 # plt.xlabel('Ratio of furnace to fin column H$_2$O')
-# plt.semilogx(col_ratios, dtfurns, '-o', c = 'r', label = 'Furnace')
-# plt.semilogx(col_ratios, dtfins, '-o', c = 'b', label = 'Fin')
-# plt.semilogx(col_ratios, dtmeans, '--o', c = 'black', label = 'Average')
-# plt.ylabel('Change in surface temperature (K)')
-# plt.legend()    
-
-# plt.xlabel('Ratio of furnace to fin column H$_2$O')
-# plt.plot(col_ratios, olrfurns, '-o', c = 'r', label = 'Furnace')
-# plt.plot(col_ratios, olrfins, '-o', c = 'b', label = 'Fin')
-# plt.plot(col_ratios, olrmeans, '--o', c = 'black', label = 'Average')
+# plt.plot(col_ratios, tfurns[:,0], '-o', c = 'r', label = 'Furnace')
+# plt.plot(col_ratios, tfins[:,0], '-o', c = 'b', label = 'Fin')
+# plt.plot(col_ratios, tmeans[:,0], '--o', c = 'black', label = 'Average')
 # plt.ylabel('Surface temperature (K)')
 # plt.legend()
+
+# plt.figure(2)
+# plt.xlabel('Ratio of furnace to fin column H$_2$O')
+# plt.plot(col_ratios, dtfurns, '-o', c = 'r', label = 'Furnace')
+# plt.plot(col_ratios, dtfins, '-o', c = 'b', label = 'Fin')
+# plt.plot(col_ratios, dtmeans, '--o', c = 'black', label = 'Average')
+# plt.ylabel('ECS (K)')
+# plt.legend()    
+
 
 # dTs = np.zeros(2)
 # dTs[0] = tbound_all_dirfil[0,:,0,1] - tbound_all_dirfil[0,:,0,0]
