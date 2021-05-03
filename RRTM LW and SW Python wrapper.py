@@ -642,7 +642,7 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.1*(60./nlayers) # max equilibrium value of total column energy budget at TOA
+eqb_col_budgs=0.01*(60./nlayers) # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
 timesteps=1000 # number of timesteps until model exits
@@ -668,7 +668,7 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[8.] #meridional transport coefficient
+c_merids=[0.] #meridional transport coefficient
 
 
 tbounds=np.array([300.]) # initalise lower boundary temperature
@@ -724,15 +724,23 @@ cldlats = [0]
 
 
 cf_tots = [ 0.0 ]
-cf_tot = 0.0
-tau_tots = [0.]
-pclddums = [2000.]
+cf_tot = 0.66
+tau_tots = [3.]
+pclddums = [700.]
 
-ssa_tot = 0.01
+ssa_tot = 0.5
 
+albedo_manual = 0.07
+
+# for inhomogeneity expts
 # col_ratios = np.array([0.25, 0.5, 1., 2., 4.])
-col_ratios = np.linspace(0.01, 0.99, 5)
+col_ratios = np.logspace( -3, 3, base=2, num=9)
 # col_ratios = [1]
+
+# for nonlinearity expts
+var_fac = np.logspace( -3, 3, base=2, num=9)
+
+nonlin_var = 5 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld
 
 #################################################################### end of variable initialisation ##################################################################################
 
@@ -769,7 +777,9 @@ for pert in perts:
               
                                                             # pclddum *= col_ratio
                                                             
-                                                            albedo_manual = col_ratio
+                                                            # albedo_manual = col_ratio
+                                                            
+                                                            tau_tot *= col_ratio
 
                                                             lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             if(lapse_source==0):
