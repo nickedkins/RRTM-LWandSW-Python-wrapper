@@ -683,7 +683,7 @@ pertlats=[0]
 pertmols=[2] #don't do zero!
 pertlays=[0]
 
-perts = [ 1., 2.]
+perts = [ 1.]
 
 # perts=[2.75e-4]
 
@@ -730,23 +730,30 @@ pclddums = [700.]
 
 ssa_tot = 0.5
 
-albedo_manual = 0.07
+albedo_manual_init = 0.07
 
 # for inhomogeneity expts
 # col_ratios = np.array([0.25, 0.5, 1., 2., 4.])
-col_ratios = np.logspace( -3, 3, base=2, num=9)
-# col_ratios = [1]
+# col_ratios = np.logspace( -3, 3, base=2, num=9)
+col_ratios = [1]
 
 # for nonlinearity expts
-var_fac = np.logspace( -3, 3, base=2, num=9)
+nonlin_var = 4 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld
 
-nonlin_var = 5 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld
+if( nonlin_var == 0 or nonlin_var == 1 or nonlin_var == 5 ):
+    var_facs = np.logspace( -3, 3, base=2, num=5)
+elif(nonlin_var == 3):
+    var_facs = np.logspace(0, 3, base=2, num=5)
+elif( nonlin_var == 2 ):
+    var_facs = np.logspace( -1, 1, base=2, num=5)
+elif( nonlin_var == 4 ):
+    var_facs = np.logspace( -0.5, 0.5, base=2, num=5)
 
 #################################################################### end of variable initialisation ##################################################################################
 
 # calculate total number of parameter combinations (number of model runs)
 i_loops=0
-totloops=np.float(len(pclddums) * len(cldlats) * len(cf_tots) * len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources)*len(tau_tots)*len(col_ratios))
+totloops=np.float(len(pclddums) * len(cldlats) * len(cf_tots) * len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources)*len(tau_tots)*len(col_ratios)*len(var_facs))
 looptime = 15 * (nlayers/60.) * nlatcols
 print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(totloops), totloops*looptime/60.))
 print()
@@ -765,7 +772,8 @@ for pert in perts:
                             for c_merid in c_merids:
                                 for extra_forcing in extra_forcings:
                                     for wklfac in wklfacs:
-                                        for col_ratio in col_ratios:                                        
+                                        # for col_ratio in col_ratios:  
+                                        for var_fac in var_facs:
                                             for pertmol in pertmols:
                                                 for pertlat in pertlats:
                                                     for pertzon in pertzons:
@@ -774,12 +782,12 @@ for pert in perts:
                                                             i_loops+=1
     
                 #########################################################################################################################################################
-              
-                                                            # pclddum *= col_ratio
                                                             
-                                                            # albedo_manual = col_ratio
-                                                            
-                                                            tau_tot *= col_ratio
+                                                            if(nonlin_var == 3):
+                                                                albedo_manual = albedo_manual_init * var_fac
+                                                            else:
+                                                                albedo_manual = albedo_manual_init
+
 
                                                             lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             if(lapse_source==0):
@@ -2266,15 +2274,17 @@ for pert in perts:
                                                                 
                                                                 # print(np.mean(wkl_master[0,0,0,:]))
                                                                 # print(wkl_master[0,0,0,:])
-                                                                if(ts==2 and nlatcols==2):
-                                                                    wkl_master[:,i_zon,0,:] = inhomogenise_2D(wkl_master[:,i_zon,0,:], col_ratio)
+                                                                # if(ts==2 and nlatcols==2):
+                                                                    # wkl_master[:,i_zon,0,:] = inhomogenise_2D(wkl_master[:,i_zon,0,:], col_ratio)
                                                                     # print(np.mean(wkl_master[0,0,0,:]))
                                                                     # print(wkl_master[0,0,0,:])
                                                                     
-                                                                # if(ts==2):
-                                                                    # wkl_master[:,i_zon,0,:] *= col_ratio
-                                                                    # wkl_master[:,i_zon,2,:] *= col_ratio
-                                                                   
+                                                                if(ts==2 and nonlin_var==0):
+                                                                    wkl_master[:,i_zon,0,:] *= var_fac
+                                                                elif(ts==2 and nonlin_var==1):
+                                                                    wkl_master[:,i_zon,2,:] *= var_fac
+                                                                elif(ts==2 and nonlin_var==2):
+                                                                    lapse_master[0,i_lat] *= var_fac                                                                    
     
                                                                 for i_lat in range(nlatcols):
                                                                    
@@ -2536,6 +2546,13 @@ for pert in perts:
                                                                         #     # cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/ncloudcols
                                                                         #     # tauclds_master[i_zon,0,cldlay_dum]=tau_tot/ncloudcols
                                                                         #     # ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/ncloudcols
+                                                                        
+                                                                        if(nonlin_var == 4 and ts == 2):
+                                                                            pclddum = pclddums[0] * var_fac
+                                                                            print('pclddum', pclddum)
+                                                                        elif(nonlin_var==5 and ts==2):
+                                                                            tau_tot = tau_tots[0] * var_fac
+                                                                        
                                                                         
                                                                         # cldlay_dum=np.argmin(abs(altz/1000.-zclddum))
                                                                         cldlay_dum=np.argmin(abs(pz-pclddum))

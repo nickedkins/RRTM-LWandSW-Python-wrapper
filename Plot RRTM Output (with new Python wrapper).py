@@ -33,11 +33,15 @@ directories = [
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v2 redo/2xco2/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v3 ssa=0.5/1xco2/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v3 ssa=0.5/2xco2/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v4 high res/1xco2/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v4 high res/2xco2/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v4 high res/1xco2/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v4 high res/2xco2/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/1xco2/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/2xco2/',
-
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/h2o/v2/1xco2/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/o3/v2/1xco2/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/lapse/v2/1xco2/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/v2/1xco2/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/pcld/v2/1xco2/',
 ]
 
 # c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -1032,28 +1036,45 @@ for directory in directories:
 
 ########################################################################## end read files #################################################################################################################
 
+nonlin_var = 4 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld
 
 
-ecs = tbound_all_dirfil[0,:,1,0] - tbound_all_dirfil[0,:,0,0]
+if( nonlin_var == 0 or nonlin_var == 1 or nonlin_var == 5 ):
+    var_facs = np.logspace( -3, 3, base=2, num=5)
+elif(nonlin_var == 3):
+    var_facs = np.logspace(0, 3, base=2, num=5)
+elif( nonlin_var == 2 ):
+    var_facs = np.logspace( -1, 1, base=2, num=5)
+elif( nonlin_var == 4 ):
+    var_facs = np.logspace( -0.5, 0.5, base=2, num=5)
+
+
 
 # print('ECS:  K {}'.format(tbound_all_dirfil[0,:,1,0] - tbound_all_dirfil[0,:,0,0]) )
 # print(tbound_all_dirfil)
 
 Ts = tbound_all_dirfil[0,:,0,0]
-dTs = Ts - Ts[4]
-# col_ratios = np.array([0.25, 0.5, 1., 2., 4.])
+dTs = Ts - Ts[2]
 col_ratios = np.logspace( -3, 3, base=2, num=9)
-# col_ratios = np.linspace(0.5, 2.0, 5)
-albedo_manuals = np.linspace(0, 1, 5)
-# pclddums = np.linspace(900,300,10)
 
 plt.figure(1)
-plt.semilogx(col_ratios, dTs, '-o')
-plt.semilogx(col_ratios[0::len(Ts)-1], dTs[0::len(Ts)-1], '--')
+plt.plot(var_facs, dTs, '-o')
+plt.plot(var_facs[0::len(Ts)-1], dTs[0::len(Ts)-1], '--')
 # plt.plot(albedo_manuals, dTs, '-o')
 # plt.plot(albedo_manuals[0::4], dTs[0::4], '--')
 plt.axhline(0,linestyle='--')
-plt.xlabel(r'Factor multiplying cloud $\tau$')
+if(nonlin_var == 0):
+    plt.xlabel(r'Factor multiplying H$_2$O')
+elif(nonlin_var == 1):
+    plt.xlabel(r'Factor multiplying O$_3$')
+elif(nonlin_var == 2):
+    plt.xlabel(r'Factor multiplying $\Gamma$')
+elif(nonlin_var == 3):
+    plt.xlabel(r'Factor multiplying surface albedo')
+elif(nonlin_var == 4):
+    plt.xlabel(r'Factor multiplying cloud top pressure')
+elif(nonlin_var == 5):
+    plt.xlabel(r'Factor multiplying cloud optical thickness')
 # plt.xlabel(r'Surface albedo')
 plt.ylabel('Change in surface temperature (K)')
 
@@ -1065,12 +1086,14 @@ plt.ylabel('Change in surface temperature (K)')
 # plt.xlabel('Cloud top pressure (hPa)')
 # plt.ylabel('Change in surface temperature (K)')
 
-plt.figure(2)
-plt.semilogx(col_ratios, ecs, '-o')
-# plt.plot(albedo_manuals, ecs, '-o')
-plt.xlabel(r'Factor multiplying cloud $\tau$')
-# plt.xlabel(r'Surface albedo')
-plt.ylabel('ECS (K)')
+# ecs = tbound_all_dirfil[0,:,1,0] - tbound_all_dirfil[0,:,0,0]
+
+# plt.figure(2)
+# plt.semilogx(col_ratios, ecs, '-o')
+# # plt.plot(albedo_manuals, ecs, '-o')
+# plt.xlabel(r'Factor multiplying cloud $\tau$')
+# # plt.xlabel(r'Surface albedo')
+# plt.ylabel('ECS (K)')
 
 
 # for i_dir in range(len(directories)):
