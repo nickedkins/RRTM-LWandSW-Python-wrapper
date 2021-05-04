@@ -30,8 +30,8 @@ directories = [
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/Every layer simultaneously/Absolute 3.86e-4 mol per mol/',
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/Every layer simultaneously/Absolute 2.83e-4 mol per mol/',
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/Every layer simultaneously/Relative 0.26 %/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/One layer at a time/Absolute 1e-5 mol per mol/',
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/One layer at a time/Relative 0.26 %/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/One layer at a time/Absolute 1e-5 mol per mol/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/v2, smaller/nl=590/One layer at a time/Relative 0.26 %/',
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o scale heights/renormalised/v2/'
 ]
 
@@ -61,7 +61,7 @@ def colors(n):
   return ret
 
 def init_plotting():
-    plt.rcParams['figure.figsize'] = (20,10)
+    plt.rcParams['figure.figsize'] = (14,7)
     plt.rcParams['font.size'] = 12
     plt.rcParams['font.family'] = 'Arial'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
@@ -87,7 +87,7 @@ def init_plotting():
 
     plt.rcParams['figure.facecolor'] = 'white'
     plt.rcParams['axes.facecolor'] = 'white'
-    #plt.rcParams['axes.color_cycle'] = ['b', 'r', 'g','pink','orange','darkgreen','purple']
+    plt.rcParams['axes.color_cycle'] = ['b', 'orange', 'g','pink','orange','darkgreen','purple']
 
     plt.rcParams['grid.color'] = 'k'
     plt.rcParams['grid.linestyle'] = ':'
@@ -490,7 +490,7 @@ totuflux_all_prp=np.zeros((len(perts), len(pertmols), len(pertlats),len(pertzons
 tbound_all_prp=np.zeros((len(perts), len(pertmols), len(pertlats),len(pertzons), len(pertlays) ))
 
 dir_labels = []
-dir_labels = ['absolute, $10^{-5}$ mol/mol', 'relative, 0.26 %']
+dir_labels = ['absolute', 'relative']
 
 i_dir=0
 for directory in directories:
