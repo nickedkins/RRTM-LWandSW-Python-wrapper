@@ -16,7 +16,7 @@ plot_switch=4 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor
 cti_type=1 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=2.5, cf=0.4/',
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=590/tau=3, cf=0.5/',
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=590/tau=0.25, cf=0.4,/',
@@ -52,7 +52,7 @@ def colors(n):
   return ret
 
 def init_plotting():
-    plt.rcParams['figure.figsize'] = (10,10)
+    plt.rcParams['figure.figsize'] = (8,8)
     plt.rcParams['font.size'] = 12
     # plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['font.family'] = 'Arial'
