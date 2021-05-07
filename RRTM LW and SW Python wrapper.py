@@ -228,7 +228,7 @@ def convection(T,z,conv_log):
     for i in range(1,len(T)):
         dT = (T[i]-T[i-1])
         dz = (z[i]-z[i-1])/1000.
-        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 0.0) and z[i]/1000. < 1000. ):
+        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 7.0) and z[i]/1000. < 1000. ):
             if(conv_log==1):
                 conv[i]=1.
             T[i] = T[i-1] - lapse * dz
@@ -518,6 +518,7 @@ def read_erai():
     r=interpolate_createprrtminput_lev('r',r_latp_max,r_ps,r_lats)
     o3=interpolate_createprrtminput_lev('o3',o3_latp_max,o3_ps,o3_lats)*28.964/48.
     fal=interpolate_createprrtminput_sfc('fal',fal_lat_max,fal_lats)
+    print(q_latp_max[:,-1])
     return q, o3, fal,r
 
 # read an input distribution of a variable vs latitude and interpolate to model lat grid
@@ -570,14 +571,14 @@ nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
+master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/RF dT_dF and dmtransp/new/dco2/baseline/2021_04_15 19_41_47'
 lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0 #0: manual, 2: EBM style
 dT_switch=1
-dtbound_switch=1
-erai_h2o_switch=0  # 0: specific humidity, 1: relative humidity
+dtbound_switch=1 # 0: don't allow tbound to change | 1: do
+erai_h2o_switch=0  # 0: specific humidity | 1: relative humidity
 transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
@@ -641,11 +642,11 @@ ur_max=3.0 # minimum value for under-relaxation constant
 eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating rate is below this value (if not using dfnet to determine eqb)
 # eqb_maxdfnet=1e-4
 
-eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
+eqb_maxdfnet=0.02*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
 eqb_col_budgs=0.01*(60./nlayers) # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
-timesteps=1000 # number of timesteps until model exits
+timesteps=100 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
@@ -685,7 +686,6 @@ pertlays=[0]
 
 perts = [ 1.]
 
-# perts=[2.75e-4]
 
 pert_type=0 # 0: relative, 1: absolute
 
@@ -725,12 +725,13 @@ cldlats = [0]
 
 cf_tots = [ 0.0 ]
 cf_tot = 0.66
-tau_tots = [3.]
+tau_tots = [3.0]
 pclddums = [700.]
 
 ssa_tot = 0.5
 
 albedo_manual_init = 0.07
+surf_rh_init = 0.8
 
 # for inhomogeneity expts
 # col_ratios = np.array([0.25, 0.5, 1., 2., 4.])
@@ -738,16 +739,38 @@ albedo_manual_init = 0.07
 col_ratios = [1]
 
 # for nonlinearity expts
-nonlin_var = 4 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld
+nonlin_var = 0 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
 
-if( nonlin_var == 0 or nonlin_var == 1 or nonlin_var == 5 ):
-    var_facs = np.logspace( -3, 3, base=2, num=5)
-elif(nonlin_var == 3):
-    var_facs = np.logspace(0, 3, base=2, num=5)
-elif( nonlin_var == 2 ):
-    var_facs = np.logspace( -1, 1, base=2, num=5)
-elif( nonlin_var == 4 ):
-    var_facs = np.logspace( -0.5, 0.5, base=2, num=5)
+# if( nonlin_var == 0 or nonlin_var == 1 or nonlin_var == 5 ):
+#     var_facs = np.logspace( -3, 3, base=2, num=5)
+# elif(nonlin_var == 3):
+#     var_facs = np.logspace(0, 3, base=2, num=5)
+# elif( nonlin_var == 2 ):
+#     var_facs = np.logspace( -1, 1, base=2, num=5)
+# elif( nonlin_var == 4 ):
+#     var_facs = np.logspace( -0.5, 0.5, base=2, num=5)
+# elif(nonlin_var==6):
+#     var_facs = np.logspace( -3, 3, base=2, num=5 )
+    
+if( nonlin_var == 0 ):
+    # var_facs = np.linspace( 1./12., 20./12., num=10 )
+    var_facs = np.linspace( 1./12., 0.4, num=10 )
+if( nonlin_var == 1 ):
+    var_facs = np.linspace( 2**-0.5, 2**0.5, num=5 )
+if( nonlin_var == 2 ):
+    var_facs = np.linspace( 1., 10., num=5 )
+if( nonlin_var == 3 ):
+    var_facs = np.linspace( 0.01, 0.99, num=5 )
+if( nonlin_var == 4 ):
+    var_facs = np.linspace( 800., 180., num=5 )
+if( nonlin_var == 5 ):
+    var_facs = np.linspace( 1.3, 60., num=5 )
+if( nonlin_var == 6 ):
+    var_facs = np.linspace( 0.2, 0.99, num=5 )
+    master_input = 8
+    
+elif(nonlin_var == -1):
+    var_facs = [1.]
 
 #################################################################### end of variable initialisation ##################################################################################
 
@@ -784,9 +807,14 @@ for pert in perts:
                 #########################################################################################################################################################
                                                             
                                                             if(nonlin_var == 3):
-                                                                albedo_manual = albedo_manual_init * var_fac
+                                                                albedo_manual = var_fac
                                                             else:
                                                                 albedo_manual = albedo_manual_init
+                                                                
+                                                            if( nonlin_var == 6 ):
+                                                                surf_rh = var_fac
+                                                            else:
+                                                                surf_rh = surf_rh_init
 
 
                                                             lapse_master=np.ones((nzoncols,nlatcols))*5.7
@@ -831,7 +859,7 @@ for pert in perts:
     
                                                             # Declare variables
                                                             cti=0
-                                                            surf_rh=0.8
+                                                            # surf_rh=0.8
                                                             vol_mixh2o_min = 1e-6
                                                             vol_mixh2o_max = 1e6
                                                             esat_liq=np.zeros(nlayers)
@@ -851,7 +879,9 @@ for pert in perts:
                                                             # tbound_inits=f(latgrid)
                                                             tbound_inits = np.ones(nlatcols) * 300.
                                                             if(nlayers==60):
-                                                                undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1. #for nl=60
+                                                                undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1. #for nl=60  
+                                                            if(master_input==8):
+                                                                undrelax_lats *= 4.
                                                             elif(nlayers==100):
                                                                 undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl=100
                                                             elif(nlayers==590):
@@ -1008,7 +1038,7 @@ for pert in perts:
                                                             vol_mixh2o = np.ones(nlayers) * molec_h2o / totmolec
                                                             vol_mixo3 = np.ones(nlayers) * molec_o3 / totmolec
     
-                                                            surf_rh=0.8
+                                                            # surf_rh=0.8
                                                             vol_mixh2o_min = 1e-6
                                                             vol_mixh2o_max = 1e6
     
@@ -2070,7 +2100,7 @@ for pert in perts:
                                                                     wbrodl=np.array(df['dry'][:-1])
                                                                     wbrodl=wbrodl[::-1]
     
-                                                                if(master_input==0 or master_input==6 or master_input==7):
+                                                                if(master_input==0 or master_input==6 or master_input==7 or master_input==8):
                                                                     pz=np.linspace(psurf,pmin,nlayers+1)
                                                                     for i in range(len(pavel)):
                                                                         pavel[i]=(pz[i]+pz[i+1])/2.
@@ -2150,15 +2180,15 @@ for pert in perts:
                                                                     altavel[i]=(altz[i]+altz[i+1])/2.
                                                                     
                                                                 
-    
-                                                                for i in range(nlayers):
-                                                                    # h2o (manabe mw67)
-                                                                    esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
-                                                                    rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
-                                                                    vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
-                                                                    if(i>1 and vol_mixh2o[i] > vol_mixh2o[i-1]):
-                                                                        vol_mixh2o[i]=vol_mixh2o[i-1]
-                                                                    vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
+                                                                if(master_input==8):
+                                                                    for i in range(nlayers):
+                                                                        # h2o (manabe mw67)
+                                                                        esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
+                                                                        rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
+                                                                        vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
+                                                                        if(i>1 and vol_mixh2o[i] > vol_mixh2o[i-1]):
+                                                                            vol_mixh2o[i]=vol_mixh2o[i-1]
+                                                                        vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
     
                                                                 # Mean molecular weight of the atmosphere
                                                                 mmwtot = mmwco2 * vol_mixco2 + mmwn2 * vol_mixn2 + mmwo2 * vol_mixo2 + mmwar*vol_mixar + mmwch4*vol_mixch4 + mmwh2o*vol_mixh2o[0]+mmwo3*vol_mixo3[0]
@@ -2202,7 +2232,7 @@ for pert in perts:
                                                                         wkl[5,i]=0.# co
                                                                         wkl[6,i]=1650e-9 # ch4
                                                                         wkl[7,i]=0. # o2
-                                                                elif(master_input==7): # wkl RCEMIP mod RD
+                                                                elif(master_input==7 or master_input==8): # wkl RCEMIP mod RD
                                                                     g1=3.6478
                                                                     g2=0.83209
                                                                     g3=11.3515
@@ -2284,7 +2314,6 @@ for pert in perts:
                                                                 elif(ts==2 and nonlin_var==1):
                                                                     wkl_master[:,i_zon,2,:] *= var_fac
                                                                 elif(ts==2 and nonlin_var==2):
-                                                                    lapse_master[0,i_lat] *= var_fac                                                                    
     
                                                                 for i_lat in range(nlatcols):
                                                                    
@@ -2298,7 +2327,7 @@ for pert in perts:
                                                                     if(input_source==0):
                                                                         
                                                                         wbrodl = mperlayr_air * 1.0e-4
-                                                                        if(master_input != 7):
+                                                                        if(not (master_input == 7 or master_input==8 or master_input==3)):
                                                                             wkl[1,:]=q[:,i_lat]
                                                                             wkl[3,:]=o3[:,i_lat]
                                                                         wkl[2,:]=400e-6*wklfac_co2
@@ -2548,10 +2577,9 @@ for pert in perts:
                                                                         #     # ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/ncloudcols
                                                                         
                                                                         if(nonlin_var == 4 and ts == 2):
-                                                                            pclddum = pclddums[0] * var_fac
-                                                                            print('pclddum', pclddum)
+                                                                            pclddum = var_fac
                                                                         elif(nonlin_var==5 and ts==2):
-                                                                            tau_tot = tau_tots[0] * var_fac
+                                                                            tau_tot = var_fac
                                                                         
                                                                         
                                                                         # cldlay_dum=np.argmin(abs(altz/1000.-zclddum))
@@ -2630,19 +2658,19 @@ for pert in perts:
                                                                                 conv=np.zeros(nlayers+1) #reset to zero
                                                                                 conv[0]=1 # set conv of lowest layer to on, otherwise it sometimes gets misidentified 
     
-                                                                                if(master_input==0 or master_input==3):
-                                                                                    surf_rh=0.8
+                                                                                if(master_input==0 or master_input==3 or master_input==8):
+                                                                                    # surf_rh=0.8
                                                                                     for i in range(nlayers):
                                                                                         esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
                                                                                         rel_hum[i] = surf_rh*(pz[i]/1000.0 - 0.02)/(1.0-0.02)
-                                                                                        rel_hum=np.clip(rel_hum,0.0,0.8)
+                                                                                        rel_hum=np.clip(rel_hum,0.0,0.99)
                                                                                         vol_mixh2o[i] = 0.622*rel_hum[i]*esat_liq[i]/(pavel[i]-rel_hum[i]*esat_liq[i])
                                                                                         if(i>1 and vol_mixh2o[i] > vol_mixh2o[i-1]):
                                                                                             vol_mixh2o[i]=vol_mixh2o[i-1]
                                                                                         vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
-                                                                                        if(master_input==0):
+                                                                                        if(master_input==0 ):
                                                                                             wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
-                                                                                        elif(master_input==3):
+                                                                                        elif(master_input==3 or master_input==8):
                                                                                             if(i_zon==0):
                                                                                                 wkl[1,i] = vol_mixh2o[i]
                                                                                             elif(i_zon==1):

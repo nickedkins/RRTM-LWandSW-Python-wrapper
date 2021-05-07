@@ -14,34 +14,13 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig
+plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/h2o/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/h2o/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/o3/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/o3/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/lapse/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/lapse/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/pcld/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/pcld/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v2 redo/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v2 redo/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v3 ssa=0.5/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v3 ssa=0.5/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v4 high res/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v4 high res/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/2xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/h2o/v2/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/o3/v2/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/lapse/v2/1xco2/',
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/v2/1xco2/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/pcld/v2/1xco2/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/h2o/v10 range from obs/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/h2o/v11 zoomed from v10/',
 ]
 
 # c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
@@ -255,7 +234,7 @@ def plotrrtmoutput_masters():
             plt.axvline(eqb_maxdfnet,linestyle='--')
             plt.ylim(1000,10)
             # plt.ylim(1000,600)
-            plt.xlim(-5,5)
+            # plt.xlim(-5,5)
             plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
             plt.ylabel('Pressure (hPa)')
             plt.grid(True,which='both')
@@ -273,6 +252,8 @@ def plotrrtmoutput_masters():
             # plt.grid(True,which='both')
             # plt.ylim(1000,10)
             # plt.xlim(-10,10)
+
+            show()
 
 
 def readrrtmoutput(fn):
@@ -1036,32 +1017,48 @@ for directory in directories:
 
 ########################################################################## end read files #################################################################################################################
 
-nonlin_var = 4 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld
+nonlin_var = 0 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
+    
+if( nonlin_var == 0 ):
+    # var_facs = np.linspace( 1./12., 20./12., num=10 )
+    var_facs = np.linspace( 1./12., 0.4, num=10 )
+if( nonlin_var == 1 ):
+    var_facs = np.linspace( 2**-0.5, 2**0.5, num=5 )
+if( nonlin_var == 2 ):
+    var_facs = np.linspace( 1., 10., num=5 )
+if( nonlin_var == 3 ):
+    var_facs = np.linspace( 0.01, 0.99, num=5 )
+if( nonlin_var == 4 ):
+    var_facs = np.linspace( 800., 180., num=5 )
+if( nonlin_var == 5 ):
+    var_facs = np.linspace( 1.3, 60., num=5 )
+if( nonlin_var == 6 ):
+    var_facs = np.linspace( 0.2, 0.99, num=5 )
+    master_input = 8
+    
+elif(nonlin_var == -1):
+    var_facs = [1.]
 
+# ecs = tbound_all_dirfil[0,:,1,0] - tbound_all_dirfil[0,:,0,0]
+hp = np.int(len(a)/2)
+ecs = tbound_all_dirfil[0,hp:,0,0] - tbound_all_dirfil[0,0:hp,0,0]
 
-if( nonlin_var == 0 or nonlin_var == 1 or nonlin_var == 5 ):
-    var_facs = np.logspace( -3, 3, base=2, num=5)
-elif(nonlin_var == 3):
-    var_facs = np.logspace(0, 3, base=2, num=5)
-elif( nonlin_var == 2 ):
-    var_facs = np.logspace( -1, 1, base=2, num=5)
-elif( nonlin_var == 4 ):
-    var_facs = np.logspace( -0.5, 0.5, base=2, num=5)
-
-
-
-# print('ECS:  K {}'.format(tbound_all_dirfil[0,:,1,0] - tbound_all_dirfil[0,:,0,0]) )
+print('ECS:  K {}'.format(ecs) )
 # print(tbound_all_dirfil)
 
-Ts = tbound_all_dirfil[0,:,0,0]
+Ts = tbound_all_dirfil[0,0:hp,0,0]
 dTs = Ts - Ts[2]
+
+fnetlws = fnet_lw_dirfil[-1,0,:,0,0]
+dfnetlws = fnetlws - fnetlws[2]
+fnetsws = fnet_sw_dirfil[-1,0,:,0,0]
+dfnetsws = fnetsws - fnetsws[2]
+
 col_ratios = np.logspace( -3, 3, base=2, num=9)
 
 plt.figure(1)
 plt.plot(var_facs, dTs, '-o')
 plt.plot(var_facs[0::len(Ts)-1], dTs[0::len(Ts)-1], '--')
-# plt.plot(albedo_manuals, dTs, '-o')
-# plt.plot(albedo_manuals[0::4], dTs[0::4], '--')
 plt.axhline(0,linestyle='--')
 if(nonlin_var == 0):
     plt.xlabel(r'Factor multiplying H$_2$O')
@@ -1075,8 +1072,47 @@ elif(nonlin_var == 4):
     plt.xlabel(r'Factor multiplying cloud top pressure')
 elif(nonlin_var == 5):
     plt.xlabel(r'Factor multiplying cloud optical thickness')
-# plt.xlabel(r'Surface albedo')
+elif(nonlin_var == 6):
+    plt.xlabel(r'Factor multiplying surface RH')
 plt.ylabel('Change in surface temperature (K)')
+
+plt.figure(2)
+plt.plot(var_facs, ecs, '-o')
+if(nonlin_var == 0):
+    plt.xlabel(r'Factor multiplying H$_2$O')
+elif(nonlin_var == 1):
+    plt.xlabel(r'Factor multiplying O$_3$')
+elif(nonlin_var == 2):
+    plt.xlabel(r'Factor multiplying $\Gamma$')
+elif(nonlin_var == 3):
+    plt.xlabel(r'Factor multiplying surface albedo')
+elif(nonlin_var == 4):
+    plt.xlabel(r'Factor multiplying cloud top pressure')
+elif(nonlin_var == 5):
+    plt.xlabel(r'Factor multiplying cloud optical thickness')
+elif(nonlin_var == 6):
+    plt.xlabel(r'Factor multiplying surface RH')
+# plt.xlabel(r'Surface albedo')
+plt.ylabel('ECS (K)')
+
+# plt.figure(1)
+# plt.plot(var_facs, dfnetlws, '-o', label = 'TOA LW')
+# plt.plot(var_facs, dfnetsws, '-o', label = 'TOA SW')
+# # plt.plot(var_facs, dfnetsws-dfnetlws, '-o', label = 'SW - LW')
+# if(nonlin_var == 0):
+#     plt.xlabel(r'Factor multiplying H$_2$O')
+# elif(nonlin_var == 1):
+#     plt.xlabel(r'Factor multiplying O$_3$')
+# elif(nonlin_var == 2):
+#     plt.xlabel(r'Factor multiplying $\Gamma$')
+# elif(nonlin_var == 3):
+#     plt.xlabel(r'Factor multiplying surface albedo')
+# elif(nonlin_var == 4):
+#     plt.xlabel(r'Factor multiplying cloud top pressure')
+# elif(nonlin_var == 5):
+#     plt.xlabel(r'Factor multiplying cloud optical thickness')
+# plt.ylabel('Change in TOA net flux (Wm$^{-2}$)')
+# plt.legend()
 
 # plt.figure(1)
 # plt.plot(pclddums, dTs, '-o')
