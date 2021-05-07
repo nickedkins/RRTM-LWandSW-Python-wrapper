@@ -2314,6 +2314,7 @@ for pert in perts:
                                                                 elif(ts==2 and nonlin_var==1):
                                                                     wkl_master[:,i_zon,2,:] *= var_fac
                                                                 elif(ts==2 and nonlin_var==2):
+                                                                    lapse_master[0,i_lat] = var_fac                                                                    
     
                                                                 for i_lat in range(nlatcols):
                                                                    
