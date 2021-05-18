@@ -228,7 +228,7 @@ def convection(T,z,conv_log):
     for i in range(1,len(T)):
         dT = (T[i]-T[i-1])
         dz = (z[i]-z[i-1])/1000.
-        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 7.0) and z[i]/1000. < 1000. ):
+        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 9.) and z[i]/1000. < 1000. ):
             if(conv_log==1):
                 conv[i]=1.
             T[i] = T[i-1] - lapse * dz
@@ -646,7 +646,7 @@ eqb_maxdfnet=0.02*(60./nlayers) # equilibrium defined as when absolute value of 
 eqb_col_budgs=0.01*(60./nlayers) # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
-timesteps=100 # number of timesteps until model exits
+timesteps=1000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
@@ -684,7 +684,7 @@ pertlats=[0]
 pertmols=[2] #don't do zero!
 pertlays=[0]
 
-perts = [ 1.]
+perts = [ 1., 2.]
 
 
 pert_type=0 # 0: relative, 1: absolute
@@ -725,8 +725,8 @@ cldlats = [0]
 
 cf_tots = [ 0.0 ]
 cf_tot = 0.66
-tau_tots = [3.0]
-pclddums = [700.]
+tau_tots = [30.65]
+pclddums = [490.]
 
 ssa_tot = 0.5
 
@@ -739,7 +739,7 @@ surf_rh_init = 0.8
 col_ratios = [1]
 
 # for nonlinearity expts
-nonlin_var = 0 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
+nonlin_var = 3 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
 
 # if( nonlin_var == 0 or nonlin_var == 1 or nonlin_var == 5 ):
 #     var_facs = np.logspace( -3, 3, base=2, num=5)
@@ -753,20 +753,23 @@ nonlin_var = 0 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcl
 #     var_facs = np.logspace( -3, 3, base=2, num=5 )
     
 if( nonlin_var == 0 ):
-    # var_facs = np.linspace( 1./12., 20./12., num=10 )
-    var_facs = np.linspace( 1./12., 0.4, num=10 )
+    # var_facs = np.linspace( 1./12., 20./12., num=5 )
+    # var_facs = np.linspace( 1./12., 0.4, num=10 )
+    var_facs = np.logspace(-4, 1, base=2, num=10)
+    # var_facs = np.linspace(0.1, 0.6, num=10)
+    # var_facs = [1.]
 if( nonlin_var == 1 ):
-    var_facs = np.linspace( 2**-0.5, 2**0.5, num=5 )
+    var_facs = np.linspace( 2**-0.5, 2**0.5, num=10 )
 if( nonlin_var == 2 ):
-    var_facs = np.linspace( 1., 10., num=5 )
+    var_facs = np.linspace( 1., 10., num=10 )
 if( nonlin_var == 3 ):
-    var_facs = np.linspace( 0.01, 0.99, num=5 )
+    var_facs = np.linspace( 0.15, 0.8, num=10 )
 if( nonlin_var == 4 ):
-    var_facs = np.linspace( 800., 180., num=5 )
+    var_facs = np.linspace( 180., 800., num=10 )
 if( nonlin_var == 5 ):
-    var_facs = np.linspace( 1.3, 60., num=5 )
+    var_facs = np.linspace( 1.3, 60., num=10 )
 if( nonlin_var == 6 ):
-    var_facs = np.linspace( 0.2, 0.99, num=5 )
+    var_facs = np.linspace( 0.2, 0.9, num=10 )
     master_input = 8
     
 elif(nonlin_var == -1):
@@ -844,8 +847,8 @@ for pert in perts:
                                                                 insollats[i_lat] = np.sum(insol[i_lat,:,:]) / np.size(insol[i_lat,:,:])
                                                                 zenlats[i_lat] = np.sum(zen[i_lat,:,:]) / np.size(zen[i_lat,:,:])
                                                             # calculate annual average solar zenith angle for a given latitude required to give the calculated annual average insolation at that latitude
-                                                            # szas = np.rad2deg(np.arccos(insollats/solar_constant))
-                                                            szas = np.ones(nlatcols) * 75.
+                                                            szas = np.rad2deg(np.arccos(insollats/solar_constant))
+                                                            # szas = np.ones(nlatcols) * 75.
                                                             
                                                             if(master_input==1):
                                                                 nlayers=51
@@ -959,10 +962,11 @@ for pert in perts:
                                                             solvar=np.ones(29)
                                                             if(master_input==3):
                                                                 isolvar=2
-                                                                solvar=np.ones(29)*409.6/1015.98791896 # different interpretation of 'insolation'
-                                                            if(master_input==3):
-                                                                isolvar=2
-                                                                solvar=np.ones(29)*238.0 # different interpretation of 'insolation'
+                                                                # solvar=np.ones(29)*409.6/1015.98791896 # different interpretation of 'insolation'
+                                                                solvar=np.ones(29) # different interpretation of 'insolation'
+                                                            # if(master_input==3):
+                                                            #     isolvar=2
+                                                            #     solvar=np.ones(29)*238.0 # different interpretation of 'insolation'
                                                             lapse=5.8
                                                             if(master_input==3): # RCEMIP
                                                                 lapse=6.7
@@ -2223,9 +2227,9 @@ for pert in perts:
                                                                         wbrodl[i] = mperlayr_air[i] * 1.0e-4
                                                                         # if(altz[i]/1000.<15.):
                                                                         if(q[i]>qt):
-                                                                            wkl[1,i]=q[i]*1e-3
+                                                                            wkl[1,i]=q[i] * var_fac
                                                                         else:
-                                                                            wkl[1,i]=qt*1e-3
+                                                                            wkl[1,i]=qt * var_fac
                                                                         wkl[2,i]=348e-6*4. # co2
                                                                         wkl[3,i]=g1*pz[i]**(g2)*np.exp(-1.0*(pz[i]/g3))*1e-6 # o3
                                                                         wkl[4,i]=306e-9 # n2o
@@ -2579,7 +2583,7 @@ for pert in perts:
                                                                         
                                                                         if(nonlin_var == 4 and ts == 2):
                                                                             pclddum = var_fac
-                                                                        elif(nonlin_var==5 and ts==2):
+                                                                        if(nonlin_var==5 and ts==2):
                                                                             tau_tot = var_fac
                                                                         
                                                                         
@@ -2659,7 +2663,7 @@ for pert in perts:
                                                                                 conv=np.zeros(nlayers+1) #reset to zero
                                                                                 conv[0]=1 # set conv of lowest layer to on, otherwise it sometimes gets misidentified 
     
-                                                                                if(master_input==0 or master_input==3 or master_input==8):
+                                                                                if(master_input==0 or master_input==8):
                                                                                     # surf_rh=0.8
                                                                                     for i in range(nlayers):
                                                                                         esat_liq[i] = 6.1094*exp(17.625*(tz[i]-273.15)/(tz[i]-273.15+243.04))
@@ -2671,7 +2675,7 @@ for pert in perts:
                                                                                         vol_mixh2o=np.clip(vol_mixh2o,vol_mixh2o_min,vol_mixh2o_max)
                                                                                         if(master_input==0 ):
                                                                                             wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
-                                                                                        elif(master_input==3 or master_input==8):
+                                                                                        elif(master_input==8):
                                                                                             if(i_zon==0):
                                                                                                 wkl[1,i] = vol_mixh2o[i]
                                                                                             elif(i_zon==1):
