@@ -14,15 +14,15 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=-1 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig
+plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig | 6: nonlin dT and ECS
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/q/v13 std/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/o3/v4 std/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/lapse/v4 std/'
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/v5 std/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/v5 std/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/pcld/v3 std/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v7 std/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/rh/v1 std/'
@@ -146,9 +146,9 @@ def plotrrtmoutput():
     # logpplot(wkl[3,:],pavel,'wkl3 (o3)','pavel')
 
 def plotrrtmoutput_masters():
-    plt.figure(1)
-    # for i_lat in range(0,nlatcols):
-    for i_lat in [0]:
+    # plt.figure(1)
+    for i_lat in range(0,nlatcols):
+    # for i_lat in [0]:
         # for i_zon in range(nzoncols):
         for i_zon in [0]:
             
@@ -178,11 +178,11 @@ def plotrrtmoutput_masters():
             # plt.legend()
 
             plt.subplot(122)
-            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
-            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),altavel_master[:,i_zon,i_lat],'-')
+            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
+            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),altavel_master[:,i_zon,i_lat],'-')
             plt.axvline(-eqb_maxdfnet,linestyle='--')
             plt.axvline(eqb_maxdfnet,linestyle='--')
-            # plt.ylim(1000,10)
+            plt.ylim(1000,10)
             # plt.ylim(1000,600)
             # plt.xlim(-5,5)
             plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
@@ -261,7 +261,6 @@ def plotrrtmoutput_masters():
             # plt.ylim(1000,10)
             # plt.xlim(-10,10)
 
-show()
 
 
 def readrrtmoutput(fn):
@@ -1028,87 +1027,89 @@ for directory in directories:
 # print(shape(wkl_all_dirfil))
 # print(wkl_all_dirfil[0,30,0,:,0,0])
 
-print(tbound_all_dirfil)
+if(plot_switch==6):
 
-nonlin_var = 3 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
-    
-if( nonlin_var == 0 ):
-    # var_facs = np.linspace( 1./12., 20./12., num=5 )
-    # var_facs = np.linspace( 1./12., 0.4, num=5 )
-    # var_facs = np.linspace(0.1, 0.6, num=10)
-    var_facs = np.logspace(-4, 1, base=2, num=10)
-if( nonlin_var == 1 ):
-    var_facs = np.linspace( 2**-0.5, 2**0.5, num=10 )
-if( nonlin_var == 2 ):
-    var_facs = np.linspace( 1., 10., num=10 )
-if( nonlin_var == 3 ):
-    var_facs = np.linspace( 0.15, 0.8, num=10 )
-if( nonlin_var == 4 ):
-    var_facs = np.linspace( 180., 800., num=10 )
-if( nonlin_var == 5 ):
-    var_facs = np.linspace( 1.3, 60., num=10 )
-if( nonlin_var == 6 ):
-    var_facs = np.linspace( 0.2, 0.9, num=10 ) * 100.
-    master_input = 8
-    
-elif(nonlin_var == -1):
-    var_facs = [1.]
+    print(tbound_all_dirfil)
 
-# ecs = tbound_all_dirfil[0,:,1,0] - tbound_all_dirfil[0,:,0,0]
-hp = np.int(len(a)/2) # halfpoint
-ecs = tbound_all_dirfil[0,hp:,0,0] - tbound_all_dirfil[0,0:hp,0,0]
+    nonlin_var = 3 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
+        
+    if( nonlin_var == 0 ):
+        # var_facs = np.linspace( 1./12., 20./12., num=5 )
+        # var_facs = np.linspace( 1./12., 0.4, num=5 )
+        # var_facs = np.linspace(0.1, 0.6, num=10)
+        var_facs = np.logspace(-4, 1, base=2, num=10)
+    if( nonlin_var == 1 ):
+        var_facs = np.linspace( 2**-0.5, 2**0.5, num=10 )
+    if( nonlin_var == 2 ):
+        var_facs = np.linspace( 1., 10., num=10 )
+    if( nonlin_var == 3 ):
+        var_facs = np.linspace( 0.15, 0.8, num=10 )
+    if( nonlin_var == 4 ):
+        var_facs = np.linspace( 180., 800., num=10 )
+    if( nonlin_var == 5 ):
+        var_facs = np.linspace( 1.3, 60., num=10 )
+    if( nonlin_var == 6 ):
+        var_facs = np.linspace( 0.2, 0.9, num=10 ) * 100.
+        master_input = 8
+        
+    elif(nonlin_var == -1):
+        var_facs = [1.]
 
-print('ECS:  K {}'.format(ecs) )
-# print(tbound_all_dirfil)
+    # ecs = tbound_all_dirfil[0,:,1,0] - tbound_all_dirfil[0,:,0,0]
+    hp = np.int(len(a)/2) # halfpoint
+    ecs = tbound_all_dirfil[0,hp:,0,0] - tbound_all_dirfil[0,0:hp,0,0]
 
-Ts = tbound_all_dirfil[0,0:hp,0,0]
-dTs = Ts - Ts[np.int(hp/2)]
+    print('ECS:  K {}'.format(ecs) )
+    # print(tbound_all_dirfil)
 
-fnetlws = fnet_lw_dirfil[-1,0,:,0,0]
-dfnetlws = fnetlws - fnetlws[2]
-fnetsws = fnet_sw_dirfil[-1,0,:,0,0]
-dfnetsws = fnetsws - fnetsws[2]
+    Ts = tbound_all_dirfil[0,0:hp,0,0]
+    dTs = Ts - Ts[np.int(hp/2)]
 
-col_ratios = np.logspace( -3, 3, base=2, num=9)
+    fnetlws = fnet_lw_dirfil[-1,0,:,0,0]
+    dfnetlws = fnetlws - fnetlws[2]
+    fnetsws = fnet_sw_dirfil[-1,0,:,0,0]
+    dfnetsws = fnetsws - fnetsws[2]
 
-plt.figure(1)
-plt.plot(var_facs, dTs, '-o')
-plt.plot(var_facs[0::len(Ts)-1], dTs[0::len(Ts)-1], '--')
-plt.axhline(0,linestyle='--')
-if(nonlin_var == 0):
-    plt.xlabel(r'Factor multiplying H$_2$O')
-elif(nonlin_var == 1):
-    plt.xlabel(r'Factor multiplying O$_3$')
-elif(nonlin_var == 2):
-    plt.xlabel(r'Lapse rate (K/km)')
-elif(nonlin_var == 3):
-    plt.xlabel(r'Surface albedo')
-elif(nonlin_var == 4):
-    plt.xlabel(r'Factor multiplying cloud top pressure')
-elif(nonlin_var == 5):
-    plt.xlabel(r'Cloud optical thickness')
-elif(nonlin_var == 6):
-    plt.xlabel(r'Surface RH (%)')
-plt.ylabel('Change in surface temperature (K)')
+    col_ratios = np.logspace( -3, 3, base=2, num=9)
 
-plt.figure(2)
-plt.plot(var_facs, ecs, '-o')
-if(nonlin_var == 0):
-    plt.xlabel(r'Factor multiplying H$_2$O')
-elif(nonlin_var == 1):
-    plt.xlabel(r'Factor multiplying O$_3$')
-elif(nonlin_var == 2):
-    plt.xlabel(r'Lapse rate (K/km)')
-elif(nonlin_var == 3):
-    plt.xlabel(r'Surface albedo')
-elif(nonlin_var == 4):
-    plt.xlabel(r'Factor multiplying cloud top pressure')
-elif(nonlin_var == 5):
-    plt.xlabel(r'Cloud optical thickness')
-elif(nonlin_var == 6):
-    plt.xlabel(r'Surface RH (%)')
-# plt.xlabel(r'Surface albedo')
-plt.ylabel('ECS (K)')
+    plt.figure(1)
+    plt.plot(var_facs, dTs, '-o')
+    plt.plot(var_facs[0::len(Ts)-1], dTs[0::len(Ts)-1], '--')
+    plt.axhline(0,linestyle='--')
+    if(nonlin_var == 0):
+        plt.xlabel(r'Factor multiplying H$_2$O')
+    elif(nonlin_var == 1):
+        plt.xlabel(r'Factor multiplying O$_3$')
+    elif(nonlin_var == 2):
+        plt.xlabel(r'Lapse rate (K/km)')
+    elif(nonlin_var == 3):
+        plt.xlabel(r'Surface albedo')
+    elif(nonlin_var == 4):
+        plt.xlabel(r'Factor multiplying cloud top pressure')
+    elif(nonlin_var == 5):
+        plt.xlabel(r'Cloud optical thickness')
+    elif(nonlin_var == 6):
+        plt.xlabel(r'Surface RH (%)')
+    plt.ylabel('Change in surface temperature (K)')
+
+    plt.figure(2)
+    plt.plot(var_facs, ecs, '-o')
+    if(nonlin_var == 0):
+        plt.xlabel(r'Factor multiplying H$_2$O')
+    elif(nonlin_var == 1):
+        plt.xlabel(r'Factor multiplying O$_3$')
+    elif(nonlin_var == 2):
+        plt.xlabel(r'Lapse rate (K/km)')
+    elif(nonlin_var == 3):
+        plt.xlabel(r'Surface albedo')
+    elif(nonlin_var == 4):
+        plt.xlabel(r'Factor multiplying cloud top pressure')
+    elif(nonlin_var == 5):
+        plt.xlabel(r'Cloud optical thickness')
+    elif(nonlin_var == 6):
+        plt.xlabel(r'Surface RH (%)')
+    # plt.xlabel(r'Surface albedo')
+    plt.ylabel('ECS (K)')
 
 # plt.figure(1)
 # plt.plot(var_facs, dfnetlws, '-o', label = 'TOA LW')

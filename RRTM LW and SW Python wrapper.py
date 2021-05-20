@@ -518,7 +518,6 @@ def read_erai():
     r=interpolate_createprrtminput_lev('r',r_latp_max,r_ps,r_lats)
     o3=interpolate_createprrtminput_lev('o3',o3_latp_max,o3_ps,o3_lats)*28.964/48.
     fal=interpolate_createprrtminput_sfc('fal',fal_lat_max,fal_lats)
-    print(q_latp_max[:,-1])
     return q, o3, fal,r
 
 # read an input distribution of a variable vs latitude and interpolate to model lat grid
@@ -568,10 +567,10 @@ def inhomogenise_2D(x, fac):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=1 # number of latitude columns
+nlatcols=9 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
+master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/RF dT_dF and dmtransp/new/dco2/baseline/2021_04_15 19_41_47'
 lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
@@ -580,6 +579,7 @@ dT_switch=1
 dtbound_switch=1 # 0: don't allow tbound to change | 1: do
 erai_h2o_switch=0  # 0: specific humidity | 1: relative humidity
 transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
+cloud_source=1 # 0: manual | 1: MISR
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
 plot_eqb_approach = 1
@@ -669,7 +669,7 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[0.] #meridional transport coefficient
+c_merids=[4.] #meridional transport coefficient
 
 
 tbounds=np.array([300.]) # initalise lower boundary temperature
@@ -682,19 +682,19 @@ extra_forcings = [0.]
 pertzons=[0]
 pertlats=[0]
 pertmols=[2] #don't do zero!
-pertlays=[0]
+pertlays=[30]
 
-perts = [ 1., 2.]
+perts = [ 1.0, 4.0]
 
 
-pert_type=0 # 0: relative, 1: absolute
+pert_type=2 # 0: relative, 1: absolute, 2: cloud fraction relative
 
 # pert_pwidth = 50.
 # pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
 # # pert_pbottoms = [1000. + pert_pwidth]
 
-pert_pbottoms = [2000.]
-pert_pwidth = 2000.
+pert_pbottoms = [400.]
+pert_pwidth = 100.
 
 pert_zon_h2o=1.0
 
@@ -739,7 +739,7 @@ surf_rh_init = 0.8
 col_ratios = [1]
 
 # for nonlinearity expts
-nonlin_var = 3 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
+nonlin_var = -1 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
 
 # if( nonlin_var == 0 or nonlin_var == 1 or nonlin_var == 5 ):
 #     var_facs = np.logspace( -3, 3, base=2, num=5)
@@ -764,6 +764,8 @@ if( nonlin_var == 2 ):
     var_facs = np.linspace( 1., 10., num=10 )
 if( nonlin_var == 3 ):
     var_facs = np.linspace( 0.15, 0.8, num=10 )
+
+
 if( nonlin_var == 4 ):
     var_facs = np.linspace( 180., 800., num=10 )
 if( nonlin_var == 5 ):
@@ -1097,7 +1099,7 @@ for pert in perts:
                                                             cld_lays_master=np.zeros((nzoncols,nlatcols,nclouds))
                                                             cld_fracs_master=np.zeros((nzoncols,nlatcols,nclouds))
                                                             tauclds_master=np.ones((nzoncols,nlatcols,nclouds))*1e-3
-                                                            ssaclds_master=np.ones((nzoncols,nlatcols,nclouds))*0.5/nlayers
+                                                            ssaclds_master=np.ones((nzoncols,nlatcols,nclouds))*0.5
                                                             # ssaclds_master[1,:,:]=np.ones((nlatcols,nclouds))*1e-3
     
                                                             tbound_master=np.zeros((nzoncols,nlatcols))
@@ -1281,7 +1283,7 @@ for pert in perts:
                                                                 cld_lays_master=np.zeros((nzoncols,nlatcols,nclouds))
                                                                 cld_fracs_master=np.zeros((nzoncols,nlatcols,nclouds))
                                                                 tauclds_master=np.ones((nzoncols,nlatcols,nclouds))*1e-3
-                                                                ssaclds_master=np.ones((nzoncols,nlatcols,nclouds))*0.5/nlayers
+                                                                ssaclds_master=np.ones((nzoncols,nlatcols,nclouds))*0.5
                                                                 # ssaclds_master[1,:,:]=np.ones((nlatcols,nclouds))*1e-3
     
                                                                 tbound_master=np.ones((nzoncols,nlatcols))
@@ -2300,6 +2302,10 @@ for pert in perts:
                                                             ztrop=np.ones(nlatcols)*12.5
                                                             lapse_add=np.zeros(nlatcols)
                                                             
+                                                            cld_fracs_master=np.zeros((nzoncols,nlatcols,nclouds))
+                                                            tauclds_master=np.zeros((nzoncols,nlatcols,nclouds))
+                                                            ssaclds_master=np.zeros((nzoncols,nlatcols,nclouds))
+                                                            
                                                             ts_rec=[]
                                                             maxdfnet_rec=[]
     
@@ -2380,9 +2386,7 @@ for pert in perts:
     
                                                                         # wkl[1,:] *= 8.123297816734589e+26 / 
                                                                     
-                                                                    cld_fracs_master=np.zeros((nzoncols,nlatcols,nclouds))
-                                                                    tauclds_master=np.zeros((nzoncols,nlatcols,nclouds))
-                                                                    ssaclds_master=np.zeros((nzoncols,nlatcols,nclouds))
+
     
                                                                     for i_zon in range(nzoncols):
                                                                         
@@ -2552,7 +2556,19 @@ for pert in perts:
     #                                                                   if(ts==1):
     
         
-                                                                        # cld_fracs_master[i_zon,:,:],altbins,tauclds_master[0,:,:]=read_misr_3()
+                                                                        if(cloud_source==1):
+                                                                            
+                                                                            ssa_tot = 0.5
+                                                                            cld_fracs_master[:,:,:],altbins,tauclds_master[:,:,:]=read_misr_3()
+                                                                            ssaclds_master[:,:,:]=ssa_tot
+                                                                            if(ts!=1):
+                                                                                if(pert_type==2):
+                                                                                    # if(i_lat==pertlat):
+                                                                                    for i_lay in range(nlayers):
+                                                                                        if(pz[i_lay] < pert_pbottom and pz[i_lay] > pert_pbottom - pert_pwidth ):
+                                                                                            cld_fracs_master[i_zon,i_lat,i_lay] *= pert
+                                                                                            # cld_fracs_master[i_zon,i_lat,i_lay] *= 0.
+                                                                            
                                                                         
                                                                         # manual cloud properties
                                                                         
@@ -2581,19 +2597,21 @@ for pert in perts:
                                                                         #     # tauclds_master[i_zon,0,cldlay_dum]=tau_tot/ncloudcols
                                                                         #     # ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/ncloudcols
                                                                         
-                                                                        if(nonlin_var == 4 and ts == 2):
-                                                                            pclddum = var_fac
-                                                                        if(nonlin_var==5 and ts==2):
-                                                                            tau_tot = var_fac
+                                                                        if(cloud_source==0):
                                                                         
-                                                                        
-                                                                        # cldlay_dum=np.argmin(abs(altz/1000.-zclddum))
-                                                                        cldlay_dum=np.argmin(abs(pz-pclddum))
+                                                                            if(nonlin_var == 4 and ts == 2):
+                                                                                pclddum = var_fac
+                                                                            if(nonlin_var==5 and ts==2):
+                                                                                tau_tot = var_fac
                                                                             
                                                                             
-                                                                        cld_fracs_master[0,cldlat,cldlay_dum]=cf_tot/ncloudcols
-                                                                        tauclds_master[0,cldlat,cldlay_dum]=tau_tot/ncloudcols
-                                                                        ssaclds_master[0,cldlat,cldlay_dum]=ssa_tot/ncloudcols
+                                                                            # cldlay_dum=np.argmin(abs(altz/1000.-zclddum))
+                                                                            cldlay_dum=np.argmin(abs(pz-pclddum))
+                                                                                
+                                                                                
+                                                                            cld_fracs_master[0,cldlat,cldlay_dum]=cf_tot/ncloudcols
+                                                                            tauclds_master[0,cldlat,cldlay_dum]=tau_tot/ncloudcols
+                                                                            ssaclds_master[0,cldlat,cldlay_dum]=ssa_tot/ncloudcols
     
                                                                         
                                                                         # cld_lay_v2=0
