@@ -9,28 +9,31 @@ from scipy import interpolate
 # from pandas import ExcelWriter
 # from pandas import ExcelFile
 import datetime
-
+    
 datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=3 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum
+plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig | 6: nonlin dT and ECS
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/absolute/',
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/h2o perts/equal total perts/relative/',
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/q/v13 std/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/o3/v4 std/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/lapse/v4 std/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/v5 std/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/pcld/v3 std/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v7 std/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/rh/v1 std/'
 ]
 
-
-
-c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
+# c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficient
 
 nlayers=60
-nlatcols=1
-nzoncols=2
+nlatcols=2
+nzoncols=1
 
 def colors(n):
   ret = []
@@ -49,7 +52,7 @@ def colors(n):
   return ret
 
 def init_plotting():
-    plt.rcParams['figure.figsize'] = (10,10)
+    plt.rcParams['figure.figsize'] = (8,8)
     plt.rcParams['font.size'] = 20
     plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
@@ -143,11 +146,11 @@ def plotrrtmoutput():
     # logpplot(wkl[3,:],pavel,'wkl3 (o3)','pavel')
 
 def plotrrtmoutput_masters():
-    plt.figure(1)
+    # plt.figure(1)
     for i_lat in range(0,nlatcols):
     # for i_lat in [0]:
-        for i_zon in range(nzoncols):
-        # for i_zon in [0]:
+        # for i_zon in range(nzoncols):
+        for i_zon in [0]:
             
             plt.figure(1)
             plt.subplot(121)
@@ -163,12 +166,26 @@ def plotrrtmoutput_masters():
             elif(cti_type==3):
                 cti=np.int(cti_wmo[i_zon,i_lat])
             plt.plot(tz_master[cti,i_zon,i_lat], pz_master[ cti, i_zon, i_lat ],'o' )
+            # plt.plot(tavel_master[cti,i_zon,i_lat], pavel_master[ cti, i_zon, i_lat ],'o' )
             # plt.plot(tz_master[np.int(cti_td[i_zon,i_lat]),i_zon,i_lat], pz_master[np.int(cti_td[i_zon,i_lat]),i_zon,i_lat], '*' )
             # plt.plot(tz_master[cti,i_zon,i_lat], altz_master[ cti, i_zon, i_lat ],'o' )
             # plt.ylim(4000,12000)
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             plt.ylim(1000,10)
             plt.xlabel('T (K)')
+            plt.ylabel('Pressure (hPa)')
+            plt.grid(True,which='both')
+            # plt.legend()
+
+            plt.subplot(122)
+            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
+            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),altavel_master[:,i_zon,i_lat],'-')
+            plt.axvline(-eqb_maxdfnet,linestyle='--')
+            plt.axvline(eqb_maxdfnet,linestyle='--')
+            plt.ylim(1000,10)
+            # plt.ylim(1000,600)
+            # plt.xlim(-5,5)
+            plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
             plt.ylabel('Pressure (hPa)')
             plt.grid(True,which='both')
             # plt.legend()
@@ -209,37 +226,27 @@ def plotrrtmoutput_masters():
             # plt.xlabel('fnet sw')
             # plt.legend()
             
-            # plt.subplot(335)
+            # plt.subplot(337)
             # plt.figure(1)
             # plt.loglog(wkl_master[:,i_zon,0,i_lat],pavel_master[:,i_zon,i_lat],label=fn)
             # plt.ylim(np.max(pz_master[:,i_zon,i_lat]),np.min(pz_master[:,i_zon,i_lat]))
             # plt.xlabel('wkl1')
             
-            # plt.subplot(336)
+            # plt.subplot(338)
             # plt.semilogy(wkl_master[:,i_zon,1,i_lat],pavel_master[:,i_zon,i_lat],label=str(i_file))
             # # plt.legend()
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wkl2')
-            # plt.subplot(337)
+            # plt.subplot(339)
             # plt.semilogy(wkl_master[:,i_zon,2,i_lat],pavel_master[:,i_zon,i_lat])
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wkl3')
-            # plt.subplot(338)
+            # plt.subplot(339)
             # plt.semilogy(wbrodl_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-o')
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
             # plt.xlabel('wbrodl')
 
-            # plt.subplot(122)
-            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
-            # plt.axvline(-eqb_maxdfnet,linestyle='--')
-            # plt.axvline(eqb_maxdfnet,linestyle='--')
-            # plt.ylim(1000,10)
-            # # plt.ylim(1000,600)
-            # plt.xlim(-5,5)
-            # plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
-            # plt.ylabel('Pressure (hPa)')
-            # plt.grid(True,which='both')
-            # # plt.legend()
+
             
             # plt.subplot(133)
             # lapsedum=np.zeros(nlayers)
@@ -253,6 +260,7 @@ def plotrrtmoutput_masters():
             # plt.grid(True,which='both')
             # plt.ylim(1000,10)
             # plt.xlim(-10,10)
+
 
 
 def readrrtmoutput(fn):
@@ -462,7 +470,7 @@ cti_td_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 cti_cp_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 cti_wmo_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
 lapse_td_all_dirfil=np.zeros((nzoncols_dirfil,nfiles,ndirs,nlatcols))
-wkl_all_dirfil=np.zeros((8,nlayers_dirfil+1,nzoncols_dirfil,nfiles,ndirs,nlatcols))
+wkl_all_dirfil=np.zeros((8,nlayers_dirfil,nzoncols_dirfil,nfiles,ndirs,nlatcols))
 
 pertzons=[0]
 pertlats=[0,1,2,3,4]
@@ -912,15 +920,15 @@ for directory in directories:
             plt.legend()
            
             
-        if(nlatcols>1):
-            ztrop=np.diagonal(altz_master[cti,0,:]/1000.)
-            ptrop=np.diagonal(pz_master[cti,0,:])
-            ttrop=np.diagonal(tz_master[cti,0,:])
-        else:
-            ztrop=altz_master[cti,0,0]/1000.
-            ptrop=pz_master[cti,0,0]
-            ttrop=tz_master[cti,0,0]
-        tsurf=tz_master[0,0,0]
+        # if(nlatcols>1):
+        #     ztrop=np.diagonal(altz_master[cti,0,:]/1000.)
+        #     ptrop=np.diagonal(pz_master[cti,0,:])
+        #     ttrop=np.diagonal(tz_master[cti,0,:])
+        # else:
+        #     ztrop=altz_master[cti,0,0]/1000.
+        #     ptrop=pz_master[cti,0,0]
+        #     ttrop=tz_master[cti,0,0]
+        # tsurf=tz_master[0,0,0]
         
         
         
@@ -969,6 +977,9 @@ for directory in directories:
         cti_td_all_dirfil[:,i_file,i_dir,:]=cti_td
         cti_cp_all_dirfil[:,i_file,i_dir,:]=cti_cp
         cti_wmo_all_dirfil[:,i_file,i_dir,:]=cti_wmo
+        for imol in range(nmol):
+            wkl_all_dirfil[imol, :, :,i_file, i_dir, : ] = wkl_master[:, :, imol, :]
+        
 
 
         # lapse_td_all_dirfil[:,i_file,i_dir,:]=cti_td
@@ -1013,7 +1024,324 @@ for directory in directories:
 
 ########################################################################## end read files #################################################################################################################
 
+# print(shape(wkl_all_dirfil))
+# print(wkl_all_dirfil[0,30,0,:,0,0])
 
+if(plot_switch==6):
+
+    print(tbound_all_dirfil)
+
+    nonlin_var = 3 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
+        
+    if( nonlin_var == 0 ):
+        # var_facs = np.linspace( 1./12., 20./12., num=5 )
+        # var_facs = np.linspace( 1./12., 0.4, num=5 )
+        # var_facs = np.linspace(0.1, 0.6, num=10)
+        var_facs = np.logspace(-4, 1, base=2, num=10)
+    if( nonlin_var == 1 ):
+        var_facs = np.linspace( 2**-0.5, 2**0.5, num=10 )
+    if( nonlin_var == 2 ):
+        var_facs = np.linspace( 1., 10., num=10 )
+    if( nonlin_var == 3 ):
+        var_facs = np.linspace( 0.15, 0.8, num=10 )
+    if( nonlin_var == 4 ):
+        var_facs = np.linspace( 180., 800., num=10 )
+    if( nonlin_var == 5 ):
+        var_facs = np.linspace( 1.3, 60., num=10 )
+    if( nonlin_var == 6 ):
+        var_facs = np.linspace( 0.2, 0.9, num=10 ) * 100.
+        master_input = 8
+        
+    elif(nonlin_var == -1):
+        var_facs = [1.]
+
+    # ecs = tbound_all_dirfil[0,:,1,0] - tbound_all_dirfil[0,:,0,0]
+    hp = np.int(len(a)/2) # halfpoint
+    ecs = tbound_all_dirfil[0,hp:,0,0] - tbound_all_dirfil[0,0:hp,0,0]
+
+    print('ECS:  K {}'.format(ecs) )
+    # print(tbound_all_dirfil)
+
+    Ts = tbound_all_dirfil[0,0:hp,0,0]
+    dTs = Ts - Ts[np.int(hp/2)]
+
+    fnetlws = fnet_lw_dirfil[-1,0,:,0,0]
+    dfnetlws = fnetlws - fnetlws[2]
+    fnetsws = fnet_sw_dirfil[-1,0,:,0,0]
+    dfnetsws = fnetsws - fnetsws[2]
+
+    col_ratios = np.logspace( -3, 3, base=2, num=9)
+
+    plt.figure(1)
+    plt.plot(var_facs, dTs, '-o')
+    plt.plot(var_facs[0::len(Ts)-1], dTs[0::len(Ts)-1], '--')
+    plt.axhline(0,linestyle='--')
+    if(nonlin_var == 0):
+        plt.xlabel(r'Factor multiplying H$_2$O')
+    elif(nonlin_var == 1):
+        plt.xlabel(r'Factor multiplying O$_3$')
+    elif(nonlin_var == 2):
+        plt.xlabel(r'Lapse rate (K/km)')
+    elif(nonlin_var == 3):
+        plt.xlabel(r'Surface albedo')
+    elif(nonlin_var == 4):
+        plt.xlabel(r'Factor multiplying cloud top pressure')
+    elif(nonlin_var == 5):
+        plt.xlabel(r'Cloud optical thickness')
+    elif(nonlin_var == 6):
+        plt.xlabel(r'Surface RH (%)')
+    plt.ylabel('Change in surface temperature (K)')
+
+    plt.figure(2)
+    plt.plot(var_facs, ecs, '-o')
+    if(nonlin_var == 0):
+        plt.xlabel(r'Factor multiplying H$_2$O')
+    elif(nonlin_var == 1):
+        plt.xlabel(r'Factor multiplying O$_3$')
+    elif(nonlin_var == 2):
+        plt.xlabel(r'Lapse rate (K/km)')
+    elif(nonlin_var == 3):
+        plt.xlabel(r'Surface albedo')
+    elif(nonlin_var == 4):
+        plt.xlabel(r'Factor multiplying cloud top pressure')
+    elif(nonlin_var == 5):
+        plt.xlabel(r'Cloud optical thickness')
+    elif(nonlin_var == 6):
+        plt.xlabel(r'Surface RH (%)')
+    # plt.xlabel(r'Surface albedo')
+    plt.ylabel('ECS (K)')
+
+# plt.figure(1)
+# plt.plot(var_facs, dfnetlws, '-o', label = 'TOA LW')
+# plt.plot(var_facs, dfnetsws, '-o', label = 'TOA SW')
+# # plt.plot(var_facs, dfnetsws-dfnetlws, '-o', label = 'SW - LW')
+# if(nonlin_var == 0):
+#     plt.xlabel(r'Factor multiplying H$_2$O')
+# elif(nonlin_var == 1):
+#     plt.xlabel(r'Factor multiplying O$_3$')
+# elif(nonlin_var == 2):
+#     plt.xlabel(r'Factor multiplying $\Gamma$')
+# elif(nonlin_var == 3):
+#     plt.xlabel(r'Factor multiplying surface albedo')
+# elif(nonlin_var == 4):
+#     plt.xlabel(r'Factor multiplying cloud top pressure')
+# elif(nonlin_var == 5):
+#     plt.xlabel(r'Factor multiplying cloud optical thickness')
+# plt.ylabel('Change in TOA net flux (Wm$^{-2}$)')
+# plt.legend()
+
+# plt.figure(1)
+# plt.plot(pclddums, dTs, '-o')
+# plt.plot(pclddums[0::9], dTs[0::9], '--')
+# plt.xlim(900,300)
+# plt.axhline(0,linestyle='--')
+# plt.xlabel('Cloud top pressure (hPa)')
+# plt.ylabel('Change in surface temperature (K)')
+
+# ecs = tbound_all_dirfil[0,:,1,0] - tbound_all_dirfil[0,:,0,0]
+
+# plt.figure(2)
+# plt.semilogx(col_ratios, ecs, '-o')
+# # plt.plot(albedo_manuals, ecs, '-o')
+# plt.xlabel(r'Factor multiplying cloud $\tau$')
+# # plt.xlabel(r'Surface albedo')
+# plt.ylabel('ECS (K)')
+
+
+# for i_dir in range(len(directories)):
+
+#     tfurns = tbound_all_dirfil[0,:,i_dir,0]
+#     tfins = tbound_all_dirfil[0,:,i_dir,1]
+#     tmeans = np.mean( tbound_all_dirfil[0,:,i_dir,:], axis=1 )
+
+# tfurns = tbound_all_dirfil[0,:,:,0]
+# tfins = tbound_all_dirfil[0,:,:,1]
+# tmeans = np.mean( tbound_all_dirfil[0,:,:,:], axis=2 )
+
+# dtfurns = tfurns[:, 1] - tfurns[:, 0]
+# dtfins = tfins[:, 1] - tfins[:, 0]
+# dtmeans = tmeans[:, 1] - tmeans[:, 0]
+
+# print(dtmeans)
+
+# # olrfurns = totuflux_all_dirfil[-1,0,:,i_dir,0]
+# # olrfins = totuflux_all_dirfil[-1,0,:,i_dir,1]
+# # olrmeans = np.mean( totuflux_all_dirfil[-1,0,:,i_dir,:], axis=1 )
+
+# col_ratios = np.array([1., 2., 4., 8., 16.])
+# inv_col_ratios = 1. / col_ratios
+
+# # print(wkl_all_dirfil[ 0, 0, :, :, :, : ] )
+# # print(wkl_all_dirfil[ 0, 0, :, :, :, 0 ] / wkl_all_dirfil[ 0, 0, :, :, :, 1 ] )
+
+# # print(np.mean(wkl_all_dirfil[ 0, 0, :, :, :, : ], axis=3) )
+
+# # plt.figure(1)
+# # plt.semilogx(col_ratios, tfurns-tfurns[0], '-o')
+# # plt.semilogx(inv_col_ratios, tfins-tfins[0], '--o')
+
+# # plt.figure(1)
+# # plt.xlabel('Ratio of furnace to fin column H$_2$O')
+# # plt.semilogx(col_ratios, tfurns, '-o', c = 'r', label = 'Furnace')
+# # plt.semilogx(col_ratios, tfins, '-o', c = 'b', label = 'Fin')
+# # plt.semilogx(col_ratios, tmeans, '--o', c = 'black', label = 'Average')
+# # plt.ylabel('Surface temperature (K)')
+# # plt.legend()
+
+# plt.figure(1)
+# plt.xlabel('Ratio of furnace to fin column H$_2$O')
+# plt.semilogx(col_ratios, dtfurns, '-o', c = 'r', label = 'Furnace')
+# plt.semilogx(col_ratios, dtfins, '-o', c = 'b', label = 'Fin')
+# plt.semilogx(col_ratios, dtmeans, '--o', c = 'black', label = 'Average')
+# plt.ylabel('Change in surface temperature (K)')
+# plt.legend()    
+
+# plt.xlabel('Ratio of furnace to fin column H$_2$O')
+# plt.plot(col_ratios, olrfurns, '-o', c = 'r', label = 'Furnace')
+# plt.plot(col_ratios, olrfins, '-o', c = 'b', label = 'Fin')
+# plt.plot(col_ratios, olrmeans, '--o', c = 'black', label = 'Average')
+# plt.ylabel('Surface temperature (K)')
+# plt.legend()
+
+# dTs = np.zeros(2)
+# dTs[0] = tbound_all_dirfil[0,:,0,1] - tbound_all_dirfil[0,:,0,0]
+# dTs[1] = tbound_all_dirfil[0,:,1,1] - tbound_all_dirfil[0,:,1,0]
+
+# print(dTs)
+
+# for i_dir in range(len(directories)):
+#     plt.figure(1)
+#     plt.plot(tbound_all_dirfil[0,:,i_dir,0], '-o',label=dir_labels[i_dir])
+#     plt.plot(tbound_all_dirfil[0,:,i_dir,1], '-o',label=dir_labels[i_dir])
+#     plt.plot(np.mean(tbound_all_dirfil[0,:,i_dir,:],axis=1), '--', label=dir_labels[i_dir])
+# plt.legend()
+
+
+# if(plot_switch==5):
+
+#     for i_dir in range(len(directories)):
+
+#         print('[', end='')
+#         for il in range(nlatcols-1):
+#             print( merid_transps_all_dirfil[0,0,i_dir,il], ',', end='' )
+#         print( merid_transps_all_dirfil[0,0,i_dir,nlatcols-1], end='' )
+#         print(']')
+
+#         # print( 'mtransp', merid_transps_all_dirfil[0,0,i_dir,:] )
+#         if( len(a) > 1 ):
+#             d_mt = merid_transps_all_dirfil[ 0, 1, i_dir, : ] - merid_transps_all_dirfil[ 0, 0, i_dir, : ]
+
+#         # plt.figure(1)
+#         # plt.plot(latgrid, tbound_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Baseline' )
+#         # plt.plot(latgrid, tbound_all_dirfil[ 0, 1, i_dir, : ], '-o', label = '4xco2, free mtransp' )
+#         # if(len(a)>2):
+#         #     plt.plot(latgrid, tbound_all_dirfil[ 0, 2, i_dir, : ], '-o', label = '4xco2, baseline mtransp' )
+#         # plt.xlabel('Latitude (deg)')
+#         # plt.ylabel('Tg (K)')
+#         # plt.legend()
+
+#         plt.figure(1)
+#         plt.title('$ \Delta T_g$ for 4 x CO$_2$')
+#         plt.plot(latgrid, tbound_all_dirfil[ 0, 1, i_dir, : ] - tbound_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Transport free to vary'+' '+dir_labels[i_dir])
+#         if(len(a)>2):
+#             plt.plot(latgrid, tbound_all_dirfil[ 0, 2, i_dir, : ]  - tbound_all_dirfil[ 0, 0, i_dir, : ] , '--o', label = 'Transport fixed at baseline'+' '+dir_labels[i_dir] )
+#         plt.xlabel('Latitude (deg)')
+#         plt.ylabel('$\Delta T_g$ (K)')
+#         plt.legend()
+
+#         # plt.figure(3)
+#         # plt.title('Meridional transport (divergence)')
+#         # plt.plot( latgrid, merid_transps_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Baseline' )
+#         # plt.plot( latgrid, merid_transps_all_dirfil[ 0, 1, i_dir, : ], '-o', label = '4 x CO2' )
+#         # plt.axhline(0, linestyle = '--')
+#         # plt.xlabel('Latitude (deg)')
+#         # plt.ylabel('mtransp (Wm$^{-2}$)')
+#         # plt.legend()        
+
+#         plt.figure(2)
+#         plt.title('$\Delta$ meridional transport for 4 x CO$_2$')
+#         plt.plot( latgrid, d_mt, '-o', label = dir_labels[i_dir])
+#         plt.axhline(0, linestyle = '--')
+#         plt.xlabel('Latitude (deg)')
+#         plt.ylabel('$\Delta$ transport (Wm$^{-2}$)')
+#         plt.legend()        
+
+        
+
+#         if(len(a)>2):
+#             dT_dyn = tbound_all_dirfil[ 0, 1, i_dir, : ]  - tbound_all_dirfil[ 0, 2, i_dir, : ] 
+#             dT_tot = tbound_all_dirfil[ 0, 1, i_dir, : ]  - tbound_all_dirfil[ 0, 0, i_dir, : ] 
+
+#             sens_dyn = dT_dyn / d_mt
+#             sens_dyn_anom = sens_dyn - np.mean( sens_dyn )
+#             print( np.sum(sens_dyn_anom * d_mt)/11. )
+#             dyn_fb = np.mean( sens_dyn_anom * d_mt )
+#             dT_tot_glob = np.mean( dT_tot )
+
+#             print( 'dT_dyn',  dT_dyn )
+#             print( 'd_mt', d_mt )
+#             print( 'sens_dyn', sens_dyn )
+#             print( 'dT_dyn tot', np.mean(dT_dyn) )
+#             print( 'dT_dyn_est', np.mean( sens_dyn_anom * d_mt ) )
+#             print( 'dT glob mean', dT_tot_glob )
+#             print( 'dyn feedback %', dyn_fb / dT_tot_glob * 100.)
+
+#             plt.figure(3)
+#             plt.title('Sources of dynamical feedback \n Absolute: {: 4.2f} K, Relative: {: 4.2f} %'.format( dyn_fb, dyn_fb / dT_tot_glob * 100. ))
+#             plt.subplot(131)
+#             plt.plot( latgrid, sens_dyn_anom, '-o', label = 'Column sensitivity anomaly ( K / ( Wm$^{-2}$ ) )'+' '+dir_labels[i_dir] )
+#             plt.legend()
+#             plt.axhline( 0., linestyle = '--' )
+#             plt.subplot(132)
+#             plt.plot( latgrid, d_mt/10., '-o', label = '$\Delta$ transport / 10 ( Wm$^{-2}$ )'+' '+dir_labels[i_dir] )
+#             plt.legend()
+#             plt.axhline( 0., linestyle = '--' )
+#             plt.subplot(133)
+#             plt.plot( latgrid, sens_dyn_anom * d_mt, '-o', label = 'Part of $\Delta$T_g from dynamical feedback due to column ( K )'+' '+dir_labels[i_dir] )
+#             plt.legend()
+#             plt.axhline( 0., linestyle = '--' )
+#             plt.xlabel( 'Latitude (deg)' )
+#             plt.legend()
+
+            
+
+        # if(len(a)>3):
+
+        #     dF = 10.
+
+        #     sens = ( tbound_all_dirfil[ 0, 3, i_dir, : ] - tbound_all_dirfil[ 0, 0, i_dir, : ] ) / dF
+
+        #     globmeansens = np.mean((tbound_all_dirfil[0,3,i_dir,:]-tbound_all_dirfil[0,0,i_dir,:])/dF)
+        #     dtransp = (merid_transps_all_dirfil[0,1,i_dir,:]-merid_transps_all_dirfil[0,0,i_dir,:])/dF
+        #     dynfb = (sens-globmeansens)*dtransp
+
+        #     plt.figure(5)
+        #     plt.title(fn)
+        #     plt.subplot(221)
+        #     # plt.plot(latgrid,tbound_all_dirfil[0,0,0,:],'-o')
+        #     plt.plot(latgrid,sens-globmeansens,'-o')
+        #     plt.axhline(0.)
+        #     plt.xlabel('Latitude (deg)')
+        #     plt.ylabel('Anomaly from glob mean sens')
+        #     plt.subplot(222)
+        #     # plt.plot(latgrid,merid_transps_all_dirfil[0,0,0,:],'-o')
+        #     plt.plot(latgrid,dtransp,'-o')
+        #     plt.axhline(0.)
+        #     plt.xlabel('Latitude (deg)')
+        #     plt.ylabel('dmtransp/dF')
+        #     plt.subplot(223)
+        #     plt.plot(latgrid,dynfb,'-o')
+        #     plt.axhline(0.)
+        #     plt.xlabel('Latitude')
+        #     plt.ylabel('dsens due to dmtransp (K)')
+            
+        #     dT_mtransp_diff = np.mean(tbound_all_dirfil[0,1,i_dir,:] - tbound_all_dirfil[0,2,i_dir,:])
+            
+        #     print(dT_mtransp_diff)
+
+        #     plt.gcf().text(0.6,0.4,'Total dT: {: 6.2f}'.format(np.mean(sens * dF )) )
+        #     # redo the dyn feedback calc
+        #     plt.gcf().text(0.6,0.3,'dT from dyn fb: {: 6.2f} or {: 6.2f} %'.format( np.sum(dynfb*dF), np.sum(dynfb) / (globmeansens) * 100. ) )
 
 # plt.subplot(131)
 # plt.imshow(crklw[0,:,::-1].T,vmin=-2.5,vmax=2.5,cmap='bwr')
