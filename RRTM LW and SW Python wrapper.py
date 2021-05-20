@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 
 def init_plotting():
@@ -567,7 +567,7 @@ def inhomogenise_2D(x, fac):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=9 # number of latitude columns
+nlatcols=2 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
@@ -680,11 +680,11 @@ extra_forcings = [0.]
 
 # location of perturbations to number of gas molecules
 pertzons=[0]
-pertlats=[0]
+pertlats=[0,1]
 pertmols=[2] #don't do zero!
 pertlays=[30]
 
-perts = [ 1.0, 4.0]
+perts = [ 4.0 ]
 
 
 pert_type=2 # 0: relative, 1: absolute, 2: cloud fraction relative
@@ -2563,11 +2563,11 @@ for pert in perts:
                                                                             ssaclds_master[:,:,:]=ssa_tot
                                                                             if(ts!=1):
                                                                                 if(pert_type==2):
-                                                                                    # if(i_lat==pertlat):
-                                                                                    for i_lay in range(nlayers):
-                                                                                        if(pz[i_lay] < pert_pbottom and pz[i_lay] > pert_pbottom - pert_pwidth ):
-                                                                                            cld_fracs_master[i_zon,i_lat,i_lay] *= pert
-                                                                                            # cld_fracs_master[i_zon,i_lat,i_lay] *= 0.
+                                                                                    if(i_lat==pertlat):
+                                                                                        for i_lay in range(nlayers):
+                                                                                            if(pz[i_lay] < pert_pbottom and pz[i_lay] > pert_pbottom - pert_pwidth ):
+                                                                                                cld_fracs_master[i_zon,i_lat,i_lay] *= pert
+                                                                                                # cld_fracs_master[i_zon,i_lat,i_lay] *= 0.
                                                                             
                                                                         
                                                                         # manual cloud properties
@@ -2898,7 +2898,7 @@ for pert in perts:
                                                                                 merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
                                                                                 
                                                                             # nje mtransp manual
-                                                                            # merid_transps_master[0,:] = [5.314048415676098 ,-13.743352077616919 ,-6.61848296650305 ,-2.834971954760022 ,-4.675919021680785 ,-4.438497039578348 ,-8.389210574671553 ,-10.681115079722305 ,-8.728319841526629 ,-1.892014460520841 ,56.67315152175815]
+                                                                            # merid_transps_master[0,:] = [-40.403, 40.403]
                                                                         
                                                                         column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+zonal_transps_master[i_zon,i_lat]+extra_forcing  #nje forcing
     

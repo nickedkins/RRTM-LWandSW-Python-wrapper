@@ -18,7 +18,7 @@ plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/q/v13 std/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/o3/v4 std/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/lapse/v4 std/'
@@ -1026,6 +1026,19 @@ for directory in directories:
 
 # print(shape(wkl_all_dirfil))
 # print(wkl_all_dirfil[0,30,0,:,0,0])
+
+dTs1 = tbound_all_dirfil[0,1,0,:] - tbound_all_dirfil[0,0,0,:]
+dTs2 = tbound_all_dirfil[0,2,0,:] - tbound_all_dirfil[0,0,0,:]
+
+dTs3 = tbound_all_dirfil[0,3,0,:] - tbound_all_dirfil[0,0,0,:]
+dTs4 = tbound_all_dirfil[0,4,0,:] - tbound_all_dirfil[0,0,0,:]
+
+print(dTs1, dTs2)
+
+print(dTs3, dTs4)
+
+# plt.figure(1)
+# plt.plot(latgrid, dTs, '-o')
 
 if(plot_switch==6):
 
