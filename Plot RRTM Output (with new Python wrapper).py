@@ -14,25 +14,24 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig | 6: nonlin dT and ECS
+plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig | 6: nonlin dT and ECS | 7: cloud perts
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/q/v13 std/'
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/o3/v4 std/'
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/lapse/v4 std/'
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/albedo/v5 std/'
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/pcld/v3 std/'
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/taucld/v7 std/'
-# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/simple radiator fins/nonlinearity/rh/v1 std/'
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=1/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=0.5/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=0/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/nl=200/ssa=0.5/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/pert=0/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/shift up 1 layer/',
 ]
 
 # c_zonals=[0.0,1.0,2.0,4.0,8.0] #zonal transport coefficient
 c_merids=[2.0] #meridional transport coefficient
 
-nlayers=60
-nlatcols=2
+nlayers=100
+nlatcols=1
 nzoncols=1
 
 def colors(n):
@@ -154,8 +153,8 @@ def plotrrtmoutput_masters():
             
             plt.figure(1)
             plt.subplot(121)
-            plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
-            # plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat])
+            # plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
+            plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat],'-')
             # plt.semilogy(tavel_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(i_zon))
             if(cti_type==0):
                 cti=np.int(cti_master[i_zon,i_lat])
@@ -165,24 +164,24 @@ def plotrrtmoutput_masters():
                 cti=np.int(cti_cp[i_zon,i_lat])
             elif(cti_type==3):
                 cti=np.int(cti_wmo[i_zon,i_lat])
-            plt.plot(tz_master[cti,i_zon,i_lat], pz_master[ cti, i_zon, i_lat ],'o' )
+            # plt.plot(tz_master[cti,i_zon,i_lat], pz_master[ cti, i_zon, i_lat ],'o' )
             # plt.plot(tavel_master[cti,i_zon,i_lat], pavel_master[ cti, i_zon, i_lat ],'o' )
             # plt.plot(tz_master[np.int(cti_td[i_zon,i_lat]),i_zon,i_lat], pz_master[np.int(cti_td[i_zon,i_lat]),i_zon,i_lat], '*' )
-            # plt.plot(tz_master[cti,i_zon,i_lat], altz_master[ cti, i_zon, i_lat ],'o' )
+            plt.plot(tz_master[cti,i_zon,i_lat], altz_master[ cti, i_zon, i_lat ],'o' )
             # plt.ylim(4000,12000)
             # plt.ylim(np.max(pz_master[:,i_zon]),np.min(pz_master[:,i_zon]))
-            plt.ylim(1000,10)
+            # plt.ylim(1000,10)
             plt.xlabel('T (K)')
             plt.ylabel('Pressure (hPa)')
             plt.grid(True,which='both')
-            # plt.legend()
+            plt.legend()
 
             plt.subplot(122)
-            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
-            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),altavel_master[:,i_zon,i_lat],'-')
+            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
+            plt.plot(np.mean(dfnet_master[:,:,i_lat],axis=1),altavel_master[:,i_zon,i_lat],'-')
             plt.axvline(-eqb_maxdfnet,linestyle='--')
             plt.axvline(eqb_maxdfnet,linestyle='--')
-            plt.ylim(1000,10)
+            # plt.ylim(1000,10)
             # plt.ylim(1000,600)
             # plt.xlim(-5,5)
             plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
@@ -669,7 +668,6 @@ for directory in directories:
         vars_master_zon_lat_cld=[cld_lays_master,cld_fracs_master,tauclds_master,ssaclds_master]
         vars_master_lat=[latgrid]
 
-
         
         for x in vars_master_lay_zon_lat:
             for k in range(nlatcols):
@@ -1005,8 +1003,8 @@ for directory in directories:
         # plt.legend()
         
     if(plot_switch==3):
-        pert_pwidth = 50.
-        pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
+        pert_pwidth = 100.
+        pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
         
         plt.figure(1)
         plt.title('Total increase in column vapour of 7%')
@@ -1018,24 +1016,29 @@ for directory in directories:
         plt.legend()
         
         print('Total T change: {: 6.4f} K'.format(np.sum(tz_all_dirfil[0,0,1:,i_dir,0]-tz_all_dirfil[0,0,0,i_dir,0])))
+
+
         
     i_dir+=1    
 
 
 ########################################################################## end read files #################################################################################################################
 
-# print(shape(wkl_all_dirfil))
-# print(wkl_all_dirfil[0,30,0,:,0,0])
+if(plot_switch==7):
+    pert_pwidth = 100.
+    pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
+    for i_dir in range(len(directories)):
+        plt.figure(1)
+        plt.plot((tz_all_dirfil[0,0,1:,i_dir,0]-tz_all_dirfil[0,0,0,i_dir,0])*1e3,pert_pbottoms[1:]-pert_pwidth/2,'-o',label=dir_labels[i_dir])
+        plt.axvline(0)
+        plt.ylim(1000,-50)
+        plt.xlabel('Temperature change (mK)')
+        plt.ylabel('Pressure at centre of {: 4.0f} hPa perturbed region (hPa)'.format(pert_pwidth))
+        plt.legend()
+    
+        print('Total T change: {: 6.4f} K'.format(np.sum(tz_all_dirfil[0,0,1:,i_dir,0]-tz_all_dirfil[0,0,0,i_dir,0])))
 
-dTs1 = tbound_all_dirfil[0,1,0,:] - tbound_all_dirfil[0,0,0,:]
-dTs2 = tbound_all_dirfil[0,2,0,:] - tbound_all_dirfil[0,0,0,:]
 
-dTs3 = tbound_all_dirfil[0,3,0,:] - tbound_all_dirfil[0,0,0,:]
-dTs4 = tbound_all_dirfil[0,4,0,:] - tbound_all_dirfil[0,0,0,:]
-
-print(dTs1, dTs2)
-
-print(dTs3, dTs4)
 
 # plt.figure(1)
 # plt.plot(latgrid, dTs, '-o')
@@ -1952,5 +1955,5 @@ baseline_tbound = 267.29358913282624-0.3
 # ax.text(0.5, 0.5, ". Axes: (0.5, 0.1)", transform=ax.transAxes)
 fig=plt.gcf()
 # fig.suptitle(str(datetime.datetime.now()))
-plt.tight_layout()
+# plt.tight_layout()
 show()

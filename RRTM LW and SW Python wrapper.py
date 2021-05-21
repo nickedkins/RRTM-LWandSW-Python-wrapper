@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 
 def init_plotting():
@@ -228,7 +228,7 @@ def convection(T,z,conv_log):
     for i in range(1,len(T)):
         dT = (T[i]-T[i-1])
         dz = (z[i]-z[i-1])/1000.
-        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 9.) and z[i]/1000. < 1000. ):
+        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 5.) and z[i]/1000. < 1000. ):
             if(conv_log==1):
                 conv[i]=1.
             T[i] = T[i-1] - lapse * dz
@@ -565,9 +565,9 @@ def inhomogenise_2D(x, fac):
 
 
 # set overall dimensions for model
-nlayers=60 # number of vertical layers
+nlayers=100 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=2 # number of latitude columns
+nlatcols=1 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
@@ -580,9 +580,10 @@ dtbound_switch=1 # 0: don't allow tbound to change | 1: do
 erai_h2o_switch=0  # 0: specific humidity | 1: relative humidity
 transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
 cloud_source=1 # 0: manual | 1: MISR
+equally_spaced_vertical_switch=1 # 0: equally spaced p | 1: equally spaced z
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
-plot_eqb_approach = 1
+plot_eqb_approach=1
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
@@ -617,7 +618,7 @@ nclouds=nlayers # number of cloud layers
 
 lw_on=1 # 0: don't call rrtm_lw, 1: do
 sw_on=1 # 0: don't call rrtm_sw, 1: do
-fixed_sw_on=0
+fixed_sw_on=1
 fixed_sw=240.
 if(master_input==7):
     fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
@@ -680,21 +681,21 @@ extra_forcings = [0.]
 
 # location of perturbations to number of gas molecules
 pertzons=[0]
-pertlats=[0,1]
+pertlats=[0]
 pertmols=[2] #don't do zero!
 pertlays=[30]
 
-perts = [ 4.0 ]
+perts = [ 1. ]
 
 
 pert_type=2 # 0: relative, 1: absolute, 2: cloud fraction relative
 
-# pert_pwidth = 50.
-# pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth*2.)
-# # pert_pbottoms = [1000. + pert_pwidth]
+# pert_pwidth = 100.
+# pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
+# pert_pbottoms = [1000. + pert_pwidth]
 
-pert_pbottoms = [400.]
-pert_pwidth = 100.
+pert_pbottoms = [2000.]
+pert_pwidth = 2000.
 
 pert_zon_h2o=1.0
 
@@ -885,12 +886,16 @@ for pert in perts:
                                                             tbound_inits = np.ones(nlatcols) * 300.
                                                             if(nlayers==60):
                                                                 undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1. #for nl=60  
+                                                                if(equally_spaced_vertical_switch==1):
+                                                                    undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1./1000. #for nl=60  
                                                             if(master_input==8):
                                                                 undrelax_lats *= 4.
                                                             elif(nlayers==100):
                                                                 undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl=100
                                                             elif(nlayers==590):
                                                                 undrelax_lats=np.ones(nlatcols)*0.5 #for nl=590
+                                                            else:
+                                                                undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl= anything else
                                                             iemiss=2 #surface emissivity. Keep this fixed for now.
                                                             iemis=2
                                                             ireflect=0 #for Lambert reflection
@@ -977,10 +982,11 @@ for pert in perts:
                                                             elif(master_input==7):
                                                                 lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             tmin=150.
+                                                            # tmin = 100.
 
                                                             if(master_input==5):
                                                                 tmin=200.
-                                                            tmax=1000.
+                                                            tmax=350.
                                                             rsp=287.04 # RCEMIP value
                                                             gravity=9.81
                                                             filewritten=0
@@ -1049,6 +1055,7 @@ for pert in perts:
                                                             vol_mixh2o_max = 1e6
     
                                                             dmax=1.
+                                                            # dmax=0.1
     
                                                             radice=90.
                                                             radliq=7.
@@ -2107,23 +2114,42 @@ for pert in perts:
                                                                     wbrodl=wbrodl[::-1]
     
                                                                 if(master_input==0 or master_input==6 or master_input==7 or master_input==8):
-                                                                    pz=np.linspace(psurf,pmin,nlayers+1)
-                                                                    for i in range(len(pavel)):
-                                                                        pavel[i]=(pz[i]+pz[i+1])/2.
-                                                                    tavel=np.zeros(nlayers)
-                                                                    for i in range(len(pavel)):
-                                                                        tavel[i]=(tz[i]+tz[i+1])/2.
-                                                                    altz[0] = 0.0
-                                                                    for i in range(1,nlayers):
-                                                                        altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
-                                                                    altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
-                                                                    # tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
-                                                                    tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
-                                                                    tz=np.clip(tz,tmin,tmax)
-                                                                    for i in range(nlayers):
-                                                                        tavel[i]=(tz[i]+tz[i+1])/2.
-                                                                    tavel[nlayers-1] = tavel[nlayers-2]
-                                                                    tavel=np.clip(tavel,tmin,tmax)
+                                                                    if(equally_spaced_vertical_switch==0):
+                                                                        pz=np.linspace(psurf,pmin,nlayers+1)
+                                                                        for i in range(len(pavel)):
+                                                                            pavel[i]=(pz[i]+pz[i+1])/2.
+                                                                        tavel=np.zeros(nlayers)
+                                                                        for i in range(len(pavel)):
+                                                                            tavel[i]=(tz[i]+tz[i+1])/2.
+                                                                        altz[0] = 0.0
+                                                                        for i in range(1,nlayers):
+                                                                            altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+                                                                        altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
+                                                                        # tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
+                                                                        tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
+                                                                        tz=np.clip(tz,tmin,tmax)
+                                                                        for i in range(nlayers):
+                                                                            tavel[i]=(tz[i]+tz[i+1])/2.
+                                                                        tavel[nlayers-1] = tavel[nlayers-2]
+                                                                        tavel=np.clip(tavel,tmin,tmax)
+                                                                    elif(equally_spaced_vertical_switch==1):
+                                                                        maxalt = 25*1e3
+                                                                        altz = np.linspace(0,maxalt,nlayers+1)
+                                                                        tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
+                                                                        tz=np.clip(tz,tmin,tmax)
+                                                                        for i in range(nlayers):
+                                                                            tavel[i]=(tz[i]+tz[i+1])/2.
+                                                                        tavel[nlayers-1] = tavel[nlayers-2]
+                                                                        tavel=np.clip(tavel,tmin,tmax)
+                                                                        pavel=np.linspace(psurf,pmin,nlayers)
+                                                                        pz[0] = psurf
+                                                                        for i in range(1,nlayers):
+                                                                            pz[i] = pz[i-1] - ( altz[i] - altz[i-1] ) * ( pavel[i] * gravity ) / ( rsp * tavel[i] )
+                                                                        pz[nlayers] = pz[nlayers-1] - ( altz[nlayers] - altz[nlayers-1] ) * ( pavel[nlayers-1] * gravity ) / ( rsp * tavel[nlayers-1] )
+                                                                        for i in range(len(pavel)):
+                                                                            pavel[i]=(pz[i]+pz[i+1])/2.
+                                                                       
+
                                                                 elif(master_input==3): # RCEMIP hydrostatics
                                                                     # tbound=295.
                                                                     # tbound=280.
@@ -2560,6 +2586,16 @@ for pert in perts:
                                                                             
                                                                             ssa_tot = 0.5
                                                                             cld_fracs_master[:,:,:],altbins,tauclds_master[:,:,:]=read_misr_3()
+                                                                            cldshift = 32
+                                                                            for i in range(nlayers):
+                                                                                if(pz[i] > 400):
+                                                                                    tauclds_master[:,:,i] = 3.0
+                                                                                else:
+                                                                                    tauclds_master[:,:,i] = 3.0
+                                                                            for i in range(nlayers-1,cldshift,-1):
+                                                                                if(altz[i]<100*1e3):
+                                                                                    cld_fracs_master[:,:,i] = cld_fracs_master[:,:,i-cldshift]
+                                                                                    tauclds_master[:,:,i] = tauclds_master[:,:,i-cldshift]
                                                                             ssaclds_master[:,:,:]=ssa_tot
                                                                             if(ts!=1):
                                                                                 if(pert_type==2):
@@ -2845,12 +2881,35 @@ for pert in perts:
                                                                             else:
                                                                                 tz[nlayers]=tavel[nlayers-1]
                                                                             
+                                                                            if(equally_spaced_vertical_switch==0):
+                                                                                altz[0] = 0.0
+                                                                                for i in range(1,nlayers):
+                                                                                    altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
+                                                                                altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
+                                                                                for i in range(nlayers-1):
+                                                                                    altavel[i]=(altz[i]+altz[i+1])/2.
+                                                                                    
+                                                                        if(equally_spaced_vertical_switch==0):
+                                                                            pz=np.linspace(psurf,pmin,nlayers+1)
+                                                                            for i in range(len(pavel)):
+                                                                                pavel[i]=(pz[i]+pz[i+1])/2.
                                                                             altz[0] = 0.0
                                                                             for i in range(1,nlayers):
                                                                                 altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
                                                                             altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
-                                                                            for i in range(nlayers-1):
-                                                                                altavel[i]=(altz[i]+altz[i+1])/2.
+                                                                        elif(equally_spaced_vertical_switch==1):
+                                                                            # maxalt = 50*1e3
+                                                                            # altz = np.linspace(0,maxalt,nlayers+1)
+                                                                            # pavel=np.linspace(psurf,pmin,nlayers)
+                                                                            pz[0] = psurf
+                                                                            for i in range(1,nlayers):
+                                                                                pz[i] = pz[i-1] - ( altz[i] - altz[i-1] ) * ( pavel[i] * gravity ) / ( rsp * tavel[i] )
+                                                                            pz[nlayers] = pz[nlayers-1] - ( altz[nlayers] - altz[nlayers-1] ) * ( pavel[nlayers-1] * gravity ) / ( rsp * tavel[nlayers-1] )
+                                                                            for i in range(len(pavel)):
+                                                                                pavel[i]=(pz[i]+pz[i+1])/2.
+
+                                                                        for i in range(nlayers-1):
+                                                                            altavel[i]=(altz[i]+altz[i+1])/2.
     
                                                                             conv=np.zeros(nlayers+1) #reset to zero
                                                                             conv[0]=1
@@ -2996,7 +3055,7 @@ for pert in perts:
                                                                                 if(ts<300):
                                                                                     dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]
                                                                                 else:
-                                                                                    dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]*1.0 
+                                                                                    dT=(np.mean(dfnet_master[i,:,i_lat]/dpz_master[i,:,i_lat]*cldweights))*-1.*undrelax_lats[i_lat]
                                                                                 dT=np.clip(dT,-maxdT[i_lat],maxdT[i_lat])
                                                                                 if(dT_switch==0):
                                                                                     dT=0.
@@ -3013,7 +3072,7 @@ for pert in perts:
                                                                         # radbott1=np.int(cti_master[i_zon,i_lat])+1
                                                                         radbott1=nlayers-5
                                                                         rad_bottom=np.min([radbott1,nlayers-1]) 
-                                                                        for i in range(rad_bottom,nlayers):
+                                                                        for i in range(rad_bottom,nlayers-2):
                                                                             if(abs(np.mean(dfnet_master[i,:,i_lat])) > abs(maxdfnet_lat[i_lat])):
                                                                                 maxdfnet_lat[i_lat]=abs(np.mean(dfnet_master[i,:,i_lat]))
                                                                                 # maxdfnet_lat[i_lat]=abs(dfnet_master[i,0,i_lat])
@@ -3093,14 +3152,14 @@ for pert in perts:
                                                                         plotrrtmoutput()
                                                                         plotted=1
                                                                     print('Equilibrium reached!')
-                                                                    # os.system('say "Equilibrium reached"')
+                                                                    os.system('say "Equilibrium reached"')
                                                                     # writeoutputfile()
                                                                     writeoutputfile_masters()
                                                                     filewritten=1
                                                                     break
                                                                 elif(ts==timesteps-1):
                                                                     print('Max timesteps')
-                                                                    # os.system('say "Max timesteps"')
+                                                                    os.system('say "Max timesteps"')
                                                                     if(plotted!=1):
                                                                         plotrrtmoutput()
                                                                         plotted=1
