@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 
 def init_plotting():
@@ -552,16 +552,17 @@ nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=1 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=7 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
+master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RDCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/baselines/nlatcols=1, nl=60, nzoncols=2, master_input=6'
-lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
+lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0
 dT_switch=1
 dtbound_switch=1
+mtransp_switch = 0 # 0: manual | 1: diffusion | 2: observed ERBE 
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
-plot_eqb_approach = 1
+plot_eqb_approach = 0
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
@@ -587,8 +588,8 @@ latweights_area/=np.mean(latweights_area)
 # if there's only one lat column, pick its lat and set some nearby boundaries to enable interpolation over short interval
 if(nlatcols==1):
     latgrid=np.array([0.])
-    # latgridbounds=[latgrid[0]-5.,latgrid[0]+5.]
-    latgridbounds=[-90,90]
+    latgridbounds=[latgrid[0]-5.,latgrid[0]+5.]
+    # latgridbounds=[-90,90]
 
 nmol=7 # number of gas molecule species
 # nclouds=10
@@ -596,7 +597,7 @@ nclouds=nlayers # number of cloud layers
 
 lw_on=1 # 0: don't call rrtm_lw, 1: do
 sw_on=1 # 0: don't call rrtm_sw, 1: do
-fixed_sw_on=1
+fixed_sw_on=0
 fixed_sw=240.
 if(master_input==7):
     fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
@@ -625,7 +626,7 @@ eqb_maxdfnet=0.1*(60./nlayers) # equilibrium defined as when absolute value of m
 eqb_col_budgs=0.1 # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
-timesteps=2000 # number of timesteps until model exits
+timesteps=1000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
@@ -656,7 +657,7 @@ tbounds=np.array([300.]) # initalise lower boundary temperature
 wklfacs=[1.0] # multiply number of molecules of a gas species by this factor in a given lat and layer range defined later
 wklfac_co2s=[1.] # ditto for co2 specifically
 
-extra_forcings = [45.]
+extra_forcings = [-45.]
 
 # location of perturbations to number of gas molecules
 pertzons=[0]
@@ -694,19 +695,19 @@ b_rdwv = 8. / Hh2os
 
 
 cldlats = np.arange(nlatcols)
-# cf_tots = [ 0.5, 0.6 ]
-# tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ] #isccp numbers
+
+tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ] #isccp numbers
 # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ] #isccp numbers
+pclddums = [ 900, 740, 620, 500, 375, 245, 115 ] #isccp numbers
+cf_tots = [ 0.99 ]
 
-cf_tots = [ 0.25 ]
-tau_tots = [ 0.4 ]
-pclddums = np.linspace(1050,200,10)
-# pclddums = [ 100. ]
+# tau_tots = [ 220 ]
+# pclddums = [ 115. ]
+# cf_tots = [ 0.99 ]
 
-
-# cf_tots = [ 0.0 ]
-# tau_tots = [ 0.]
-# pclddums = [ 1050. ]
+cf_tots = [ 0. ]
+tau_tots = [ 0.]
+pclddums = [ 1050. ]
 
 
 
@@ -744,9 +745,11 @@ for cf_tot in cf_tots:
                                                             lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             if(lapse_source==0):
                                                                 lapse_master=np.ones((nzoncols,nlatcols)) * 6.7 #actual lapse
+                                                                lapse=6.7
                                                             elif(lapse_source==1):
                                                                 for i_zon in range(nzoncols):
                                                                     lapse_master[i_zon,:]=np.array(createlatdistbn('Doug Mason Lapse Rate vs Latitude'))
+                                                                    
                                                                 lapse_master*=-1.
                
                                                             # calculate insolation at a given latitude, day, and hour
@@ -884,12 +887,14 @@ for cf_tot in cf_tots:
                                                             if(master_input==3):
                                                                 isolvar=2
                                                                 solvar=np.ones(29)*238.0 # different interpretation of 'insolation'
-                                                            lapse=5.8
                                                             if(master_input==3): # RCEMIP
+                                                                lapse_master=np.ones((nzoncols,nlatcols))*6.7
                                                                 lapse=6.7
                                                             elif(master_input==5):
+                                                                lapse_master=np.ones((nzoncols,nlatcols))*6.2
                                                                 lapse=6.2
                                                             elif(master_input==7):
+                                                                lapse_master=np.ones((nzoncols,nlatcols))*5.8
                                                                 lapse=5.8
                                                             tmin=150.
 
@@ -2031,7 +2036,7 @@ for cf_tot in cf_tots:
                                                                         altz[i]=altz[i-1]+(pz[i-1]-pz[i])*rsp*tavel[i]/pavel[i]/gravity
                                                                     altz[nlayers] = altz[nlayers-1]+(pz[nlayers-1]-pz[nlayers])*rsp*tavel[nlayers-1]/pavel[nlayers-1]/gravity
                                                                     # tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
-                                                                    tz=np.ones(nlayers+1) * tbound-lapse*altz/1000.
+                                                                    tz=np.ones(nlayers+1) * tbound-lapse_master[0,0]*altz/1000.
                                                                     tz=np.clip(tz,tmin,tmax)
                                                                     for i in range(nlayers):
                                                                         tavel[i]=(tz[i]+tz[i+1])/2.
@@ -2442,7 +2447,8 @@ for cf_tot in cf_tots:
                                                                         # cf_tot = 0.6
                                                                         # tau_tot = 3.0
                                                                         # ssa_tot = 0.5
-                                                                        ssa_tot = 0.01
+                                                                        
+                                                                        ssa_tot = 0.5
 
                                                                         # cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
                                                                         # cldlay_dums=[np.int(nlayers/2)]
@@ -2737,6 +2743,9 @@ for cf_tot in cf_tots:
                                                                                 # merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[0,i_zon,i_lat-1]-tz_master[0,i_zon,i_lat]))*latweights_area[i_lat]
                                                                                 merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
     
+    
+                                                                        if(mtransp_switch==2):
+                                                                            merid_transps_master[i_zon,:] = createlatdistbn('/Users/nickedkins/Dropbox/Figure Data/x[lat]_y[TOA_Fnet]_trenberth2001.txt')
                                                                         
                                                                         column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+zonal_transps_master[i_zon,i_lat]+extra_forcing  #nje forcing
     
@@ -2938,7 +2947,7 @@ for cf_tot in cf_tots:
                                                                     break
                                                                 elif(ts==timesteps-1):
                                                                     print('Max timesteps')
-                                                                    os.system('say "Max timesteps"')
+                                                                    # os.system('say "Max timesteps"')
                                                                     if(plotted!=1):
                                                                         plotrrtmoutput()
                                                                         plotted=1

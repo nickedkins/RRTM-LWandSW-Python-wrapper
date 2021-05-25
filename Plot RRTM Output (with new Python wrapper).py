@@ -9,21 +9,22 @@ from scipy import interpolate
 # from pandas import ExcelWriter
 # from pandas import ExcelFile
 import datetime
+from matplotlib.image import NonUniformImage
+
 
 datetime.datetime.now()
 
-plot_switch=4 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: thin cloud heights
+plot_switch=6 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: thin cloud heights, 5: new CRKs | 6: eqb CRKs
 cti_type=1 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=2.5, cf=0.4/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=590/tau=3, cf=0.5/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=590/tau=0.25, cf=0.4,/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=0.1, cf=1.0/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=1.0, cf=0.1/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=0.25, cf=0.4/',
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/thin cloud heights/v2/nl=60/tau=0.25, cf=0.4, conv/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/',
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/no eqb/ssa=0.5/local lat lapse and gases/lat=0/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/no eqb/ssa=0.5/local lat lapse and gases/lat=45/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/no eqb/ssa=0.5/local lat lapse and gases/lat=85/'
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/eqb/lat=0/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/eqb/lat=45/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/CRK expts/eqb/lat=85/'
 ]
 
 
@@ -52,7 +53,7 @@ def colors(n):
   return ret
 
 def init_plotting():
-    plt.rcParams['figure.figsize'] = (8,8)
+    plt.rcParams['figure.figsize'] = (4,8)
     plt.rcParams['font.size'] = 12
     # plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['font.family'] = 'Arial'
@@ -905,7 +906,7 @@ for directory in directories:
         
         
         # print('{} ztrop: {: 4.2f} ptrop: {: 4.2f} ttrop: {: 4.2f} tsurf: {: 4.2f} '.format(fn, ztrop, ptrop, ttrop, tsurf))
-        print('{: 6.4f}, {: 6.4f}, {: 6.4f}, {: 6.4f} '.format(ztrop, ptrop, ttrop, tsurf))
+        # print('{: 6.4f}, {: 6.4f}, {: 6.4f}, {: 6.4f} '.format(ztrop, ptrop, ttrop, tsurf))
          
         # b_rdwvs=np.arange(1,8)
         
@@ -1018,6 +1019,83 @@ for directory in directories:
 ########################################################################## end read files #################################################################################################################
 
 
+
+for i_dir in range(len(directories)):
+    dfnet_lws = fnet_lw_dirfil[-1,0,:-1,i_dir,0] - fnet_lw_dirfil[-1,0,-1,i_dir,0]
+    dfnet_sws = fnet_sw_dirfil[-1,0,:-1,i_dir,0] - fnet_sw_dirfil[-1,0,-1,i_dir,0]
+    dfnet_alls = fnet_all_dirfil[-1,0,:-1,i_dir,0] - fnet_all_dirfil[-1,0,-1,i_dir,0]
+    dtgs = tbound_all_dirfil[0,:-1,i_dir,0] - tbound_all_dirfil[0,-1,i_dir,0]
+dfnet_lws = np.reshape(dfnet_lws,(7,7))
+dfnet_sws = np.reshape(dfnet_sws,(7,7))
+dfnet_alls = np.reshape(dfnet_alls,(7,7))
+dtgs = np.reshape(dtgs,(7,7))
+
+dcf = 0.99
+
+crklws = -dfnet_lws[:,::-1].T/dcf/100.
+crksws = dfnet_sws[:,::-1].T/dcf/100.
+crknets = dfnet_alls[:,::-1].T/dcf/100.
+crktgs = dtgs[:,::-1].T/dcf/100.
+
+x_edges = [0,0.3,.3,3.6,9.4,23,60,380]
+y_edges = [1000,800,680,560,440,310,180,50]
+
+x_label_list = ['0','0.3','1.3','3.6','9.4','23','60','380']
+y_label_list = ['1000','800','680','560','440','310','180','50']
+
+plt.figure(1)
+
+if(plot_switch==6):
+
+    plt.imshow(crktgs,vmin=-2,vmax=2,cmap='bwr',aspect=380/950,extent=[0,380,1000,50])
+    plt.xticks(np.linspace(min(x_edges),max(x_edges),len(x_edges) ) )
+    plt.gca().set_xticklabels(x_label_list)
+    plt.yticks(np.linspace(max(y_edges),min(y_edges),len(y_edges) ) )
+    plt.gca().set_yticklabels(y_label_list)
+    plt.title('Eqb Cloud Radiative Kernel')
+    plt.xlabel(r'$\tau$')
+    plt.ylabel('CTP (hPa)')
+    cbar = plt.colorbar(fraction=0.046, pad=0.04)
+    cbar.ax.set_ylabel(r'$K$%$^{-1}$', rotation=0,labelpad=30,y=0.53)
+
+elif(plot_switch==5):
+
+    plt.subplot(311)
+    plt.imshow(crklws,vmin=-2,vmax=2,cmap='bwr',aspect=380/950,extent=[0,380,1000,50])
+    plt.xticks(np.linspace(min(x_edges),max(x_edges),len(x_edges) ) )
+    plt.gca().set_xticklabels(x_label_list)
+    plt.yticks(np.linspace(max(y_edges),min(y_edges),len(y_edges) ) )
+    plt.gca().set_yticklabels(y_label_list)
+    plt.title('LW Cloud Radiative Kernel')
+    plt.xlabel(r'$\tau$')
+    plt.ylabel('CTP (hPa)')
+    cbar = plt.colorbar(fraction=0.046, pad=0.04)
+    cbar.ax.set_ylabel(r'Wm$^{-2}$%$^{-1}$', rotation=0,labelpad=30,y=0.53)
+
+    plt.subplot(312)
+    plt.imshow(crksws,vmin=-2,vmax=2,cmap='bwr',aspect=380/950,extent=[0,380,1000,50])
+    plt.xticks(np.linspace(min(x_edges),max(x_edges),len(x_edges) ) )
+    plt.gca().set_xticklabels(x_label_list)
+    plt.yticks(np.linspace(max(y_edges),min(y_edges),len(y_edges) ) )
+    plt.gca().set_yticklabels(y_label_list)
+    plt.title('SW Cloud Radiative Kernel')
+    plt.xlabel(r'$\tau$')
+    plt.ylabel('CTP (hPa)')
+    cbar = plt.colorbar(fraction=0.046, pad=0.04)
+    cbar.ax.set_ylabel(r'Wm$^{-2}$%$^{-1}$', rotation=0,labelpad=30,y=0.53)
+
+    plt.subplot(313)
+    plt.imshow(crknets,vmin=-2,vmax=2,cmap='bwr',aspect=380/950,extent=[0,380,1000,50])
+    plt.xticks(np.linspace(min(x_edges),max(x_edges),len(x_edges) ) )
+    plt.gca().set_xticklabels(x_label_list)
+    plt.yticks(np.linspace(max(y_edges),min(y_edges),len(y_edges) ) )
+    plt.gca().set_yticklabels(y_label_list)
+    plt.title('Net Cloud Radiative Kernel')
+    plt.xlabel(r'$\tau$')
+    plt.ylabel('CTP (hPa)')
+    cbar = plt.colorbar(fraction=0.046, pad=0.04)
+    cbar.ax.set_ylabel(r'Wm$^{-2}$%$^{-1}$', rotation=0,labelpad=30,y=0.53)
+
 if(plot_switch==4):
     for i_dir in range(len(directories)):
         pclddums = np.linspace(1050,200,10)
@@ -1028,14 +1106,23 @@ if(plot_switch==4):
         dTs = tbound_all_dirfil[0,:,i_dir,0] - tbound_all_dirfil[0,0,i_dir,0]
         dttrops = ttrops_dirfil[0,:,i_dir,0] - ttrops_dirfil[0,0,i_dir,0]
         dztrops = ztrops_dirfil[0,:,i_dir,0] - ztrops_dirfil[0,0,i_dir,0]
+        dfnet_lws = fnet_lw_dirfil[-1,0,:,i_dir,0] - fnet_lw_dirfil[-1,0,0,i_dir,0]
+        dfnet_sws = fnet_sw_dirfil[-1,0,:,i_dir,0] - fnet_sw_dirfil[-1,0,0,i_dir,0]
+        dfnet_alls = fnet_all_dirfil[-1,0,:,i_dir,0] - fnet_all_dirfil[-1,0,0,i_dir,0]
         
         plt.figure(1)
-        plt.plot(zclddums[1:]/1000.,dTs[1:], '-o',label='dTsurf' )
+        # plt.plot(zclddums[1:]/1000.,dTs[1:], '-o',label='dTsurf' )
+        plt.plot(dfnet_lws[1:]/10.,pclddums[1:],'-o',label='dFnet_lw' )
+        plt.plot(dfnet_sws[1:]/10.,pclddums[1:],'-o',label='dFnet_sw' )
+        plt.plot(dfnet_alls[1:]/10.,pclddums[1:],'-o',label='dFnet_all' )
+        plt.ylim(1000,10)
+        plt.axvline(0)
         # plt.plot(zclddums[1:]/1000.,dttrops[1:], '-o',label='dTtrop' )
         # plt.plot(zclddums[1:]/1000.,dztrops[1:], '-o',label='dztrop (km)' )
-        plt.ylabel('change in surface temperature (K)')
+        plt.ylabel('change in net flux at TOA (Wm^-2)')
         plt.xlabel('height of additional thin cloud (km)')
         # plt.ylim(1000,10)
+        plt.legend()
 
 # plt.legend()
 
