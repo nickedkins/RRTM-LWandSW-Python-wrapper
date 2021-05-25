@@ -682,7 +682,7 @@ C      &RM='FORMATTED')
 
 !      OPEN(IRDCLD,FILE='/Users/nickedkins/Uni GitHub Repositories/RRTM-L
 !     &WandSW-Python-wrapper/IN_CLD_RRTM NJE',FORM='FORMATTED')
-      
+
       
 
 C     Read in cloud input option.  
