@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 
 def init_plotting():
@@ -754,7 +754,7 @@ nonlin_var = 0 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcl
     
 if( nonlin_var == 0 ):
     # var_facs = np.linspace( 1./12., 20./12., num=10 )
-    var_facs = np.linspace( 1./12., 0.4, num=10 )
+    var_facs = np.linspace( 1./12., 0.4, num=5 )
 if( nonlin_var == 1 ):
     var_facs = np.linspace( 2**-0.5, 2**0.5, num=5 )
 if( nonlin_var == 2 ):
