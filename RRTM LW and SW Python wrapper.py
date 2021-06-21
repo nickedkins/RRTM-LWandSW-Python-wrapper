@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 
 def init_plotting():
@@ -568,7 +568,7 @@ def inhomogenise_2D(x, fac):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=1 # number of latitude columns
+nlatcols=2 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
@@ -669,7 +669,7 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[0.] #meridional transport coefficient
+c_merids=[0.,10.] #meridional transport coefficient
 
 
 tbounds=np.array([300.]) # initalise lower boundary temperature
@@ -723,12 +723,19 @@ cldlats = [0]
 
 
 
-cf_tots = [ 0.0 ]
-cf_tot = 0.66
-tau_tots = [30.65]
-pclddums = [490.]
+# cf_tots = [ 0.0 ]
+# cf_tot = 0.66
+# tau_tots = [30.65]
+# pclddums = [490.]
+# ssa_tot = 0.5
 
-ssa_tot = 0.5
+cf_tots = [0.]
+cf_tot = 0.
+tau_tots = [0.]
+ssa_tot = 0.
+pclddums = [500.]
+
+
 
 albedo_manual_init = 0.07
 surf_rh_init = 0.8
@@ -736,10 +743,10 @@ surf_rh_init = 0.8
 # for inhomogeneity expts
 # col_ratios = np.array([0.25, 0.5, 1., 2., 4.])
 # col_ratios = np.logspace( -3, 3, base=2, num=9)
-col_ratios = [1]
+col_ratios = [1.,2.,4.,8.,16.]
 
 # for nonlinearity expts
-nonlin_var = 3 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
+nonlin_var = -1 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
 
 # if( nonlin_var == 0 or nonlin_var == 1 or nonlin_var == 5 ):
 #     var_facs = np.logspace( -3, 3, base=2, num=5)
@@ -761,7 +768,7 @@ if( nonlin_var == 0 ):
 if( nonlin_var == 1 ):
     var_facs = np.linspace( 2**-0.5, 2**0.5, num=10 )
 if( nonlin_var == 2 ):
-    var_facs = np.linspace( 1., 10., num=10 )
+    var_facs = np.linspace( 2., 10., num=5 )
 if( nonlin_var == 3 ):
     var_facs = np.linspace( 0.15, 0.8, num=10 )
 if( nonlin_var == 4 ):
@@ -774,6 +781,8 @@ if( nonlin_var == 6 ):
     
 elif(nonlin_var == -1):
     var_facs = [1.]
+
+var_fac = 1
 
 #################################################################### end of variable initialisation ##################################################################################
 
@@ -798,8 +807,8 @@ for pert in perts:
                             for c_merid in c_merids:
                                 for extra_forcing in extra_forcings:
                                     for wklfac in wklfacs:
-                                        # for col_ratio in col_ratios:  
-                                        for var_fac in var_facs:
+                                        for col_ratio in col_ratios:  
+                                        # for var_fac in var_facs:
                                             for pertmol in pertmols:
                                                 for pertlat in pertlats:
                                                     for pertzon in pertzons:
@@ -847,8 +856,8 @@ for pert in perts:
                                                                 insollats[i_lat] = np.sum(insol[i_lat,:,:]) / np.size(insol[i_lat,:,:])
                                                                 zenlats[i_lat] = np.sum(zen[i_lat,:,:]) / np.size(zen[i_lat,:,:])
                                                             # calculate annual average solar zenith angle for a given latitude required to give the calculated annual average insolation at that latitude
-                                                            szas = np.rad2deg(np.arccos(insollats/solar_constant))
-                                                            # szas = np.ones(nlatcols) * 75.
+                                                            # szas = np.rad2deg(np.arccos(insollats/solar_constant))
+                                                            szas = np.ones(nlatcols) * 75.
                                                             
                                                             if(master_input==1):
                                                                 nlayers=51
@@ -2308,8 +2317,10 @@ for pert in perts:
                                                                 
                                                                 # print(np.mean(wkl_master[0,0,0,:]))
                                                                 # print(wkl_master[0,0,0,:])
-                                                                # if(ts==2 and nlatcols==2):
-                                                                    # wkl_master[:,i_zon,0,:] = inhomogenise_2D(wkl_master[:,i_zon,0,:], col_ratio)
+                                                                if(ts==2 and nlatcols==2):
+                                                                    wkl_master[:,i_zon,0,:] = inhomogenise_2D(wkl_master[:,i_zon,0,:], col_ratio)
+                                                                    # lapse_master[i_zon,:] = inhomogenise_1D(lapse_master[i_zon,:],col_ratio)
+                                                                    # lapse_master[i_zon,:] = [8.,2.]
                                                                     # print(np.mean(wkl_master[0,0,0,:]))
                                                                     # print(wkl_master[0,0,0,:])
                                                                     
