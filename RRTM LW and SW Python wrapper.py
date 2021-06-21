@@ -567,11 +567,11 @@ def inhomogenise_2D(x, fac):
 
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
-nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=1 # number of latitude columns
+nzoncols=2 # number of zonal columns (usually just 2: cloudy and clear)
+nlatcols=2 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
+master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/RF dT_dF and dmtransp/new/dco2/baseline/2021_04_15 19_41_47'
 lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
@@ -646,7 +646,7 @@ eqb_maxdfnet=0.02*(60./nlayers) # equilibrium defined as when absolute value of 
 eqb_col_budgs=0.01*(60./nlayers) # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
-timesteps=100 # number of timesteps until model exits
+timesteps=1000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
@@ -724,8 +724,8 @@ cldlats = [0]
 
 
 cf_tots = [ 0.0 ]
-cf_tot = 0.66
-tau_tots = [3.0]
+cf_tot = 0.66 * 0.
+tau_tots = [3.0 * 0.]
 pclddums = [700.]
 
 ssa_tot = 0.5
@@ -736,10 +736,10 @@ surf_rh_init = 0.8
 # for inhomogeneity expts
 # col_ratios = np.array([0.25, 0.5, 1., 2., 4.])
 # col_ratios = np.logspace( -3, 3, base=2, num=9)
-col_ratios = [1]
+col_ratios = [2]
 
 # for nonlinearity expts
-nonlin_var = 0 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
+nonlin_var = -1 # -1: none | 0: q | 1: o3 | 2: lapse | 3: surface albedo | 4: pcld | 5: taucld | 6: surf_rh
 
 # if( nonlin_var == 0 or nonlin_var == 1 or nonlin_var == 5 ):
 #     var_facs = np.logspace( -3, 3, base=2, num=5)
@@ -795,8 +795,8 @@ for pert in perts:
                             for c_merid in c_merids:
                                 for extra_forcing in extra_forcings:
                                     for wklfac in wklfacs:
-                                        # for col_ratio in col_ratios:  
-                                        for var_fac in var_facs:
+                                        for col_ratio in col_ratios:  
+                                        # for var_fac in var_facs:
                                             for pertmol in pertmols:
                                                 for pertlat in pertlats:
                                                     for pertzon in pertzons:
@@ -2303,11 +2303,11 @@ for pert in perts:
                                                             for ts in range(timesteps):
                                                                 
                                                                 # print(np.mean(wkl_master[0,0,0,:]))
-                                                                # print(wkl_master[0,0,0,:])
-                                                                # if(ts==2 and nlatcols==2):
-                                                                    # wkl_master[:,i_zon,0,:] = inhomogenise_2D(wkl_master[:,i_zon,0,:], col_ratio)
+                                                                print(wkl_master[0,0,0,:])
+                                                                if(ts==2 and nlatcols==2):
+                                                                    wkl_master[:,i_zon,0,:] = inhomogenise_2D(wkl_master[:,i_zon,0,:], col_ratio)
                                                                     # print(np.mean(wkl_master[0,0,0,:]))
-                                                                    # print(wkl_master[0,0,0,:])
+                                                                    print(wkl_master[0,0,0,:])
                                                                     
                                                                 if(ts==2 and nonlin_var==0):
                                                                     wkl_master[:,i_zon,0,:] *= var_fac
