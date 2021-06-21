@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 
 def init_plotting():
@@ -565,22 +565,22 @@ def inhomogenise_2D(x, fac):
 
 
 # set overall dimensions for model
-nlayers=100 # number of vertical layers
+nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=1 # number of latitude columns
+nlatcols=11 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/RF dT_dF and dmtransp/new/dco2/baseline/2021_04_15 19_41_47'
-lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
+lapse_sources=[2] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0 #0: manual, 2: EBM style
 dT_switch=1
 dtbound_switch=1 # 0: don't allow tbound to change | 1: do
-erai_h2o_switch=0  # 0: specific humidity | 1: relative humidity
+erai_h2o_switch=1  # 0: specific humidity | 1: relative humidity
 transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
-cloud_source=1 # 0: manual | 1: MISR
-equally_spaced_vertical_switch=1 # 0: equally spaced p | 1: equally spaced z
+cloud_source=0 # 0: manual | 1: MISR
+equally_spaced_vertical_switch=0 # 0: equally spaced p | 1: equally spaced z
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
 plot_eqb_approach=1
@@ -592,7 +592,8 @@ plot_eqb_approach=1
 # xgridbounds=np.sin(np.deg2rad(latgridbounds))
 
 # create latgrid evenly spaced in cos(lat)
-xgridbounds=np.linspace(-0.,1.,nlatcols+1)
+# xgridbounds=np.linspace(-0.,1.,nlatcols+1)
+xgridbounds=np.linspace(-1.,1.,nlatcols+1)
 # xgridbounds=[0.95,1.0]
 latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
 
@@ -618,7 +619,7 @@ nclouds=nlayers # number of cloud layers
 
 lw_on=1 # 0: don't call rrtm_lw, 1: do
 sw_on=1 # 0: don't call rrtm_sw, 1: do
-fixed_sw_on=1
+fixed_sw_on=0
 fixed_sw=240.
 if(master_input==7):
     fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
@@ -685,10 +686,11 @@ pertlats=[0]
 pertmols=[2] #don't do zero!
 pertlays=[30]
 
-perts = [ 1. ]
+perts = [ 1., 2. ]
+# perts = [ 2. ]
 
 
-pert_type=2 # 0: relative, 1: absolute, 2: cloud fraction relative
+pert_type=0 # 0: relative, 1: absolute, 2: cloud fraction relative
 
 # pert_pwidth = 100.
 # pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
@@ -724,12 +726,17 @@ cldlats = [0]
 
 
 
-cf_tots = [ 0.0 ]
-cf_tot = 0.66
-tau_tots = [30.65]
-pclddums = [490.]
+# cf_tots = [ 0.0 ]
+# cf_tot = 0.66
+# tau_tots = [30.65]
+# pclddums = [490.]
+# ssa_tot = 0.5
 
-ssa_tot = 0.5
+cf_tots = [ 0.0 ]
+cf_tot = 0.
+tau_tots = [0.]
+pclddums = [490.]
+ssa_tot = 0.
 
 albedo_manual_init = 0.07
 surf_rh_init = 0.8
@@ -2586,7 +2593,7 @@ for pert in perts:
                                                                             
                                                                             ssa_tot = 0.5
                                                                             cld_fracs_master[:,:,:],altbins,tauclds_master[:,:,:]=read_misr_3()
-                                                                            cldshift = 32
+                                                                            cldshift = 0
                                                                             for i in range(nlayers):
                                                                                 if(pz[i] > 400):
                                                                                     tauclds_master[:,:,i] = 3.0
@@ -2957,7 +2964,8 @@ for pert in perts:
                                                                                 merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
                                                                                 
                                                                             # nje mtransp manual
-                                                                            # merid_transps_master[0,:] = [-40.403, 40.403]
+                                                                            # merid_transps_master[0,:] = [97.01201953857586 ,-19.516742519890265 ,-19.57677346870218 ,-16.627771407070217 ,-30.15916780465114 ,-33.25623809531564 ,-24.278958104141573 ,-11.068683186241516 ,-12.207794936929535 ,-2.7631424128214808 ,72.43902552586944]
+
                                                                         
                                                                         column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+zonal_transps_master[i_zon,i_lat]+extra_forcing  #nje forcing
     
@@ -3130,13 +3138,13 @@ for pert in perts:
                                                                     print( '{: 4d}|'.format(ts))
                                                                     ts_rec.append(ts)
                                                                     maxdfnet_rec.append(np.max(maxdfnet_lat))
-                                                                    plt.figure(1)
-                                                                    plt.plot(ts_rec,maxdfnet_rec,'-o')
-                                                                    plt.ylim(0.,np.max(maxdfnet_rec[-10:])*1.1)
-                                                                    plt.axhline(-eqb_maxdfnet,linestyle='--')
-                                                                    plt.axhline(eqb_maxdfnet,linestyle='--')
-                                                                    # plt.ylim(-abs(np.array(maxdfnet_rec[:-10])), abs(np.array(maxdfnet_rec[:-10])))
-                                                                    show()
+                                                                    # plt.figure(1)
+                                                                    # plt.plot(ts_rec,maxdfnet_rec,'-o')
+                                                                    # plt.ylim(0.,np.max(maxdfnet_rec[-10:])*1.1)
+                                                                    # plt.axhline(-eqb_maxdfnet,linestyle='--')
+                                                                    # plt.axhline(eqb_maxdfnet,linestyle='--')
+                                                                    # # plt.ylim(-abs(np.array(maxdfnet_rec[:-10])), abs(np.array(maxdfnet_rec[:-10])))
+                                                                    # show()
                                                                     if(detail_print==1):
                                                                         for i_lat in range(nlatcols):
                                                                             if(i_lat<nlatcols-1):
