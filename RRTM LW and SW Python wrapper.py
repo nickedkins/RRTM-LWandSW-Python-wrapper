@@ -567,17 +567,17 @@ def inhomogenise_2D(x, fac):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=11 # number of latitude columns
+nlatcols=22 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/RF dT_dF and dmtransp/new/dco2/baseline/2021_04_15 19_41_47'
-lapse_sources=[2] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
-albedo_source=0 #0: manual, 2: EBM style
+lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
+albedo_source=2 #0: manual, 2: EBM style
 dT_switch=1
 dtbound_switch=1 # 0: don't allow tbound to change | 1: do
-erai_h2o_switch=1  # 0: specific humidity | 1: relative humidity
+erai_h2o_switch=0  # 0: specific humidity | 1: relative humidity
 transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
 cloud_source=0 # 0: manual | 1: MISR
 equally_spaced_vertical_switch=0 # 0: equally spaced p | 1: equally spaced z
@@ -686,8 +686,8 @@ pertlats=[0]
 pertmols=[2] #don't do zero!
 pertlays=[30]
 
-perts = [ 1., 2. ]
-# perts = [ 2. ]
+# perts = [ 1., 2. ]
+perts = [ 2. ]
 
 
 pert_type=0 # 0: relative, 1: absolute, 2: cloud fraction relative
@@ -2964,7 +2964,10 @@ for pert in perts:
                                                                                 merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
                                                                                 
                                                                             # nje mtransp manual
-                                                                            # merid_transps_master[0,:] = [97.01201953857586 ,-19.516742519890265 ,-19.57677346870218 ,-16.627771407070217 ,-30.15916780465114 ,-33.25623809531564 ,-24.278958104141573 ,-11.068683186241516 ,-12.207794936929535 ,-2.7631424128214808 ,72.43902552586944]
+                                                                            merid_transps_master[0,:] = [32.99528458227031 ,15.490504654286728 ,17.616705086078454 ,-21.594662845191696 ,-12.524621633228666 ,-6.7566355356857395 ,-4.949448253811171 ,-4.6229782751322555 ,-5.220540764912813 ,-6.305383520809302 ,-5.1088175378549705 ,-4.665752984773003 ,-5.460932263318691 ,-4.9751705014957635 ,-4.831307133605613 ,-5.569288807766947 ,-7.403304016848318 ,-12.741622810735427 ,-22.047843460924675 ,17.17564995705564 ,15.459807346544366 ,36.03486879471355]
+
+
+
 
                                                                         
                                                                         column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+zonal_transps_master[i_zon,i_lat]+extra_forcing  #nje forcing

@@ -20,7 +20,9 @@ cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 directories = [
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/erai rh/'
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/h82 lapse/'
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/h82 lapse/'
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/erai rh, ebm albedo/'
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=22/ebm albedo/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=1/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=0.5/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=0/',
@@ -33,7 +35,7 @@ directories = [
 c_merids=[2.0] #meridional transport coefficient
 
 nlayers=60
-nlatcols=11
+nlatcols=22
 nzoncols=1
 
 def colors(n):
@@ -1289,12 +1291,15 @@ if(plot_switch==5):
         
 
         if(len(a)>2):
+            tbound_all_dirfil = np.delete(tbound_all_dirfil, [2, 18, 19], axis=3)
+            d_mt = np.delete(d_mt, [2, 18, 19])
+            latgrid = np.delete(latgrid, [2, 18, 19])
             dT_dyn = tbound_all_dirfil[ 0, 1, i_dir, : ]  - tbound_all_dirfil[ 0, 2, i_dir, : ] 
             dT_tot = tbound_all_dirfil[ 0, 1, i_dir, : ]  - tbound_all_dirfil[ 0, 0, i_dir, : ] 
 
             sens_dyn = dT_dyn / d_mt
             sens_dyn_anom = sens_dyn - np.mean( sens_dyn )
-            print( np.sum(sens_dyn_anom * d_mt)/11. )
+            print( np.sum(sens_dyn_anom * d_mt)/nlatcols )
             dyn_fb = np.mean( sens_dyn_anom * d_mt )
             dT_tot_glob = np.mean( dT_tot )
 
