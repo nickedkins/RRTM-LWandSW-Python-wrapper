@@ -567,7 +567,7 @@ def inhomogenise_2D(x, fac):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=22 # number of latitude columns
+nlatcols=11 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
@@ -577,7 +577,7 @@ lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: S
 albedo_source=2 #0: manual, 2: EBM style
 dT_switch=1
 dtbound_switch=1 # 0: don't allow tbound to change | 1: do
-erai_h2o_switch=0  # 0: specific humidity | 1: relative humidity
+erai_h2o_switch=1  # 0: specific humidity | 1: relative humidity
 transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
 cloud_source=0 # 0: manual | 1: MISR
 equally_spaced_vertical_switch=0 # 0: equally spaced p | 1: equally spaced z
@@ -592,8 +592,8 @@ plot_eqb_approach=1
 # xgridbounds=np.sin(np.deg2rad(latgridbounds))
 
 # create latgrid evenly spaced in cos(lat)
-# xgridbounds=np.linspace(-0.,1.,nlatcols+1)
 xgridbounds=np.linspace(-1.,1.,nlatcols+1)
+# xgridbounds=np.linspace(-1.,1.,nlatcols+1)
 # xgridbounds=[0.95,1.0]
 latgridbounds=np.rad2deg(np.arcsin(xgridbounds))
 
@@ -671,7 +671,7 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[4.] #meridional transport coefficient
+c_merids=[8.] #meridional transport coefficient
 
 
 tbounds=np.array([300.]) # initalise lower boundary temperature
@@ -2427,11 +2427,17 @@ for pert in perts:
                                                                             a_0=0.697
                                                                             a_2=-0.0779
                                                                             b_0=0.38
-                                                                            if(tbound_master[0,i_lat] < 263.):
+                                                                            talb1 = 253.
+                                                                            talb2 = 263.
+                                                                            if(tbound_master[0,i_lat] < talb1):
                                                                                 coalbedo[i_lat] = b_0
+                                                                            elif(tbound_master[0,i_lat] > talb1 and tbound_master[0,i_lat] < talb2):
+                                                                                coalbedo[i_lat] = b_0 * (talb2 - tbound_master[0,i_lat]) / (talb2-talb1) + (a_0 + a_2 * 0.5*(3. * (np.sin( np.deg2rad(latgrid[i_lat]) )**2.) -1. ) )  * (tbound_master[0,i_lat] - talb1 ) / (talb2-talb1)
                                                                             else:
                                                                                 coalbedo[i_lat]= (a_0 + a_2 * 0.5*(3. * (np.sin( np.deg2rad(latgrid[i_lat]) )**2.) -1. ))
                                                                             semiss = np.ones(29) * coalbedo[i_lat]
+                                                                            if(ts%23==0):
+                                                                                print('tbound: {: 4.2f}, coalbedo: {: 4.2f}, albedo: {: 4.2f}'.format(tbound_master[0,i_lat], coalbedo[i_lat], 1. - coalbedo[i_lat]) )
     
                                                                         if(ts>1 or input_source==1 or input_source==2):
     
@@ -2964,7 +2970,10 @@ for pert in perts:
                                                                                 merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
                                                                                 
                                                                             # nje mtransp manual
-                                                                            merid_transps_master[0,:] = [32.99528458227031 ,15.490504654286728 ,17.616705086078454 ,-21.594662845191696 ,-12.524621633228666 ,-6.7566355356857395 ,-4.949448253811171 ,-4.6229782751322555 ,-5.220540764912813 ,-6.305383520809302 ,-5.1088175378549705 ,-4.665752984773003 ,-5.460932263318691 ,-4.9751705014957635 ,-4.831307133605613 ,-5.569288807766947 ,-7.403304016848318 ,-12.741622810735427 ,-22.047843460924675 ,17.17564995705564 ,15.459807346544366 ,36.03486879471355]
+                                                                            merid_transps_master[0,:] = [80.64059654097197 ,6.043668629389911 ,-14.117078701398436 ,-23.92772881956535 ,-33.57164432538048 ,-35.31080372758149 ,-31.524613671680534 ,-23.46350117258817 ,-13.779687624985858 ,6.280849168688976 ,82.71286774408684]
+
+
+
 
 
 

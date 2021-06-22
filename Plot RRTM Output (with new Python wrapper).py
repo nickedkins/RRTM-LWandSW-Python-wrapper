@@ -19,10 +19,14 @@ cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=11/erai rh/'
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=11/NH, ebm alb smooth, v2/'
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=11/rh and ebm alb/'
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=11/erai rh/'
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/h82 lapse/'
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/erai rh, ebm albedo/'
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=22/ebm albedo/'
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=22/ebm albedo smooth/'
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=11/NH, ebm albedo smooth/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=1/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=0.5/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=0/',
@@ -747,6 +751,8 @@ for directory in directories:
                         cti_wmo[i_zon,i_lat]=i
                         break
                 # cti_wmo[i_zon,i_lat]=np.argmin(tz_master[:,i_zon,i_lat])
+
+        print(semiss)
                 
 
         if(plot_switch==4):
@@ -1033,7 +1039,9 @@ for directory in directories:
 
 ########################################################################## end read files #################################################################################################################
 
-print(merid_transps_all_dirfil)
+print(tbound_all_dirfil)
+
+# print(merid_transps_all_dirfil)
 
 if(plot_switch==7):
     pert_pwidth = 100.
@@ -1284,11 +1292,11 @@ if(plot_switch==5):
         # plt.ylabel('mtransp (Wm$^{-2}$)')
         # plt.legend()        
 
-        # plt.figure(2)
-        # plt.plot( latgrid, d_mt, '-o')
-        # plt.axhline(0, linestyle = '--')
-        # plt.xlabel('Latitude (deg)')
-        # plt.ylabel('$\Delta F_{mtransp}$ (Wm$^{-2}$)')
+        plt.figure(2)
+        plt.plot( latgrid, d_mt, '-o')
+        plt.axhline(0, linestyle = '--')
+        plt.xlabel('Latitude (deg)')
+        plt.ylabel('$\Delta F_{mtransp}$ (Wm$^{-2}$)')
 
         
 
@@ -1313,22 +1321,22 @@ if(plot_switch==5):
             print( 'dT glob mean', dT_tot_glob )
             print( 'dyn feedback %', dyn_fb / dT_tot_glob * 100.)
 
-            # plt.figure(3)
+            plt.figure(3)
             
-            # plt.plot( latgrid, sens_dyn_anom, '-o')
-            # plt.axhline( 0., linestyle = '--' )
-            # plt.xlabel('Latitude (deg)')
-            # plt.ylabel(r'Column sensitivity anomaly $\alpha(\phi) - \alpha_{tot}$')
+            plt.plot( latgrid, sens_dyn_anom, '-o')
+            plt.axhline( 0., linestyle = '--' )
+            plt.xlabel('Latitude (deg)')
+            plt.ylabel(r'Column sensitivity anomaly $\alpha(\phi) - \alpha_{tot}$')
 
-            # plt.figure(4)
-            # plt.title('Sources of dynamical feedback \n Absolute: {: 4.2f} K, Relative: {: 4.2f} %'.format( dyn_fb, dyn_fb / dT_tot_glob * 100. ))
-            # # plt.plot( latgrid, sens_dyn_anom * d_mt, '-o')
-            # rfe = sens_dyn_anom * d_mt
-            # plt.plot( latgrid, np.sign(rfe) * rfe / np.sum(rfe) * 100., '-o')
-            # plt.legend()
-            # plt.axhline( 0., linestyle = '--' )
-            # plt.xlabel( 'Latitude (deg)' )
-            # plt.ylabel('Contribution to dynamical feedback (%)')
+            plt.figure(4)
+            plt.title('Sources of dynamical feedback \n Absolute: {: 4.2f} K, Relative: {: 4.2f} \%'.format( dyn_fb, dyn_fb / dT_tot_glob * 100. ))
+            # plt.plot( latgrid, sens_dyn_anom * d_mt, '-o')
+            rfe = sens_dyn_anom * d_mt
+            plt.plot( latgrid, np.sign(rfe) * rfe / np.sum(rfe) * 100., '-o')
+            plt.legend()
+            plt.axhline( 0., linestyle = '--' )
+            plt.xlabel( 'Latitude (deg)' )
+            plt.ylabel('Contribution to dynamical feedback (\%)')
 
             
 
