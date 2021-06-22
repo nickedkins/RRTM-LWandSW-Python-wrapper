@@ -19,10 +19,10 @@ cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/erai rh/'
+'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=11/erai rh/'
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/h82 lapse/'
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/erai rh, ebm albedo/'
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=22/ebm albedo/'
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=22/ebm albedo/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=1/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=0.5/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=0/',
@@ -35,7 +35,7 @@ directories = [
 c_merids=[2.0] #meridional transport coefficient
 
 nlayers=60
-nlatcols=22
+nlatcols=11
 nzoncols=1
 
 def colors(n):
@@ -55,8 +55,8 @@ def colors(n):
   return ret
 
 def init_plotting():
-    plt.rcParams['figure.figsize'] = (8,8)
-    plt.rcParams['font.size'] = 20
+    plt.rcParams['figure.figsize'] = (10,10)
+    plt.rcParams['font.size'] = 15
     plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['axes.titlesize'] = 1.2*plt.rcParams['font.size']
@@ -86,6 +86,11 @@ def init_plotting():
     plt.rcParams['grid.color'] = 'k'
     plt.rcParams['grid.linestyle'] = ':'
     plt.rcParams['grid.linewidth'] = 0.5
+
+    rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+    rc('text', usetex=True)
+
+
 
     #plt.gca().spines['right'].set_color('None')
     #plt.gca().spines['top'].set_color('None')
@@ -1263,10 +1268,9 @@ if(plot_switch==5):
         # plt.legend()
 
         plt.figure(1)
-        plt.title('$ \Delta T_g$ for 4 x CO$_2$')
-        plt.plot(latgrid, tbound_all_dirfil[ 0, 1, i_dir, : ] - tbound_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Transport free to vary'+' '+dir_labels[i_dir])
+        plt.plot(latgrid, tbound_all_dirfil[ 0, 1, i_dir, : ] - tbound_all_dirfil[ 0, 0, i_dir, : ], '-o', label = 'Transport free to vary')
         if(len(a)>2):
-            plt.plot(latgrid, tbound_all_dirfil[ 0, 2, i_dir, : ]  - tbound_all_dirfil[ 0, 0, i_dir, : ] , '--o', label = 'Transport fixed at baseline'+' '+dir_labels[i_dir] )
+            plt.plot(latgrid, tbound_all_dirfil[ 0, 2, i_dir, : ]  - tbound_all_dirfil[ 0, 0, i_dir, : ] , '--o', label = 'Transport fixed at baseline')
         plt.xlabel('Latitude (deg)')
         plt.ylabel('$\Delta T_g$ (K)')
         plt.legend()
@@ -1280,20 +1284,18 @@ if(plot_switch==5):
         # plt.ylabel('mtransp (Wm$^{-2}$)')
         # plt.legend()        
 
-        plt.figure(2)
-        plt.title('$\Delta$ meridional transport for 4 x CO$_2$')
-        plt.plot( latgrid, d_mt, '-o', label = dir_labels[i_dir])
-        plt.axhline(0, linestyle = '--')
-        plt.xlabel('Latitude (deg)')
-        plt.ylabel('$\Delta$ transport (Wm$^{-2}$)')
-        plt.legend()        
+        # plt.figure(2)
+        # plt.plot( latgrid, d_mt, '-o')
+        # plt.axhline(0, linestyle = '--')
+        # plt.xlabel('Latitude (deg)')
+        # plt.ylabel('$\Delta F_{mtransp}$ (Wm$^{-2}$)')
 
         
 
         if(len(a)>2):
-            tbound_all_dirfil = np.delete(tbound_all_dirfil, [2, 18, 19], axis=3)
-            d_mt = np.delete(d_mt, [2, 18, 19])
-            latgrid = np.delete(latgrid, [2, 18, 19])
+            # tbound_all_dirfil = np.delete(tbound_all_dirfil, [2, 18, 19], axis=3)
+            # d_mt = np.delete(d_mt, [2, 18, 19])
+            # latgrid = np.delete(latgrid, [2, 18, 19])
             dT_dyn = tbound_all_dirfil[ 0, 1, i_dir, : ]  - tbound_all_dirfil[ 0, 2, i_dir, : ] 
             dT_tot = tbound_all_dirfil[ 0, 1, i_dir, : ]  - tbound_all_dirfil[ 0, 0, i_dir, : ] 
 
@@ -1311,22 +1313,22 @@ if(plot_switch==5):
             print( 'dT glob mean', dT_tot_glob )
             print( 'dyn feedback %', dyn_fb / dT_tot_glob * 100.)
 
-            plt.figure(3)
-            plt.title('Sources of dynamical feedback \n Absolute: {: 4.2f} K, Relative: {: 4.2f} %'.format( dyn_fb, dyn_fb / dT_tot_glob * 100. ))
-            plt.subplot(131)
-            plt.plot( latgrid, sens_dyn_anom, '-o', label = 'Column sensitivity anomaly ( K / ( Wm$^{-2}$ ) )'+' '+dir_labels[i_dir] )
-            plt.legend()
-            plt.axhline( 0., linestyle = '--' )
-            plt.subplot(132)
-            plt.plot( latgrid, d_mt/10., '-o', label = '$\Delta$ transport / 10 ( Wm$^{-2}$ )'+' '+dir_labels[i_dir] )
-            plt.legend()
-            plt.axhline( 0., linestyle = '--' )
-            plt.subplot(133)
-            plt.plot( latgrid, sens_dyn_anom * d_mt, '-o', label = 'Part of $\Delta$T_g from dynamical feedback due to column ( K )'+' '+dir_labels[i_dir] )
-            plt.legend()
-            plt.axhline( 0., linestyle = '--' )
-            plt.xlabel( 'Latitude (deg)' )
-            plt.legend()
+            # plt.figure(3)
+            
+            # plt.plot( latgrid, sens_dyn_anom, '-o')
+            # plt.axhline( 0., linestyle = '--' )
+            # plt.xlabel('Latitude (deg)')
+            # plt.ylabel(r'Column sensitivity anomaly $\alpha(\phi) - \alpha_{tot}$')
+
+            # plt.figure(4)
+            # plt.title('Sources of dynamical feedback \n Absolute: {: 4.2f} K, Relative: {: 4.2f} %'.format( dyn_fb, dyn_fb / dT_tot_glob * 100. ))
+            # # plt.plot( latgrid, sens_dyn_anom * d_mt, '-o')
+            # rfe = sens_dyn_anom * d_mt
+            # plt.plot( latgrid, np.sign(rfe) * rfe / np.sum(rfe) * 100., '-o')
+            # plt.legend()
+            # plt.axhline( 0., linestyle = '--' )
+            # plt.xlabel( 'Latitude (deg)' )
+            # plt.ylabel('Contribution to dynamical feedback (%)')
 
             
 

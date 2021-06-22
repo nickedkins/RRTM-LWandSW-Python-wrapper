@@ -18,7 +18,7 @@ project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wra
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (10,10)
-    plt.rcParams['font.size'] = 10
+    plt.rcParams['font.size'] = 15
     plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['axes.titlesize'] = 1.2*plt.rcParams['font.size']
