@@ -571,14 +571,14 @@ nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
 nlatcols=2 # number of latitude columns
 
 # master switches for the basic type of input
-master_input=3 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
+master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/RF dT_dF and dmtransp/new/dco2/baseline/2021_04_15 19_41_47'
 lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0 #0: manual, 2: EBM style
 dT_switch=1
 dtbound_switch=1 # 0: don't allow tbound to change | 1: do
-erai_h2o_switch=0  # 0: specific humidity | 1: relative humidity
+erai_h2o_switch=1  # 0: specific humidity | 1: relative humidity
 transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
@@ -2298,6 +2298,7 @@ for pert in perts:
         
                                                                 if(master_input==6): #ERA-I
                                                                     q,o3,fal,r = read_erai()
+                                                                    r[:,:] = inhomogenise_2D(r[:,:], col_ratio)
                                                             
                                                             if(input_source==2):
                                                                 q,o3,fal,r = read_erai()
@@ -2317,8 +2318,8 @@ for pert in perts:
                                                                 
                                                                 # print(np.mean(wkl_master[0,0,0,:]))
                                                                 # print(wkl_master[0,0,0,:])
-                                                                if(ts==2 and nlatcols==2):
-                                                                    wkl_master[:,i_zon,0,:] = inhomogenise_2D(wkl_master[:,i_zon,0,:], col_ratio)
+                                                                # if(ts==2 and nlatcols==2):
+                                                                    # wkl_master[:,i_zon,0,:] = inhomogenise_2D(wkl_master[:,i_zon,0,:], col_ratio)
                                                                     # lapse_master[i_zon,:] = inhomogenise_1D(lapse_master[i_zon,:],col_ratio)
                                                                     # lapse_master[i_zon,:] = [8.,2.]
                                                                     # print(np.mean(wkl_master[0,0,0,:]))
@@ -3064,13 +3065,13 @@ for pert in perts:
                                                                     print( '{: 4d}|'.format(ts))
                                                                     ts_rec.append(ts)
                                                                     maxdfnet_rec.append(np.max(maxdfnet_lat))
-                                                                    plt.figure(1)
-                                                                    plt.plot(ts_rec,maxdfnet_rec,'-o')
-                                                                    plt.ylim(0.,np.max(maxdfnet_rec[-10:])*1.1)
-                                                                    plt.axhline(-eqb_maxdfnet,linestyle='--')
-                                                                    plt.axhline(eqb_maxdfnet,linestyle='--')
-                                                                    # plt.ylim(-abs(np.array(maxdfnet_rec[:-10])), abs(np.array(maxdfnet_rec[:-10])))
-                                                                    show()
+                                                                    # plt.figure(1)
+                                                                    # plt.plot(ts_rec,maxdfnet_rec,'-o')
+                                                                    # plt.ylim(0.,np.max(maxdfnet_rec[-10:])*1.1)
+                                                                    # plt.axhline(-eqb_maxdfnet,linestyle='--')
+                                                                    # plt.axhline(eqb_maxdfnet,linestyle='--')
+                                                                    # # plt.ylim(-abs(np.array(maxdfnet_rec[:-10])), abs(np.array(maxdfnet_rec[:-10])))
+                                                                    # show()
                                                                     if(detail_print==1):
                                                                         for i_lat in range(nlatcols):
                                                                             if(i_lat<nlatcols-1):
