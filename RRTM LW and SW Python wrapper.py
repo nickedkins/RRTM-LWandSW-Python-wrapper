@@ -396,7 +396,7 @@ def read_misr_3():
     misr_cf_latalt_max=np.load(interpdir+'fracs_latalt.npy')
     cfs=misr_cf_latalt_max
     misr_cod_latalt_max=np.load(interpdir+'od_wghtd_latalt.npy')
-    cods=misr_cod_latalt_max
+    cods=misr_cod_latalt_max    
     misr_alts=np.load(interpdir+'alts.npy')
     misr_lats=np.load(interpdir+'lats.npy')
     x=misr_lats[1:,0]
@@ -449,7 +449,7 @@ def read_misr_4():
     return cld_lay_v2[i_lat], cf_mro[i_lat], od_eff[i_lat]
 
 #  use array of previously collated ERA-Interim data to interpolate from to get h2o and o3 mixing ratios and surface albedos
-def read_erai():
+def read_erai(latgrid,nlatcols):
 
     def interpolate_createprrtminput_lev(shortname,latparray,ps,lats):             
         lats = lats
@@ -463,6 +463,7 @@ def read_erai():
             xxnew, yynew = np.meshgrid(xnew,ynew)
             (xxnewr,yynewr) = (xxnew.ravel(),yynew.ravel())
             znew = f((xxnewr,yynewr),method='linear')
+            
             znew=znew.reshape(nlayers,nlatcols)
             # znew = znew[:,::-1]
             xnew = xnew[::-1]
@@ -567,7 +568,7 @@ def inhomogenise_2D(x, fac):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=1 # number of latitude columns
+nlatcols=2 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
@@ -581,6 +582,7 @@ erai_h2o_switch=0  # 0: specific humidity | 1: relative humidity
 transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
 cloud_source=0 # 0: manual | 1: MISR
 equally_spaced_vertical_switch=0 # 0: equally spaced p | 1: equally spaced z
+mtransp_switch=1
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
 plot_eqb_approach=1
@@ -609,8 +611,8 @@ latweights_area/=np.mean(latweights_area)
 # if there's only one lat column, pick its lat and set some nearby boundaries to enable interpolation over short interval
 if(nlatcols==1):
     latgrid=np.array([0.])
-    latgridbounds=[latgrid[0]-5.,latgrid[0]+5.]
-    # latgridbounds=[-90,90]
+    # latgridbounds=[latgrid[0]-5.,latgrid[0]+5.]
+    latgridbounds=[-90,90]
 
 nmol=7 # number of gas molecule species
 # nclouds=10
@@ -647,7 +649,7 @@ eqb_maxdfnet=0.02*(60./nlayers) # equilibrium defined as when absolute value of 
 eqb_col_budgs=0.01*(60./nlayers) # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
-timesteps=1000 # number of timesteps until model exits
+timesteps=600 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
@@ -689,6 +691,8 @@ pertlays=[0]
 perts=[0.]
 pert_type=1 # 0: relative, 1: absolute
 
+pert = perts[0]
+
 # pert_pwidth = 1000.
 # # pert_pbottoms = np.arange(1000+pert_pwidth,0,-pert_pwidth)
 # pert_pbottoms = [1000. + pert_pwidth]
@@ -717,20 +721,22 @@ b_rdwv = 8. / Hh2os
 
 
 cldlats = np.arange(nlatcols)
+# cldlats = [0]
 
-tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ] #isccp numbers
+# tau_tots = [ 0.15, 0.8, 2.45, 6.5, 16.2, 41.5, 220 ] #isccp numbers
+# # pclddums = [ 800, 680, 560, 440, 310, 180, 50 ] #isccp numbers
+# pclddums = [ 900, 740, 620, 500, 375, 245, 115 ] #isccp numbers middle of boxes
+# cf_tots = [ 0.5 ]
 
-# pclddums = [ 800, 680, 560, 440, 310, 180, 50 ] #isccp numbers
-pclddums = [ 900, 740, 620, 500, 375, 245, 115 ] #isccp numbers
+# cf_tots = [ 0. ]
+# tau_tots = [ 0.]
+# pclddums = [ 1050. ]
+
+tau_tots = [ 41.5 ]
+pclddums = [ 115. ]
 cf_tots = [ 0.99 ]
 
-# tau_tots = [ 220 ]
-# pclddums = [ 115. ]
-# cf_tots = [ 0.99 ]
 
-cf_tots = [ 0. ]
-tau_tots = [ 0.]
-pclddums = [ 1050. ]
 
 
 ssa_tot = 0.5
@@ -788,7 +794,7 @@ elif(nonlin_var == -1):
 # calculate total number of parameter combinations (number of model runs)
 i_loops=0
 totloops=np.float(len(pclddums) * len(cldlats) * len(cf_tots) * len(pertzons)*len(pertlats)*len(pertmols)*len(pert_pbottoms)*len(perts)*len(c_merids)*len(c_zonals)*len(lapseloops)*len(wklfac_co2s)*len(extra_forcings)*len(lapse_sources)*len(tau_tots)*len(col_ratios)*len(var_facs))
-looptime = 15 * (nlayers/60.) * nlatcols
+looptime = 30. * (nlayers/60.) * nlatcols
 print('Total loops: {:4d} | Expected run time: {:4.1f} minute(s)'.format(int(totloops), totloops*looptime/60.))
 print()
 
@@ -810,7 +816,7 @@ for cf_tot in cf_tots:
                                                 for pertlat in pertlats:
                                                     for pertzon in pertzons:
                                                         for pert_pbottom in pert_pbottoms:
-                                                            print('loop {} of {}, {} percent done '.format(i_loops,totloops,i_loops/totloops*100.))
+                                                            print('loop {: 2.0f} of {: 2.0f}, {: 4.1f} % done, {: 4.1f} mins remaining '.format(i_loops,totloops,i_loops/totloops*100., (totloops-i_loops)*looptime/60.))
                                                             i_loops+=1
     
                 #########################################################################################################################################################
@@ -893,14 +899,15 @@ for cf_tot in cf_tots:
                                                                 undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1. #for nl=60  
                                                                 if(equally_spaced_vertical_switch==1):
                                                                     undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1./1000. #for nl=60  
-                                                            if(master_input==8):
-                                                                undrelax_lats *= 4.
+
                                                             elif(nlayers==100):
                                                                 undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl=100
                                                             elif(nlayers==590):
                                                                 undrelax_lats=np.ones(nlatcols)*0.5 #for nl=590
                                                             else:
                                                                 undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl= anything else
+                                                            if(master_input==8):
+                                                                undrelax_lats *= 4.
                                                             iemiss=2 #surface emissivity. Keep this fixed for now.
                                                             iemis=2
                                                             ireflect=0 #for Lambert reflection
@@ -2326,7 +2333,28 @@ for cf_tot in cf_tots:
                                                                     color.append('#%06X' % randint(0, 0xFFFFFF))
         
                                                                 if(master_input==6): #ERA-I
-                                                                    q,o3,fal,r = read_erai()
+                                                                    # q,o3,fal,r = read_erai()
+                                                                    q=np.zeros((nlayers,nlatcols))
+                                                                    o3=np.zeros((nlayers,nlatcols))
+                                                                    fal=np.zeros((nlatcols))
+                                                                    r=np.zeros((nlayers,nlatcols))
+                                                                    ndumlats=10
+                                                                    for i_lat in range(nlatcols):
+                                                                        dumlats = np.linspace(latgridbounds[i_lat], latgridbounds[i_lat+1],ndumlats)
+                                                                        nlatcolsdum=ndumlats
+                                                                        qdum,o3dum,faldum,rdum = read_erai(dumlats,nlatcolsdum)
+                                                                        
+                                                                        cossums2 = np.zeros(ndumlats)
+                                                                        for idumlat in range(ndumlats-1):
+                                                                            cossums2[idumlat] = np.abs(np.cos( np.deg2rad( dumlats[idumlat+1] ) ) - np.cos( np.deg2rad( dumlats[idumlat] ) ))
+                                                                            q[:,i_lat] += qdum[:,idumlat] * cossums2[idumlat]
+                                                                            o3[:,i_lat] += o3dum[:,idumlat] * cossums2[idumlat]
+                                                                            fal[i_lat] += faldum[idumlat] * cossums2[idumlat]
+                                                                            r[:,i_lat] += rdum[:,idumlat] * cossums2[idumlat]
+                                                                        q[:,i_lat] /= np.sum(cossums2)
+                                                                        o3[:,i_lat] /= np.sum(cossums2)
+                                                                        fal[i_lat] /= np.sum(cossums2)
+                                                                        r[:,i_lat] /= np.sum(cossums2)
                                                             
                                                             if(input_source==2):
                                                                 q,o3,fal,r = read_erai()
@@ -2971,15 +2999,16 @@ for cf_tot in cf_tots:
     
     
                                                                         if(mtransp_switch==2):
-                                                                            merid_transps_master[i_zon,:] = createlatdistbn('/Users/nickedkins/Dropbox/Figure Data/x[lat]_y[TOA_Fnet]_trenberth2001.txt')
+                                                                            merid_transps_master[i_zon,:] = np.array(createlatdistbn('x[lat]_y[TOA_Fnet]_trenberth2001'))*-1.
                                                                                 
-                                                                            # nje mtransp manual
-                                                                            # merid_transps_master[0,:] = [-40.403, 40.403]
+                                                                        # nje mtransp manual
+                                                                        if(mtransp_switch==1):
+                                                                            merid_transps_master[0,:] = [-68.858, 68.858 ]
                                                                         
                                                                         column_budgets_master[i_zon,i_lat]=toa_fnet+merid_transps_master[i_zon,i_lat]+zonal_transps_master[i_zon,i_lat]+extra_forcing  #nje forcing
     
     
-                                                                        # add current values of variables to master arrays
+                                                                        # add current0 values of variables to master arrays
                                                                         tz_master[:,i_zon,i_lat]=tz
                                                                         tavel_master[:,i_zon,i_lat]=tavel
                                                                         pz_master[:,i_zon,i_lat]=pz
@@ -3169,7 +3198,7 @@ for cf_tot in cf_tots:
                                                                         plotrrtmoutput()
                                                                         plotted=1
                                                                     print('Equilibrium reached!')
-                                                                    os.system('say "Equilibrium reached"')
+                                                                    # os.system('say "Equilibrium reached"')
                                                                     # writeoutputfile()
                                                                     writeoutputfile_masters()
                                                                     filewritten=1
@@ -3198,7 +3227,7 @@ tend = datetime.datetime.now()
 ttotal = tend-tstart
 print(ttotal)
 
-print('Done')
+# print('Done')
 os.system('say "Done"')
 # plt.tight_layout()
 # show()
