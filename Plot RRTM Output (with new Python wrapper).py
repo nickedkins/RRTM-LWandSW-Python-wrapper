@@ -18,9 +18,10 @@ plot_switch=5 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=11/NH, ebm alb smooth, v2/'
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=11/rh and ebm alb/'
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=11/rh and ebm alb/'
+# '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=30, even lat/ef=40/'
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/ncols=11/erai rh/'
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/h82 lapse/'
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/erai rh, ebm albedo/'
@@ -39,7 +40,7 @@ directories = [
 c_merids=[2.0] #meridional transport coefficient
 
 nlayers=60
-nlatcols=11
+nlatcols=40
 nzoncols=1
 
 def colors(n):
@@ -91,8 +92,8 @@ def init_plotting():
     plt.rcParams['grid.linestyle'] = ':'
     plt.rcParams['grid.linewidth'] = 0.5
 
-    rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
-    rc('text', usetex=True)
+    # rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+    # rc('text', usetex=True)
 
 
 
@@ -1256,11 +1257,11 @@ if(plot_switch==5):
 
     for i_dir in range(len(directories)):
 
-        print('[', end='')
+        print '[',
         for il in range(nlatcols-1):
-            print( merid_transps_all_dirfil[0,0,i_dir,il], ',', end='' )
-        print( merid_transps_all_dirfil[0,0,i_dir,nlatcols-1], end='' )
-        print(']')
+            print merid_transps_all_dirfil[0,0,i_dir,il], ',', 
+        print merid_transps_all_dirfil[0,0,i_dir,nlatcols-1],
+        print ']'
 
         # print( 'mtransp', merid_transps_all_dirfil[0,0,i_dir,:] )
         if( len(a) > 1 ):

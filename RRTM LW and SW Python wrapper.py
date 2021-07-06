@@ -13,7 +13,7 @@ from scipy import interpolate, stats
 from scipy.interpolate import interp1d, interp2d, RectBivariateSpline, RegularGridInterpolator
 
 tstart = datetime.datetime.now()
-project_dir = '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
+project_dir = '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/'
 
 
 def init_plotting():
@@ -567,7 +567,7 @@ def inhomogenise_2D(x, fac):
 # set overall dimensions for model
 nlayers=60 # number of vertical layers
 nzoncols=1 # number of zonal columns (usually just 2: cloudy and clear)
-nlatcols=11 # number of latitude columns
+nlatcols=40 # number of latitude columns
 
 # master switches for the basic type of input
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
@@ -579,7 +579,7 @@ dT_switch=1
 dtbound_switch=1 # 0: don't allow tbound to change | 1: do
 erai_h2o_switch=1  # 0: specific humidity | 1: relative humidity
 transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
-cloud_source=0 # 0: manual | 1: MISR
+cloud_source=1 # 0: manual | 1: MISR
 equally_spaced_vertical_switch=0 # 0: equally spaced p | 1: equally spaced z
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
@@ -588,7 +588,7 @@ plot_eqb_approach=1
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
 # create latgrid evenly spaced in latitude
-# latgridbounds=np.linspace(60,90.,nlatcols+1)
+# latgridbounds=np.linspace(-90,90.,nlatcols+1)
 # xgridbounds=np.sin(np.deg2rad(latgridbounds))
 
 # create latgrid evenly spaced in cos(lat)
@@ -671,14 +671,14 @@ coalbedo=np.zeros(nlatcols)
 lapseloops=[6]
 
 c_zonals=[0.] #zonal transport coefficient
-c_merids=[8.] #meridional transport coefficient
+c_merids=[24.] #meridional transport coefficient
 
 
 tbounds=np.array([300.]) # initalise lower boundary temperature
 wklfacs=[1.0] # multiply number of molecules of a gas species by this factor in a given lat and layer range defined later
 wklfac_co2s=[1.] # ditto for co2 specifically, deprecated
 
-extra_forcings = [0.]
+extra_forcings = [50.]
 
 # location of perturbations to number of gas molecules
 pertzons=[0]
@@ -686,8 +686,8 @@ pertlats=[0]
 pertmols=[2] #don't do zero!
 pertlays=[30]
 
-# perts = [ 1., 2. ]
-perts = [ 2. ]
+perts = [ 1., 2. ]
+# perts = [ 1. ]
 
 
 pert_type=0 # 0: relative, 1: absolute, 2: cloud fraction relative
@@ -2427,8 +2427,8 @@ for pert in perts:
                                                                             a_0=0.697
                                                                             a_2=-0.0779
                                                                             b_0=0.38
-                                                                            talb1 = 253.
-                                                                            talb2 = 263.
+                                                                            talb1 = 258.
+                                                                            talb2 = 288.
                                                                             if(tbound_master[0,i_lat] < talb1):
                                                                                 coalbedo[i_lat] = b_0
                                                                             elif(tbound_master[0,i_lat] > talb1 and tbound_master[0,i_lat] < talb2):
@@ -2436,8 +2436,6 @@ for pert in perts:
                                                                             else:
                                                                                 coalbedo[i_lat]= (a_0 + a_2 * 0.5*(3. * (np.sin( np.deg2rad(latgrid[i_lat]) )**2.) -1. ))
                                                                             semiss = np.ones(29) * coalbedo[i_lat]
-                                                                            if(ts%23==0):
-                                                                                print('tbound: {: 4.2f}, coalbedo: {: 4.2f}, albedo: {: 4.2f}'.format(tbound_master[0,i_lat], coalbedo[i_lat], 1. - coalbedo[i_lat]) )
     
                                                                         if(ts>1 or input_source==1 or input_source==2):
     
@@ -2602,14 +2600,14 @@ for pert in perts:
                                                                             cldshift = 0
                                                                             for i in range(nlayers):
                                                                                 if(pz[i] > 400):
-                                                                                    tauclds_master[:,:,i] = 3.0
+                                                                                    tauclds_master[:,:,i] = 3.0/nlayers
                                                                                 else:
-                                                                                    tauclds_master[:,:,i] = 3.0
+                                                                                    tauclds_master[:,:,i] = 0.1/nlayers
                                                                             for i in range(nlayers-1,cldshift,-1):
                                                                                 if(altz[i]<100*1e3):
                                                                                     cld_fracs_master[:,:,i] = cld_fracs_master[:,:,i-cldshift]
                                                                                     tauclds_master[:,:,i] = tauclds_master[:,:,i-cldshift]
-                                                                            ssaclds_master[:,:,:]=ssa_tot
+                                                                            ssaclds_master[:,:,:]=ssa_tot/nlayers
                                                                             if(ts!=1):
                                                                                 if(pert_type==2):
                                                                                     if(i_lat==pertlat):
@@ -2778,7 +2776,7 @@ for pert in perts:
                                                                         # perturb surface temperature to reduce column energy imbalance
                                                                         if((input_source==0 and ts>100) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
-                                                                            dtbound=column_budgets_master[i_zon,i_lat]*undrelax_lats[0]*0.01
+                                                                            dtbound=column_budgets_master[i_zon,i_lat]*undrelax_lats[0]*0.01*0.25
                                                                             if(dtbound_switch==0):
                                                                                 dtbound=0.
                                                                             dtbound=np.clip(dtbound,-dmax,dmax)
@@ -2970,7 +2968,7 @@ for pert in perts:
                                                                                 merid_transps_master[i_zon,i_lat]=(c_merid*(tz_master[mti,i_zon,i_lat-1]-tz_master[mti,i_zon,i_lat]))*latweights_area[i_lat]
                                                                                 
                                                                             # nje mtransp manual
-                                                                            merid_transps_master[0,:] = [80.64059654097197 ,6.043668629389911 ,-14.117078701398436 ,-23.92772881956535 ,-33.57164432538048 ,-35.31080372758149 ,-31.524613671680534 ,-23.46350117258817 ,-13.779687624985858 ,6.280849168688976 ,82.71286774408684]
+                                                                            # merid_transps_master[0,:] = [ 29.5538494593 , 38.3345597854 , 26.8706060132 , 16.360044089 , 7.89739358931 , 0.552427302558 , -3.8542634164 , -5.08279166515 , -5.64066948561 , -5.80449544365 , -5.83336931012 , -5.39029290471 , -5.63864177537 , -6.06684083108 , -7.48487553174 , -10.4730284428 , -14.2936880738 , -16.7857562513 , -18.3373623703 , -17.1360278449 , -15.9102896654 , -14.6698955133 , -12.8097157837 , -10.6589901206 , -8.48316251086 , -6.72322606606 , -5.87870347432 , -5.8379881674 , -5.7148699758 , -6.21229340764 , -6.35295969633 , -6.50006405688 , -6.39677992331 , -5.5555929439 , 0.0537785404977 , 7.27367594434 , 15.3448437034 , 24.8411899978 , 34.4868140761 , 44.0267996718 ]
 
 
 
