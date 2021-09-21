@@ -1,0 +1,86 @@
+# $Id: make_prrtm_linux_pgi 22601 2013-11-11 16:18:51Z kcadyper $
+# Makefile for rrtm - LINUX platform
+
+SHELL = /bin/sh
+
+###############################
+# Set variables
+###############################
+
+PLATFORM = linux_pgi
+VERSION = v1.3
+
+FC = pgf90
+FCFLAG =  -fast -r8 -i8 
+OUTPUT = prrtm_$(VERSION)_$(PLATFORM)
+
+CDOTO = $(PLATFORM)_$(FC)_dbl.obj
+vpath %.f src
+vpath %.o $(CDOTO)
+
+SRC =   rrtm.f   rtreg.f   rtr.f   rrtatm.f   setcoef.f   taumol.f   rtregcld.f   rtrcld.f   util_$(PLATFORM).f   extra.f   rtrcldmr.f \
+  rtregcldmr.f   k_g.f   cldprop.f   rtrdis.f   RDI1MACH.f   ErrPack.f   LINPAK.f   disort.f
+
+OBJ = $(SRC:.f=.o)
+
+%.o : %.f 
+	$(FC) -c $(FCFLAG)  $< -o $@
+
+
+###############################
+# Load line
+###############################
+
+all : intro $(OUTPUT) conclude
+.PHONY : all intro conclude
+
+$(OUTPUT) : $(OBJ) 
+	$(FC) $(FCFLAG) -o $(OUTPUT) $^
+	mkdir -p $(CDOTO) 
+	\mv *.o $(CDOTO)
+
+k_g.o : src/k_gB*.f
+###############################
+# Clean line
+###############################
+clean:  
+	\rm *.o $(CDOTO)/*.o 
+
+
+###############################
+# Intro information
+###############################
+
+.SILENT:
+intro :
+	echo
+	echo '-----------------'
+	echo '  $(OUTPUT) Makefile'
+	echo '-----------------'
+	echo
+	echo 'This Makefile was designed for the $(PLATFORM) platform.'
+	echo
+	echo 'It uses the $(FC) compiler, with the following options:'
+	echo '      $(FCFLAG)'
+	echo
+	echo 'The object files used are as follows:'
+	echo
+	echo '      $(OBJ)'
+	echo
+	echo
+	echo '$(OUTPUT) make in progress ...'
+	echo
+
+
+
+###############################
+# Concluding information
+###############################
+
+conclude :
+	echo
+	echo '================='
+	echo '  Makefile done'
+	echo '================='
+
+
