@@ -14,13 +14,13 @@ datetime.datetime.now()
 # print(datetime.datetime.now())
 # print('Started')
 
-plot_switch=5 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig | 6: nonlin dT and ECS | 7: cloud perts
+plot_switch=0 # 0: T(p) and dfnet(p), 1: lapse and trops, 2: CRK, 3: water vapor perts, 4: rel hum, 5: dream fig | 6: nonlin dT and ECS | 7: cloud perts
 cti_type=0 # 0: convective, 1: top down radiative, 2: cold point, 3:WMO
 
 directories = [
-# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
+'/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Current Output/'
 # '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/erai rh/'
-'/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/h82 lapse/'
+# '/Users/nickedkins/Uni GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/dream fig expts/h82 lapse/'
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=1/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=0.5/',
 # '/Users/nickedkins/Home GitHub Repositories/RRTM-LWandSW-Python-wrapper/_Useful Data/misr cloud perts/1d/ssa=0/',
@@ -53,7 +53,7 @@ def colors(n):
   return ret
 
 def init_plotting():
-    plt.rcParams['figure.figsize'] = (8,8)
+    plt.rcParams['figure.figsize'] = (10,10)
     plt.rcParams['font.size'] = 20
     plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
@@ -155,8 +155,9 @@ def plotrrtmoutput_masters():
             
             plt.figure(1)
             plt.subplot(121)
-            # plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
-            plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat],'-')
+            plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
+            plt.ylim(1700,10)
+            # plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat],'-')
             # plt.semilogy(tavel_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(i_zon))
             if(cti_type==0):
                 cti=np.int(cti_master[i_zon,i_lat])
@@ -179,8 +180,9 @@ def plotrrtmoutput_masters():
             plt.legend()
 
             plt.subplot(122)
-            # plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
-            plt.plot(np.mean(dfnet_master[:,:,i_lat],axis=1),altavel_master[:,i_zon,i_lat],'-')
+            plt.semilogy(np.mean(dfnet_master[:,:,i_lat],axis=1),pavel_master[:,i_zon,i_lat],'-')
+            plt.ylim(1700,10)
+            # plt.plot(np.mean(dfnet_master[:,:,i_lat],axis=1),altavel_master[:,i_zon,i_lat],'-')
             plt.axvline(-eqb_maxdfnet,linestyle='--')
             plt.axvline(eqb_maxdfnet,linestyle='--')
             # plt.ylim(1000,10)
@@ -189,7 +191,7 @@ def plotrrtmoutput_masters():
             plt.xlabel(r'$\Delta F_{net}$ in layer (Wm$^{-2}$)')
             plt.ylabel('Pressure (hPa)')
             plt.grid(True,which='both')
-            # plt.legend()
+            plt.legend()
             
             # plt.subplot(331)
             # plt.semilogy(totuflux_lw_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],label=fn)
@@ -983,6 +985,8 @@ for directory in directories:
 
 
         # lapse_td_all_dirfil[:,i_file,i_dir,:]=cti_td
+        
+        print(tbound, psurf)
         
         
         i_file+=1

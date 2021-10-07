@@ -128,6 +128,27 @@ def writeformattedinputfile_lw():
     f.write('%%%%%\n')
     f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
 
+# same as above but for prrtm LW
+def writeformattedinputfile_prrtmlw():
+    f=open(project_dir+'PRRTM LW/Input RRTM LW NJE Formatted','w+')
+    f.write('INPUT_PRRTM_LW NJE created\n')
+    f.write('0        1         2         3         4         5         6         7         8         9\n')
+    f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
+    f.write('$ STANDARD MID-LATITUDE SUMMER ATMOSPHERE\n')
+    f.write('{:50d}{:20d}{:13d}{:2d}{:5d}{:5d}\n'.format(iatm,ixsect,iscat,numangs,iout,icld))
+    f.write('{:16.11f} {:1d}  {:1d}'.format(tbound,iemiss,ireflect)) #add semis read here?
+    for i in semis:
+        f.write('{:5.3f}'.format(i))
+    f.write('\n')
+    f.write('{:2d}{:3d}{:5d}  1.000000MIDLATITUDE SUMM H1=    0.00 H2=   70.00 ANG=   0.000 LEN= 0\n'.format(iform,nlayers,nmol))
+    f.write('{:21.14f}{:25.13f}{:15d}{:18.13f}{:18.12f}{:17.12f}{:17.13f}{:18.12f}{:17.12f}\n'.format(pavel[0],tavel[0],ipthak,altz[0]/1000.,pz[0],tz[0],altz[1]/1000.,pz[1],tz[1]))
+    f.write('{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}\n'.format(wkl[1,0],wkl[2,0],wkl[3,0],wkl[4,0],wkl[5,0],wkl[6,0],wkl[7,0],wbrodl[0] ))
+    for i in range(2,nlayers+1):
+        f.write('{:21.14f}{:25.13f}{:15.0f}{:41.14f}{:18.13f}{:17.12f}\n'.format(pavel[i-1],tavel[i-1],ipthrk,altz[i]/1000.,pz[i],tz[i]))
+        f.write('{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}{:15.7E}\n'.format(wkl[1,i-1],wkl[2,i-1],wkl[3,i-1],wkl[4,i-1],wkl[5,i-1],wkl[6,i-1],wkl[7,i-1],wbrodl[i-1] ))
+    f.write('%%%%%\n')
+    f.write('123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-\n')
+
 # write formatted cloud file for rrtm input
 def writeformattedcloudfile():
     f=open(project_dir+'IN_CLD_RRTM NJE','w+')
@@ -146,6 +167,12 @@ def callrrtmlw():
     p = subprocess.Popen([loc])
     stdoutdata, stderrdata = p.communicate()
 
+def callprrtmlw():
+    loc = project_dir+'PRRTM LW/prrtmlw'
+    os.chdir(project_dir+'/PRRTM LW')
+    p = subprocess.Popen([loc])
+    stdoutdata, stderrdata = p.communicate()
+
 # ditto for SW
 def callrrtmsw():
     loc = project_dir+'SW/rrtmsw'
@@ -156,6 +183,20 @@ def callrrtmsw():
 # read output produced by rrtmlw executable for use in next timestep within this python wrapper
 def readrrtmoutput_lw():
     f=open(project_dir+'LW/My Live Output RRTM')
+    for i in range(0,nlayers+1):
+        totuflux_lw[i] =  f.readline()
+    for i in range(0,nlayers+1):
+        totdflux_lw[i] =  f.readline()
+    for i in range(0,nlayers+1):
+        fnet_lw[i] =  f.readline()
+    for i in range(0,nlayers+1):
+        htr_lw[i] =  f.readline()
+    f.close()
+    return totuflux_lw,totdflux_lw,fnet_lw,htr_lw
+
+# read output produced by prrtmlw executable for use in next timestep within this python wrapper
+def readrrtmoutput_prrtmlw():
+    f=open(project_dir+'PRRTM LW/My Live Output RRTM')
     for i in range(0,nlayers+1):
         totuflux_lw[i] =  f.readline()
     for i in range(0,nlayers+1):
@@ -230,7 +271,8 @@ def convection(T,z,conv_log):
     for i in range(1,len(T)):
         dT = (T[i]-T[i-1])
         dz = (z[i]-z[i-1])/1000.
-        if( (-1.0 * dT/dz > lapse or z[i]/1000. < 5.) and z[i]/1000. < 1000. ):
+        # if( (-1.0 * dT/dz > lapse or z[i]/1000. < 5.) and z[i]/1000. < 1000. ):
+        if( -1.0 * dT/dz > lapse or pz[i] > 800.):
             if(conv_log==1):
                 conv[i]=1.
             T[i] = T[i-1] - lapse * dz
@@ -575,17 +617,17 @@ nlatcols=1 # number of latitude columns
 master_input=6 #0: manual values, 1: MLS, 2: MLS RD mods, 3: RCEMIP, 4: RD repl 'Nicks2', 5: Pierrehumbert95 radiator fins, 6: ERA-Interim, 7: RCEMIP mod by RD | 8: RCEMIP mod by RD but with MW67 RH
 input_source=0 # 0: set inputs here, 1: use inputs from output file of previous run, 2: use outputs of previous run and run to eqb
 prev_output_file=project_dir+'_Useful Data/RF dT_dF and dmtransp/new/dco2/baseline/2021_04_15 19_41_47'
-lapse_sources=[1] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
+lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0 #0: manual, 2: EBM style
 dT_switch=1
 dtbound_switch=1 # 0: don't allow tbound to change | 1: do
-erai_h2o_switch=0  # 0: specific humidity | 1: relative humidity
+erai_h2o_switch=1  # 0: specific humidity | 1: relative humidity
 transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
 cloud_source=0 # 0: manual | 1: MISR
 equally_spaced_vertical_switch=0 # 0: equally spaced p | 1: equally spaced z
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
-plot_eqb_approach=1
+plot_eqb_approach=0
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
@@ -619,10 +661,10 @@ nmol=7 # number of gas molecule species
 # nclouds=10
 nclouds=nlayers # number of cloud layers
 
-lw_on=1 # 0: don't call rrtm_lw, 1: do
-sw_on=1 # 0: don't call rrtm_sw, 1: do
-fixed_sw_on=0
-fixed_sw=240.
+lw_on=1 # 0: don't call rrtm_lw, 1: do, 2: prrtmlw
+sw_on=0 # 0: don't call rrtm_sw, 1: do
+fixed_sw_on=1
+fixed_sw=128.
 if(master_input==7):
     fixed_sw=238. # for using a fixed value of total SW absorption instead of using RRTM_SW
 if(sw_on==0):
@@ -647,10 +689,10 @@ eqb_maxhtr=1e-4 # equilibrium defined as when absolute value of maximum heating 
 # eqb_maxdfnet=1e-4
 
 eqb_maxdfnet=0.02*(60./nlayers) # equilibrium defined as when absolute value of maximum layer change in net flux is below this value (if not using htr to determine eqb)
-eqb_col_budgs=0.01*(60./nlayers) # max equilibrium value of total column energy budget at TOA
+eqb_col_budgs=1.0*(60./nlayers) # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
-timesteps=1000 # number of timesteps until model exits
+timesteps=500 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
@@ -666,7 +708,8 @@ zen=np.zeros((nlatcols,365,24)) # solar zenith angle
 insol=np.zeros((nlatcols,365,24)) # insolation
 zenlats=np.zeros(nlatcols) 
 insollats=np.zeros(nlatcols)
-solar_constant=1368.
+# solar_constant=1368.
+solar_constant=1280.
 coalbedo=np.zeros(nlatcols)
 
 # lapseloops=np.arange(4,11) # global average critical lapse rates to loop over
@@ -825,7 +868,7 @@ for pert in perts:
 
                                                             lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             if(lapse_source==0):
-                                                                lapse_master=np.ones((nzoncols,nlatcols)) * 6.7 #actual lapse
+                                                                lapse_master=np.ones((nzoncols,nlatcols)) * 9.8 #actual lapse
                                                             elif(lapse_source==1):
                                                                 for i_zon in range(nzoncols):
                                                                     lapse_master[i_zon,:]=np.array(createlatdistbn('Doug Mason Lapse Rate vs Latitude'))
@@ -885,15 +928,15 @@ for pert in perts:
                                                             # tbound_inits=f(latgrid)
                                                             tbound_inits = np.ones(nlatcols) * 300.
                                                             if(nlayers==60):
-                                                                undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1. #for nl=60  
+                                                                undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1.*4. #for nl=60  
                                                                 if(equally_spaced_vertical_switch==1):
                                                                     undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1./1000. #for nl=60  
-                                                            if(master_input==8):
-                                                                undrelax_lats *= 4.
-                                                            elif(nlayers==100):
-                                                                undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl=100
-                                                            elif(nlayers==590):
-                                                                undrelax_lats=np.ones(nlatcols)*0.5 #for nl=590
+                                                                if(master_input==8):
+                                                                    undrelax_lats *= 4.
+                                                                elif(nlayers==100):
+                                                                    undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl=100
+                                                                elif(nlayers==590):
+                                                                    undrelax_lats=np.ones(nlatcols)*0.5 #for nl=590
                                                             else:
                                                                 undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers) #for nl= anything else
                                                             iemiss=2 #surface emissivity. Keep this fixed for now.
@@ -906,7 +949,7 @@ for pert in perts:
                                                             idelm=1             # flag for outputting downwelling fluxes computed using the delta-M scaling approximation. 0=output "true" direct and diffuse downwelling fluxes, 1=output direct and diffuse downwelling fluxes computed with delta-M approximation
                                                             icos=0              #0:there is no need to account for instrumental cosine response, 1:to account for instrumental cosine response in the computation of the direct and diffuse fluxes, 2:2 to account for instrumental cosine response in the computation of the diffuse fluxes only
                                                             semis=np.ones(16)*1.0   #all spectral bands the same as iemissm (maybe this is the surface??)
-                                                            semiss=np.ones(29)*1.
+                                                            semiss=np.ones(29)*(1.-0.664) #surface albedo
                                                             if(master_input==1):
                                                                 semiss[15:29] = np.array([
                                                                 0.881,
@@ -981,8 +1024,8 @@ for pert in perts:
                                                                 lapse=6.2
                                                             elif(master_input==7):
                                                                 lapse_master=np.ones((nzoncols,nlatcols))*5.7
-                                                            tmin=150.
-                                                            # tmin = 100.
+                                                            # tmin=150.
+                                                            tmin = 100.
 
                                                             if(master_input==5):
                                                                 tmin=200.
@@ -993,8 +1036,8 @@ for pert in perts:
                                                             sw_freq=100
                                                             plotted=1
     
-                                                            pin2 = 0.79 * 1e5 #convert the input in bar to Pa
-                                                            pico2 = 400e-6 * 1e5 #convert the input in bar to Pa
+                                                            pin2 = 0.89 * 1e5 #convert the input in bar to Pa
+                                                            pico2 = 0.4 * 1e5 #convert the input in bar to Pa
                                                             pio2 = 0.2 * 1e5
                                                             piar = 0.0 * 1e5 #convert the input in bar to Pa
                                                             pich4 = 0.0 * 1e5 #convert the input in bar to Pa
@@ -1010,6 +1053,7 @@ for pert in perts:
                                                             mmwo3 = 48.0e-3
     
                                                             piair = pin2 + pio2 + piar
+                                                            psurf = (piair + pico2) * 1e-2
     
                                                             massatmo_co2 = pico2 / gravity # [kg]
                                                             massatmo_n2 = pin2 / gravity # [kg]
@@ -2240,8 +2284,8 @@ for pert in perts:
                                                                         wbrodl[i] = mperlayr_air[i] * 1.0e-4
                                                                         wkl[1,i] = mperlayr[i] * 1.0e-4 * vol_mixh2o[i]
                                                                         # wkl[1,i] = mperlayr[i] * 1.0e-4 * 123e-6
-                                                                        # wkl[2,i] = mperlayr[i] * 1.0e-4 * vol_mixco2
-                                                                        wkl[2,i] = mperlayr[i] * 1.0e-4 * 400e-6
+                                                                        wkl[2,i] = mperlayr[i] * 1.0e-4 * vol_mixco2
+                                                                        # wkl[2,i] = mperlayr[i] * 1.0e-4 * 400e-6
                                                                         wkl[3,i] = mperlayr[i] * 1.0e-4 * vol_mixo3[i]*0.
                                                                         # wkl[3,i] = mperlayr[i] * 1.0e-4 * 456e-6
                                                                         wkl[6,i] = mperlayr[i] * 1.0e-4 * vol_mixch4*0.
@@ -2367,12 +2411,13 @@ for pert in perts:
                                                                         if(not (master_input == 7 or master_input==8 or master_input==3)):
                                                                             wkl[1,:]=q[:,i_lat]
                                                                             wkl[3,:]=o3[:,i_lat]
-                                                                        wkl[2,:]=400e-6*wklfac_co2
+                                                                        # wkl[2,:]=400e-6*wklfac_co2
                                                                         sza=szas[i_lat]
                                                                         lapse=lapse_master[0,i_lat]
                                                                         # lapse=lapseloop
                                                                         if(master_input==6):
                                                                             semiss=np.ones(29)*(1.0-fal[i_lat])
+                                                                            semiss=np.ones(29)*(1.0-0.664)
     
     
                                                                     if(input_source==2):
@@ -2609,9 +2654,10 @@ for pert in perts:
                                                                         # manual cloud properties
                                                                         
 
-                                                                        # cf_tot = 0.5
-                                                                        # tau_tot = 3.
-                                                                        # ssa_tot = 0.5
+                                                                        cf_tot = 0.01
+                                                                        tau_tot = 10.
+                                                                        ssa_tot = 0.5
+                                                                        pclddum = 900.
 
 
                                                                         # cf_tot = 0.6
@@ -2621,10 +2667,12 @@ for pert in perts:
                                                                         # cldlay_dums = np.linspace(1,np.int(nlayers/2),ncloudcols)
                                                                         # cldlay_dums=[np.int(nlayers/2)]
                                                                         # cldlay_dum = np.int(np.linspace(1,np.int(nlayers/2),nzoncols)[i_zon])
-                                                                        
-                                                                        # cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/nzoncols
-                                                                        # tauclds_master[i_zon,0,cldlay_dum]=tau_tot/nzoncols
-                                                                        # ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/nzoncols
+
+                                                                        cldlay_dum=np.argmin(abs(pz-pclddum))
+                                                                            
+                                                                        cld_fracs_master[i_zon,0,cldlay_dum]=cf_tot/nzoncols
+                                                                        tauclds_master[i_zon,0,cldlay_dum]=tau_tot/nzoncols
+                                                                        ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/nzoncols
                                                                         
                                                                         
                                                                         # for cldlay_dum in cldlay_dums:
@@ -2633,21 +2681,21 @@ for pert in perts:
                                                                         #     # tauclds_master[i_zon,0,cldlay_dum]=tau_tot/ncloudcols
                                                                         #     # ssaclds_master[i_zon,0,cldlay_dum]=ssa_tot/ncloudcols
                                                                         
-                                                                        if(cloud_source==0):
+                                                                        # if(cloud_source==0):
                                                                         
-                                                                            if(nonlin_var == 4 and ts == 2):
-                                                                                pclddum = var_fac
-                                                                            if(nonlin_var==5 and ts==2):
-                                                                                tau_tot = var_fac
+                                                                        #     if(nonlin_var == 4 and ts == 2):
+                                                                        #         pclddum = var_fac
+                                                                        #     if(nonlin_var==5 and ts==2):
+                                                                        #         tau_tot = var_fac
                                                                             
                                                                             
                                                                             # cldlay_dum=np.argmin(abs(altz/1000.-zclddum))
-                                                                            cldlay_dum=np.argmin(abs(pz-pclddum))
+                                                                            # cldlay_dum=np.argmin(abs(pz-pclddum))
                                                                                 
                                                                                 
-                                                                            cld_fracs_master[0,cldlat,cldlay_dum]=cf_tot/ncloudcols
-                                                                            tauclds_master[0,cldlat,cldlay_dum]=tau_tot/ncloudcols
-                                                                            ssaclds_master[0,cldlat,cldlay_dum]=ssa_tot/ncloudcols
+                                                                            # cld_fracs_master[0,cldlat,cldlay_dum]=cf_tot/ncloudcols
+                                                                            # tauclds_master[0,cldlat,cldlay_dum]=tau_tot/ncloudcols
+                                                                            # ssaclds_master[0,cldlat,cldlay_dum]=ssa_tot/ncloudcols
     
                                                                         
                                                                         # cld_lay_v2=0
@@ -2745,6 +2793,7 @@ for pert in perts:
                                                                                             wkl[1,i] = vol_mixh2o[i] # ERA-I relative humidity
                                                                                         elif(erai_h2o_switch == 0):
                                                                                             wkl[1,i]=q[i,i_lat] # ERA-I specific humidity
+                                                                                        wkl[2,i]=vol_mixco2
                                                                                     if(i_zon==0):
                                                                                         # wkl[1,:]=wkl[1,:]*2.
                                                                                         wkl[1,:]=wkl[1,:]*(pert_zon_h2o**0.5)
@@ -2810,6 +2859,11 @@ for pert in perts:
                                                                             writeformattedinputfile_lw()
                                                                             callrrtmlw()
                                                                             totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_lw()
+
+                                                                        if(lw_on==2):
+                                                                            writeformattedinputfile_prrtmlw()
+                                                                            callprrtmlw()
+                                                                            totuflux_lw,totdflux_lw,fnet_lw,htr_lw = readrrtmoutput_prrtmlw()
     
                                                                         # call the compiled RRTM executable for SW radiative transfer, but as infrequently as possible because it's expensive
                                                                         # if((ts==2 or (abs(maxdfnet_tot) < eqb_maxdfnet*10. and stepssinceswcalled>500)) and sw_on==1):
