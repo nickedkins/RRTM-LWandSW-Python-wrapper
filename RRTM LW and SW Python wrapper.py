@@ -267,12 +267,13 @@ def plotrrtmoutput():
 
 # perform a basic convective adjustment, given T and z
 def convection(T,z,conv_log):
-    T[0]=tbound
+    T[0] = tz[0]
+    # T[0]=tbound
     for i in range(1,len(T)):
         dT = (T[i]-T[i-1])
         dz = (z[i]-z[i-1])/1000.
         # if( (-1.0 * dT/dz > lapse or z[i]/1000. < 5.) and z[i]/1000. < 1000. ):
-        if( -1.0 * dT/dz > lapse or pz[i] > 800.):
+        if( -1.0 * dT/dz > lapse or pz[i] > 8000.):
             if(conv_log==1):
                 conv[i]=1.
             T[i] = T[i-1] - lapse * dz
@@ -620,14 +621,14 @@ prev_output_file=project_dir+'_Useful Data/RF dT_dF and dmtransp/new/dco2/baseli
 lapse_sources=[0] # 0: manual, 1: Mason ERA-Interim values, 2: Hel82 param, 3: SC79, 4: CJ19 RAE only
 albedo_source=0 #0: manual, 2: EBM style
 dT_switch=1
-dtbound_switch=1 # 0: don't allow tbound to change | 1: do
+dtbound_switch=0 # 0: don't allow tbound to change | 1: do
 erai_h2o_switch=1  # 0: specific humidity | 1: relative humidity
 transp_surf_atm_switch = 0 # 0: use surface temps for transp, 1: use atmospheric temps
 cloud_source=0 # 0: manual | 1: MISR
 equally_spaced_vertical_switch=0 # 0: equally spaced p | 1: equally spaced z
 
 detail_print=1 # 0: don't print approach to eqb, 1: print heating rates and temps on approach to eqb
-plot_eqb_approach=0
+plot_eqb_approach=1
 
 # latgridbounds=[-90,-66.5,-23.5,23.5,66.5,90] # 5 box poles, subtropics, tropics
 
@@ -662,7 +663,7 @@ nmol=7 # number of gas molecule species
 nclouds=nlayers # number of cloud layers
 
 lw_on=1 # 0: don't call rrtm_lw, 1: do, 2: prrtmlw
-sw_on=0 # 0: don't call rrtm_sw, 1: do
+sw_on=1 # 0: don't call rrtm_sw, 1: do
 fixed_sw_on=1
 fixed_sw=128.
 if(master_input==7):
@@ -868,7 +869,7 @@ for pert in perts:
 
                                                             lapse_master=np.ones((nzoncols,nlatcols))*5.7
                                                             if(lapse_source==0):
-                                                                lapse_master=np.ones((nzoncols,nlatcols)) * 9.8 #actual lapse
+                                                                lapse_master=np.ones((nzoncols,nlatcols)) * 9.8*10 #actual lapse
                                                             elif(lapse_source==1):
                                                                 for i_zon in range(nzoncols):
                                                                     lapse_master[i_zon,:]=np.array(createlatdistbn('Doug Mason Lapse Rate vs Latitude'))
@@ -901,7 +902,7 @@ for pert in perts:
                                                             conv_on_lats=np.ones(nlatcols) #0: no convection, 1: convective adjustment
                                                             if(master_input==3):
                                                                 conv_on_lats=np.ones(nlatcols)
-                                                            surf_lowlev_coupled=1 #0: surface and lowest level temperatures independent, 1: lowest level temperature = surface temperature
+                                                            surf_lowlev_coupled=0 #0: surface and lowest level temperatures independent, 1: lowest level temperature = surface temperature
                                                             lay_intp=0 #0: linear interpolation to get tavel from tz, 1: isothermal layers
                                                             # if(conv_on==1):
                                                             #     surf_lowlev_coupled=1
@@ -915,9 +916,9 @@ for pert in perts:
                                                             rel_hum=np.zeros(nlayers)
                                                             maxhtr=0.
                                                             toa_fnet=0
-                                                            tbound=290. #surface temperature (K)
+                                                            tbound=200. #surface temperature (K)
                                                             # tbound_inits=220. + np.cos(np.deg2rad(latgrid))*80.
-                                                            tbound_inits=220. + np.cos(np.deg2rad(latgrid))*80.
+                                                            # tbound_inits=220. + np.cos(np.deg2rad(latgrid))*80.
                                                             # undrelax_lats= (2.0 - np.cos(np.deg2rad(latgrid)))*2.
                                                             # data=np.genfromtxt(project_dir+'Latitudinal Distributions/Doug Mason Temperature vs Latitude NH.txt',delimiter=',')
                                                             data=np.genfromtxt(project_dir+'Latitudinal Distributions/Doug Mason Temperature vs Latitude.txt',delimiter=',')
@@ -926,9 +927,9 @@ for pert in perts:
                                                             tg_obs=data[:,1]
                                                             f=interp1d(lat_obs,tg_obs)
                                                             # tbound_inits=f(latgrid)
-                                                            tbound_inits = np.ones(nlatcols) * 300.
+                                                            tbound_inits = np.ones(nlatcols) * 190.
                                                             if(nlayers==60):
-                                                                undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1.*4. #for nl=60  
+                                                                undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1. #for nl=60  
                                                                 if(equally_spaced_vertical_switch==1):
                                                                     undrelax_lats=np.ones(nlatcols)*4.*(60./nlayers)*1./1000. #for nl=60  
                                                                 if(master_input==8):
@@ -1036,8 +1037,8 @@ for pert in perts:
                                                             sw_freq=100
                                                             plotted=1
     
-                                                            pin2 = 0.89 * 1e5 #convert the input in bar to Pa
-                                                            pico2 = 0.4 * 1e5 #convert the input in bar to Pa
+                                                            pin2 = 0.79 * 1e5 #convert the input in bar to Pa
+                                                            pico2 = 0.1 * 1e5 #convert the input in bar to Pa
                                                             pio2 = 0.2 * 1e5
                                                             piar = 0.0 * 1e5 #convert the input in bar to Pa
                                                             pich4 = 0.0 * 1e5 #convert the input in bar to Pa
@@ -2654,7 +2655,7 @@ for pert in perts:
                                                                         # manual cloud properties
                                                                         
 
-                                                                        cf_tot = 0.01
+                                                                        cf_tot = 0.5
                                                                         tau_tot = 10.
                                                                         ssa_tot = 0.5
                                                                         pclddum = 900.
@@ -2815,11 +2816,24 @@ for pert in perts:
                                                                         if((input_source==0 and ts>100) or input_source==2):
                                                                             # dtbound=toa_fnet*0.1*0.5*0.1
                                                                             dtbound=column_budgets_master[i_zon,i_lat]*undrelax_lats[0]*0.01
+                                                                            # if(surf_lowlev_coupled==0):
+                                                                                
+                                                                            #     if(ts>300):                                                                                
+                                                                            #         dtbound = seb/100.
+                                                                            #     else:
+                                                                            #         dtbound=0
                                                                             if(dtbound_switch==0):
                                                                                 dtbound=0.
                                                                             dtbound=np.clip(dtbound,-dmax,dmax)
                                                                             tbound+=dtbound
-                                                                        tbound=np.clip(tbound,tmin,tmax)
+                                                                            # tz[0]+=dtbound
+                                                                        # tbound=np.clip(tbound,tmin,tmax)
+                                                                        # tbound=np.clip(tbound,tmin,tz[0])
+                                                                        
+                                                                        seb = totdflux[0] - totuflux[0]
+                                                                        print(seb)
+                                                                        if(ts>100):
+                                                                            tbound += seb/100
                                                                         
     
                                                                         # if(input_source==0 and master_input==5)

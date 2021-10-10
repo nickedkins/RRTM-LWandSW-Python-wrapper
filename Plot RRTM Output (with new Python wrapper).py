@@ -157,6 +157,7 @@ def plotrrtmoutput_masters():
             plt.subplot(121)
             plt.semilogy(tz_master[:,i_zon,i_lat],pz_master[:,i_zon,i_lat],'-',label='{}'.format(fn))
             plt.ylim(1700,10)
+            plt.plot(tbound,pz[0],'o')
             # plt.plot(tz_master[:,i_zon,i_lat],altz_master[:,i_zon,i_lat],'-')
             # plt.semilogy(tavel_master[:,i_zon,i_lat],pavel_master[:,i_zon,i_lat],'-o',label=str(i_zon))
             if(cti_type==0):
@@ -986,7 +987,7 @@ for directory in directories:
 
         # lapse_td_all_dirfil[:,i_file,i_dir,:]=cti_td
         
-        print(tbound, psurf)
+        print(tbound, psurf, tbound-tz_all_dirfil[0,0,0,0,0])
         
         
         i_file+=1
