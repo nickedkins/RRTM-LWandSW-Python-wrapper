@@ -693,7 +693,7 @@ eqb_maxdfnet=0.02*(60./nlayers) # equilibrium defined as when absolute value of 
 eqb_col_budgs=1.0*(60./nlayers) # max equilibrium value of total column energy budget at TOA
 if(dtbound_switch==0):
     eqb_col_budgs*=1e12
-timesteps=500 # number of timesteps until model exits
+timesteps=1000 # number of timesteps until model exits
 maxdfnet_tot=1.0 # maximum value of dfnet for and lat col and layer (just defining initial value here) RE
 
 toa_fnet_eqb=1.0e12 # superseded now by eqb_col_budgs, but leave in for backward compatibility so I can read old files
@@ -1037,7 +1037,7 @@ for pert in perts:
                                                             sw_freq=100
                                                             plotted=1
     
-                                                            pin2 = 0.79 * 1e5 #convert the input in bar to Pa
+                                                            pin2 = 0.89 * 1e5 #convert the input in bar to Pa
                                                             pico2 = 0.1 * 1e5 #convert the input in bar to Pa
                                                             pio2 = 0.2 * 1e5
                                                             piar = 0.0 * 1e5 #convert the input in bar to Pa
@@ -2833,7 +2833,7 @@ for pert in perts:
                                                                         seb = totdflux[0] - totuflux[0]
                                                                         print(seb)
                                                                         if(ts>100):
-                                                                            tbound += seb/100
+                                                                            tbound += seb/200
                                                                         
     
                                                                         # if(input_source==0 and master_input==5)
